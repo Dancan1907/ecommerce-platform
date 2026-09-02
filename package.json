@@ -1,0 +1,19 @@
+{
+  "name": "ecommerce-platform",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "dev": "pnpm run --parallel dev",
+    "build": "pnpm run --parallel build",
+    "lint": "pnpm run --parallel lint",
+    "format": "pnpm run --parallel format"
+  },
+  "devDependencies": {
+    "typescript": "^5.3.3",
+    "turbo": "^1.11.3"
+  },
+  "packageManager": "pnpm@8.10.0",
+  "engines": {
+    "node": ">=18"
+  }
+}
