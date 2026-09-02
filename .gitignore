@@ -1,0 +1,128 @@
+# Open .gitignore and add content
+cat > .gitignore << 'EOF'
+# ============================================
+# NODE & PNPM
+# ============================================
+node_modules/
+.pnpm-store/
+.npm/
+.yarn/
+
+# ============================================
+# BUILD OUTPUTS
+# ============================================
+# Frontend (Next.js)
+.next/
+out/
+build/
+dist/
+.vercel/
+
+# Backend (NestJS)
+dist/
+build/
+
+# Shared packages
+packages/*/dist/
+packages/*/build/
+
+# ============================================
+# ENVIRONMENT VARIABLES
+# ============================================
+.env
+.env.local
+.env.*.local
+.env.development
+.env.production
+.env.test
+
+# ============================================
+# LOGS
+# ============================================
+*.log
+npm-debug.log*
+pnpm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+
+# ============================================
+# OS & EDITOR FILES
+# ============================================
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# Linux
+.directory
+*.pid
+*.seed
+*.pid.lock
+
+# ============================================
+# IDE FILES
+# ============================================
+# VS Code
+.vscode/
+*.code-workspace
+
+# IntelliJ
+.idea/
+*.iml
+*.iws
+*.ipr
+
+# Sublime
+*.sublime-project
+*.sublime-workspace
+
+# Vim
+*.swp
+*.swo
+*~
+
+# ============================================
+# TESTING
+# ============================================
+coverage/
+.nyc_output/
+*.test.js
+*.spec.js
+
+# ============================================
+# SECURITY
+# ============================================
+*.pem
+*.key
+*.crt
+*.p12
+*.pfx
+*.jks
+
+# ============================================
+# MISC
+# ============================================
+*.log
+*.tgz
+*.gz
+*.rar
+*.zip
+*.7z
+
+# Temporal files
+tmp/
+temp/
+*.tmp
+*.temp
+
+# Docker
+*.dockerignore
+*.docker
+EOF
