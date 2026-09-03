@@ -1,0 +1,252 @@
+// ============================================
+// GENERATOR & DATASOURCE
+// ============================================
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ============================================
+// ENUMS
+// ============================================
+
+enum UserRole {
+  ADMIN
+  SELLER
+  USER
+}
+
+enum OrderStatus {
+  PENDING
+  PAID
+  SHIPPED
+  DELIVERED
+  CANCELLED
+}
+
+// ============================================
+// USER TABLE
+// ============================================
+
+model User {
+  id                  String    @id @default(uuid())
+  email               String    @unique
+  passwordHash        String
+  firstName           String
+  lastName            String
+  role                UserRole  @default(USER)
+  isEmailVerified     Boolean   @default(false)
+  verificationToken   String?   @unique
+  refreshTokenHash    String?
+  resetPasswordToken  String?   @unique
+  resetPasswordExpires DateTime?
+  lastLoginAt         DateTime?
+  avatar              String?
+  isActive            Boolean   @default(true)
+  deletedAt           DateTime?
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
+
+  // Relationships
+  products    Product[]
+  orders      Order[]
+  cart        Cart?
+  reviews     Review[]
+
+  @@index([email])
+  @@index([role])
+  @@index([isActive])
+  @@index([deletedAt])
+}
+
+// ============================================
+// CATEGORY TABLE
+// ============================================
+
+model Category {
+  id          String    @id @default(uuid())
+  name        String
+  slug        String    @unique
+  description String?
+  parentId    String?   @map("parent_id")
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  parent      Category? @relation("CategoryParent", fields: [parentId], references: [id])
+  children    Category[] @relation("CategoryParent")
+  products    Product[]
+
+  @@unique([name])
+  @@index([slug])
+  @@index([parentId])
+}
+
+// ============================================
+// PRODUCT TABLE
+// ============================================
+
+model Product {
+  id            String    @id @default(uuid())
+  name          String
+  slug          String    @unique
+  description   String
+  price         Decimal   @db.Decimal(10, 2)
+  stockQuantity Int       @default(0)
+  sku           String    @unique
+  isActive      Boolean   @default(true)
+  categoryId    String    @map("category_id")
+  sellerId      String    @map("seller_id")
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  category      Category  @relation(fields: [categoryId], references: [id])
+  seller        User      @relation(fields: [sellerId], references: [id])
+  images        ProductImage[]
+  cartItems     CartItem[]
+  orderItems    OrderItem[]
+  reviews       Review[]
+
+  @@index([slug])
+  @@index([sku])
+  @@index([categoryId])
+  @@index([sellerId])
+  @@index([isActive])
+  @@index([price])
+}
+
+// ============================================
+// PRODUCT IMAGE TABLE
+// ============================================
+
+model ProductImage {
+  id           String   @id @default(uuid())
+  url          String
+  publicId     String
+  isMain       Boolean  @default(false)
+  displayOrder Int      @default(0)
+  productId    String   @map("product_id")
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  product      Product  @relation(fields: [productId], references: [id])
+
+  @@unique([productId, displayOrder])
+  @@index([productId])
+  @@index([isMain])
+}
+
+// ============================================
+// CART TABLE
+// ============================================
+
+model Cart {
+  id        String     @id @default(uuid())
+  userId    String     @unique @map("user_id")
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+
+  user      User       @relation(fields: [userId], references: [id])
+  items     CartItem[]
+
+  @@index([userId])
+}
+
+// ============================================
+// CART ITEM TABLE
+// ============================================
+
+model CartItem {
+  id        String   @id @default(uuid())
+  cartId    String   @map("cart_id")
+  productId String   @map("product_id")
+  quantity  Int      @default(1)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  cart      Cart     @relation(fields: [cartId], references: [id])
+  product   Product  @relation(fields: [productId], references: [id])
+
+  @@unique([cartId, productId])
+  @@index([cartId])
+  @@index([productId])
+}
+
+// ============================================
+// ORDER TABLE
+// ============================================
+
+model Order {
+  id              String      @id @default(uuid())
+  orderNumber     String      @unique
+  userId          String      @map("user_id")
+  subtotal        Decimal     @db.Decimal(10, 2)
+  tax             Decimal     @db.Decimal(10, 2)
+  shippingCost    Decimal     @db.Decimal(10, 2)
+  total           Decimal     @db.Decimal(10, 2)
+  status          OrderStatus @default(PENDING)
+  shippingAddress String      @db.Text
+  paymentId       String?
+  paymentMethod   String?
+  paidAt          DateTime?
+  shippedAt       DateTime?
+  deliveredAt     DateTime?
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+
+  user            User        @relation(fields: [userId], references: [id])
+  items           OrderItem[]
+
+  @@index([orderNumber])
+  @@index([userId])
+  @@index([status])
+  @@index([createdAt])
+  @@index([paidAt])
+}
+
+// ============================================
+// ORDER ITEM TABLE
+// ============================================
+
+model OrderItem {
+  id           String   @id @default(uuid())
+  orderId      String   @map("order_id")
+  productName  String
+  productSku   String
+  price        Decimal  @db.Decimal(10, 2)
+  quantity     Int
+  subtotal     Decimal  @db.Decimal(10, 2)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  order        Order    @relation(fields: [orderId], references: [id])
+
+  @@index([orderId])
+  @@index([productSku])
+}
+
+// ============================================
+// REVIEW TABLE (LOW PRIORITY - ADD LATER)
+// ============================================
+
+model Review {
+  id          String   @id @default(uuid())
+  rating      Int      @default(5)
+  comment     String?  @db.Text
+  userId      String   @map("user_id")
+  productId   String   @map("product_id")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  user        User     @relation(fields: [userId], references: [id])
+  product     Product  @relation(fields: [productId], references: [id])
+
+  @@unique([userId, productId])
+  @@index([userId])
+  @@index([productId])
+  @@index([rating])
+}
