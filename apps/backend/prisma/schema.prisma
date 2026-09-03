@@ -108,7 +108,6 @@ model Product {
   seller        User      @relation(fields: [sellerId], references: [id])
   images        ProductImage[]
   cartItems     CartItem[]
-  orderItems    OrderItem[]
   reviews       Review[]
 
   @@index([slug])
@@ -132,7 +131,6 @@ model ProductImage {
   productId    String   @map("product_id")
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
-
   product      Product  @relation(fields: [productId], references: [id])
 
   @@unique([productId, displayOrder])
@@ -215,9 +213,9 @@ model Order {
 model OrderItem {
   id           String   @id @default(uuid())
   orderId      String   @map("order_id")
-  productName  String
-  productSku   String
-  price        Decimal  @db.Decimal(10, 2)
+  productName  String   // Snapshot of product name at order time
+  productSku   String   // Snapshot of SKU at order time
+  price        Decimal  @db.Decimal(10, 2) // Snapshot of price at order time
   quantity     Int
   subtotal     Decimal  @db.Decimal(10, 2)
   createdAt    DateTime @default(now())
@@ -230,7 +228,7 @@ model OrderItem {
 }
 
 // ============================================
-// REVIEW TABLE (LOW PRIORITY - ADD LATER)
+// REVIEW TABLE
 // ============================================
 
 model Review {
