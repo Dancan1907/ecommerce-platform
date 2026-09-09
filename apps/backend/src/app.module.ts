@@ -3,8 +3,8 @@
  *
  * Entry point for the NestJS application.
  * - Loads environment variables globally
- * - Imports feature modules (Auth, Prisma)
- * - Registers controllers and providers
+ * - Imports feature modules (Auth, Prisma, Categories)
+ * - Registers root-level controllers and providers
  */
 
 import { Module } from '@nestjs/common';
@@ -13,6 +13,7 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AuthModule } from './modules/auth/auth.module';
 import { PrismaModule } from './prisma/prisma.module';
+import { CategoriesModule } from './modules/categories/categories.module';
 
 @Module({
   imports: [
@@ -24,14 +25,17 @@ import { PrismaModule } from './prisma/prisma.module';
     }),
 
     // ✅ Feature modules
-    // AuthModule handles authentication (register, login, tokens, guards)
+    // AuthModule → handles authentication (login, register, guards, strategies)
     AuthModule,
 
-    // PrismaModule provides database access layer
+    // PrismaModule → provides PrismaService for database access
     PrismaModule,
+
+    // CategoriesModule → handles category CRUD and hierarchy
+    CategoriesModule,
   ],
 
-  // ✅ Root controller (optional, for health checks or app-level routes)
+  // ✅ Root controller (optional, for app-level routes like health checks)
   controllers: [AppController],
 
   // ✅ Root service (optional, for app-level logic)
