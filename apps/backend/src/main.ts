@@ -2,8 +2,8 @@
  * Application Entry Point
  * Bootstraps the NestJS application with Swagger API documentation
  *
- * Swagger UI: /api/docs
- * API prefix: /api/v1
+ * Swagger UI will be available at: /api/docs
+ * API endpoint: /api/v1
  */
 
 import { NestFactory } from '@nestjs/core';
@@ -43,8 +43,6 @@ async function bootstrap() {
       'access-token'
     )
     .addServer('http://localhost:3000', 'Development Server')
-    .addServer('https://staging.yourdomain.com', 'Staging Server')
-    .addServer('https://api.yourdomain.com', 'Production Server')
     .build();
 
   const document = SwaggerModule.createDocument(app, config);
@@ -64,7 +62,7 @@ async function bootstrap() {
 
   const port = process.env.PORT || 3000;
   await app.listen(port);
-  console.log(`🚀 Application running at: http://localhost:${port}`);
-  console.log(`📚 Swagger docs available at: http://localhost:${port}/api/docs`);
+  console.log(`🚀 Application is running on: http://localhost:${port}`);
+  console.log(`📚 Swagger API documentation: http://localhost:${port}/api/docs`);
 }
 bootstrap();
