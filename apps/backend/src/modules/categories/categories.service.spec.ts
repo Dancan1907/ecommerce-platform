@@ -39,7 +39,7 @@ describe('CategoriesService', () => {
     },
   ];
 
-  // ✅ Mock PrismaService
+  // Mock PrismaService
   const mockPrismaService = {
     category: {
       findUnique: jest.fn(),
@@ -62,9 +62,8 @@ describe('CategoriesService', () => {
     }).compile();
 
     service = module.get<CategoriesService>(CategoriesService);
-    prismaService = module.get<PrismaService>(PrismaService);
 
-    // ✅ Clear all mocks before each test
+    // Clear all mocks before each test
     jest.clearAllMocks();
   });
 
@@ -108,8 +107,8 @@ describe('CategoriesService', () => {
       const createDto = { name: 'Electronics' };
 
       mockPrismaService.category.findUnique
-        .mockResolvedValueOnce(mockCategory) // First call finds existing
-        .mockResolvedValueOnce(null); // Second call finds no match
+        .mockResolvedValueOnce(mockCategory)
+        .mockResolvedValueOnce(null);
 
       mockPrismaService.category.create.mockResolvedValue({
         ...mockCategory,

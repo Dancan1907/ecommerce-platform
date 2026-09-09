@@ -19,7 +19,7 @@ import { UnauthorizedException, ConflictException } from '@nestjs/common';
 import { UserRole } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
 
-// ✅ Mock bcrypt
+// Mock bcrypt
 jest.mock('bcrypt');
 
 describe('AuthService', () => {
@@ -42,7 +42,7 @@ describe('AuthService', () => {
     refreshToken: 'mock-refresh-token',
   };
 
-  // ✅ Mock PrismaService
+  // Mock PrismaService
   const mockPrismaService = {
     user: {
       findUnique: jest.fn(),
@@ -51,13 +51,13 @@ describe('AuthService', () => {
     },
   };
 
-  // ✅ Mock JwtService
+  // Mock JwtService
   const mockJwtService = {
     sign: jest.fn().mockReturnValue('mock-token'),
     verify: jest.fn().mockReturnValue({ sub: 'user-123', email: 'test@example.com' }),
   };
 
-  // ✅ Mock ConfigService
+  // Mock ConfigService
   const mockConfigService = {
     get: jest.fn().mockReturnValue('test-secret'),
   };
@@ -73,10 +73,8 @@ describe('AuthService', () => {
     }).compile();
 
     service = module.get<AuthService>(AuthService);
-    prismaService = module.get<PrismaService>(PrismaService);
-    jwtService = module.get<JwtService>(JwtService);
 
-    // ✅ Clear all mocks before each test
+    // Clear all mocks before each test
     jest.clearAllMocks();
   });
 
