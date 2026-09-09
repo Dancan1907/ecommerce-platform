@@ -1,36 +1,26 @@
 /**
  * Jest Setup File
  *
- * Runs before any test starts.
- * - Sets up the testing environment
- * - Configures global variables
- * - Provides hooks for database cleanup
+ * This file runs before any test starts.
+ * We DO NOT connect to the real database for unit tests.
+ * All database operations should be mocked.
  */
 
-import { PrismaClient } from '@prisma/client';
-
-// ✅ Initialize Prisma client for test DB operations
-const prisma = new PrismaClient();
-
-// ✅ Global test timeout (30 seconds for DB-heavy operations)
+// Global test timeout
 jest.setTimeout(30000);
 
-// ✅ Global environment variables for tests
-process.env.NODE_ENV = 'test';
-process.env.JWT_ACCESS_SECRET = 'test-access-secret-key-min-32-chars';
-process.env.JWT_REFRESH_SECRET = 'test-refresh-secret-key-min-32-chars';
-
-// ✅ Optional: mock console methods to keep test output clean
+// Mock console methods to keep test output clean (optional)
 // console.log = jest.fn();
 // console.error = jest.fn();
 
-// ✅ Clean up database before each test suite (optional, depends on your needs)
-beforeEach(async () => {
-  // Example: clear categories table before each test
-  await prisma.category.deleteMany();
-});
+// Global test environment variables
+process.env.NODE_ENV = 'test';
+process.env.JWT_ACCESS_SECRET = 'test-access-secret-key-min-32-chars';
+process.env.JWT_REFRESH_SECRET = 'test-refresh-secret-key-min-32-chars';
+process.env.DATABASE_URL = 'postgresql://test:test@localhost:5432/test_db';
 
-// ✅ Disconnect Prisma after all tests
+// Clean up after all tests
 afterAll(async () => {
-  await prisma.$disconnect();
+  // Add global cleanup if needed
+  // We don't need to clean a real database because we're mocking everything
 });
