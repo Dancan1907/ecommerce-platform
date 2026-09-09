@@ -89,9 +89,17 @@ describe('AuthService', () => {
 
       (bcrypt.hash as jest.Mock).mockResolvedValue('hashed-password');
       mockPrismaService.user.findUnique.mockResolvedValue(null);
+      // The real service's Prisma `create` call uses a `select` clause that
+      // excludes passwordHash from the returned object. A jest.fn() mock has
+      // no concept of `select` filtering, so the mocked return value must be
+      // shaped manually to match what Prisma would actually send back.
       mockPrismaService.user.create.mockResolvedValue({
-        ...mockUser,
-        passwordHash: 'hashed-password',
+        id: mockUser.id,
+        email: mockUser.email,
+        firstName: mockUser.firstName,
+        lastName: mockUser.lastName,
+        role: mockUser.role,
+        createdAt: mockUser.createdAt,
       });
 
       const result = await service.register(registerDto);
