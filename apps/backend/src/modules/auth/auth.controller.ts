@@ -23,6 +23,7 @@ import {
   HttpCode,
   HttpStatus,
 } from '@nestjs/common';
+import { Request as ExpressRequest } from 'express';
 import { AuthService } from './auth.service';
 import { LoginDto } from './dto/login.dto';
 import { RegisterDto } from './dto/register.dto';
@@ -32,6 +33,22 @@ import { Public } from './decorators/public.decorator';
 import { Roles } from './decorators/roles.decorator';
 import { RolesGuard } from './guards/roles.guard';
 import { UserRole } from '@prisma/client';
+
+/**
+ * Shape of the authenticated request populated by JwtStrategy.validate(),
+ * which Passport attaches to req.user after a valid JWT is verified.
+ * Must match the `select` fields returned by JwtStrategy.validate().
+ */
+interface AuthenticatedRequest extends ExpressRequest {
+  user: {
+    id: string;
+    email: string;
+    firstName: string;
+    lastName: string;
+    role: UserRole;
+    isActive: boolean;
+  };
+}
 
 @Controller('auth')
 export class AuthController {
@@ -76,7 +93,7 @@ export class AuthController {
   @UseGuards(JwtAuthGuard)
   @Post('logout')
   @HttpCode(HttpStatus.OK)
-  async logout(@Request() req) {
+  async logout(@Request() req: AuthenticatedRequest) {
     await this.authService.logout(req.user.id);
     return { message: 'Logged out successfully' };
   }
@@ -87,7 +104,7 @@ export class AuthController {
    */
   @UseGuards(JwtAuthGuard)
   @Get('profile')
-  async getProfile(@Request() req) {
+  async getProfile(@Request() req: AuthenticatedRequest) {
     return this.authService.getProfile(req.user.id);
   }
 
@@ -98,7 +115,7 @@ export class AuthController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.ADMIN)
   @Get('admin')
-  async adminAccess(@Request() req) {
+  async adminAccess(@Request() req: AuthenticatedRequest) {
     return {
       message: 'You have admin access!',
       user: req.user,
@@ -112,7 +129,7 @@ export class AuthController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.SELLER, UserRole.ADMIN)
   @Get('seller')
-  async sellerAccess(@Request() req) {
+  async sellerAccess(@Request() req: AuthenticatedRequest) {
     return {
       message: 'You have seller or admin access!',
       user: req.user,
