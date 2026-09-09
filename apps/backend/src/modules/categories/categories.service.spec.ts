@@ -63,8 +63,11 @@ describe('CategoriesService', () => {
 
     service = module.get<CategoriesService>(CategoriesService);
 
-    // Clear all mocks before each test
-    jest.clearAllMocks();
+    // Fully reset mocks before each test. jest.clearAllMocks() only clears
+    // call history and NOT queued mockResolvedValueOnce() values, which can
+    // leak into later tests and cause false failures. resetAllMocks() clears
+    // implementations/queued values too.
+    jest.resetAllMocks();
   });
 
   describe('create', () => {
