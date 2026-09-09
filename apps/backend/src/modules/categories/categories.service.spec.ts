@@ -6,7 +6,6 @@
  * - Finding categories
  * - Updating categories
  * - Deleting categories
- * - Category tree
  */
 
 import { Test, TestingModule } from '@nestjs/testing';
@@ -16,7 +15,6 @@ import { NotFoundException, ConflictException } from '@nestjs/common';
 
 describe('CategoriesService', () => {
   let service: CategoriesService;
-  let prismaService: PrismaService;
 
   const mockCategory = {
     id: 'cat-123',
@@ -41,35 +39,41 @@ describe('CategoriesService', () => {
     },
   ];
 
+  // ✅ Mock PrismaService
+  const mockPrismaService = {
+    category: {
+      findUnique: jest.fn(),
+      findMany: jest.fn(),
+      create: jest.fn(),
+      update: jest.fn(),
+      delete: jest.fn(),
+    },
+  };
+
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         CategoriesService,
         {
           provide: PrismaService,
-          useValue: {
-            category: {
-              findUnique: jest.fn(),
-              findMany: jest.fn(),
-              create: jest.fn(),
-              update: jest.fn(),
-              delete: jest.fn(),
-            },
-          },
+          useValue: mockPrismaService,
         },
       ],
     }).compile();
 
     service = module.get<CategoriesService>(CategoriesService);
     prismaService = module.get<PrismaService>(PrismaService);
+
+    // ✅ Clear all mocks before each test
+    jest.clearAllMocks();
   });
 
   describe('create', () => {
     it('should create a category with auto-generated slug', async () => {
       const createDto = { name: 'Smartphones', description: 'Mobile phones and accessories' };
 
-      (prismaService.category.findUnique as jest.Mock).mockResolvedValue(null);
-      (prismaService.category.create as jest.Mock).mockResolvedValue({
+      mockPrismaService.category.findUnique.mockResolvedValue(null);
+      mockPrismaService.category.create.mockResolvedValue({
         ...mockCategory,
         name: 'Smartphones',
         slug: 'smartphones',
@@ -77,7 +81,7 @@ describe('CategoriesService', () => {
 
       const result = await service.create(createDto);
 
-      expect(prismaService.category.create).toHaveBeenCalled();
+      expect(mockPrismaService.category.create).toHaveBeenCalled();
       expect(result.slug).toBe('smartphones');
     });
 
@@ -88,8 +92,8 @@ describe('CategoriesService', () => {
         description: 'Mobile phones and accessories',
       };
 
-      (prismaService.category.findUnique as jest.Mock).mockResolvedValue(null);
-      (prismaService.category.create as jest.Mock).mockResolvedValue({
+      mockPrismaService.category.findUnique.mockResolvedValue(null);
+      mockPrismaService.category.create.mockResolvedValue({
         ...mockCategory,
         name: 'Smartphones',
         slug: 'mobile-phones',
@@ -103,11 +107,11 @@ describe('CategoriesService', () => {
     it('should handle duplicate slug by appending suffix', async () => {
       const createDto = { name: 'Electronics' };
 
-      (prismaService.category.findUnique as jest.Mock)
+      mockPrismaService.category.findUnique
         .mockResolvedValueOnce(mockCategory) // First call finds existing
         .mockResolvedValueOnce(null); // Second call finds no match
 
-      (prismaService.category.create as jest.Mock).mockResolvedValue({
+      mockPrismaService.category.create.mockResolvedValue({
         ...mockCategory,
         slug: expect.stringMatching(/electronics-\d{6}/),
       });
@@ -120,20 +124,20 @@ describe('CategoriesService', () => {
 
   describe('findAll', () => {
     it('should return all categories', async () => {
-      (prismaService.category.findMany as jest.Mock).mockResolvedValue(mockCategories);
+      mockPrismaService.category.findMany.mockResolvedValue(mockCategories);
 
       const result = await service.findAll();
 
-      expect(prismaService.category.findMany).toHaveBeenCalled();
+      expect(mockPrismaService.category.findMany).toHaveBeenCalled();
       expect(result).toHaveLength(2);
     });
 
     it('should filter categories by parentId', async () => {
-      (prismaService.category.findMany as jest.Mock).mockResolvedValue([mockCategories[1]]);
+      mockPrismaService.category.findMany.mockResolvedValue([mockCategories[1]]);
 
       const result = await service.findAll('cat-123');
 
-      expect(prismaService.category.findMany).toHaveBeenCalledWith({
+      expect(mockPrismaService.category.findMany).toHaveBeenCalledWith({
         where: { parentId: 'cat-123' },
         include: expect.any(Object),
         orderBy: expect.any(Object),
@@ -144,26 +148,26 @@ describe('CategoriesService', () => {
 
   describe('findTree', () => {
     it('should return category tree with nested children', async () => {
-      (prismaService.category.findMany as jest.Mock).mockResolvedValue(mockCategories);
+      mockPrismaService.category.findMany.mockResolvedValue([mockCategory]);
 
       const result = await service.findTree();
 
-      expect(prismaService.category.findMany).toHaveBeenCalledWith({
+      expect(mockPrismaService.category.findMany).toHaveBeenCalledWith({
         where: { parentId: null },
         include: expect.any(Object),
         orderBy: expect.any(Object),
       });
-      expect(result).toEqual(mockCategories);
+      expect(result).toEqual([mockCategory]);
     });
   });
 
   describe('findOne', () => {
     it('should return a category by id', async () => {
-      (prismaService.category.findUnique as jest.Mock).mockResolvedValue(mockCategory);
+      mockPrismaService.category.findUnique.mockResolvedValue(mockCategory);
 
       const result = await service.findOne('cat-123');
 
-      expect(prismaService.category.findUnique).toHaveBeenCalledWith({
+      expect(mockPrismaService.category.findUnique).toHaveBeenCalledWith({
         where: { id: 'cat-123' },
         include: expect.any(Object),
       });
@@ -171,7 +175,7 @@ describe('CategoriesService', () => {
     });
 
     it('should throw NotFoundException if category not found', async () => {
-      (prismaService.category.findUnique as jest.Mock).mockResolvedValue(null);
+      mockPrismaService.category.findUnique.mockResolvedValue(null);
 
       await expect(service.findOne('nonexistent')).rejects.toThrow(NotFoundException);
     });
@@ -181,8 +185,8 @@ describe('CategoriesService', () => {
     it('should update a category', async () => {
       const updateDto = { name: 'Consumer Electronics', description: 'Updated description' };
 
-      (prismaService.category.findUnique as jest.Mock).mockResolvedValue(mockCategory);
-      (prismaService.category.update as jest.Mock).mockResolvedValue({
+      mockPrismaService.category.findUnique.mockResolvedValue(mockCategory);
+      mockPrismaService.category.update.mockResolvedValue({
         ...mockCategory,
         name: 'Consumer Electronics',
         description: 'Updated description',
@@ -190,12 +194,12 @@ describe('CategoriesService', () => {
 
       const result = await service.update('cat-123', updateDto);
 
-      expect(prismaService.category.update).toHaveBeenCalled();
+      expect(mockPrismaService.category.update).toHaveBeenCalled();
       expect(result.name).toBe('Consumer Electronics');
     });
 
     it('should throw NotFoundException if category not found', async () => {
-      (prismaService.category.findUnique as jest.Mock).mockResolvedValue(null);
+      mockPrismaService.category.findUnique.mockResolvedValue(null);
 
       await expect(service.update('nonexistent', {})).rejects.toThrow(NotFoundException);
     });
@@ -203,7 +207,7 @@ describe('CategoriesService', () => {
     it('should throw ConflictException if parentId equals category id', async () => {
       const updateDto = { parentId: 'cat-123' };
 
-      (prismaService.category.findUnique as jest.Mock).mockResolvedValue(mockCategory);
+      mockPrismaService.category.findUnique.mockResolvedValue(mockCategory);
 
       await expect(service.update('cat-123', updateDto)).rejects.toThrow(ConflictException);
     });
@@ -211,17 +215,17 @@ describe('CategoriesService', () => {
 
   describe('remove', () => {
     it('should delete a category', async () => {
-      (prismaService.category.findUnique as jest.Mock).mockResolvedValue(mockCategory);
-      (prismaService.category.delete as jest.Mock).mockResolvedValue(mockCategory);
+      mockPrismaService.category.findUnique.mockResolvedValue(mockCategory);
+      mockPrismaService.category.delete.mockResolvedValue(mockCategory);
 
       const result = await service.remove('cat-123');
 
-      expect(prismaService.category.delete).toHaveBeenCalledWith({ where: { id: 'cat-123' } });
+      expect(mockPrismaService.category.delete).toHaveBeenCalledWith({ where: { id: 'cat-123' } });
       expect(result.message).toContain('deleted successfully');
     });
 
     it('should throw NotFoundException if category not found', async () => {
-      (prismaService.category.findUnique as jest.Mock).mockResolvedValue(null);
+      mockPrismaService.category.findUnique.mockResolvedValue(null);
 
       await expect(service.remove('nonexistent')).rejects.toThrow(NotFoundException);
     });
