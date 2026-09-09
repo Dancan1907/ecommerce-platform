@@ -112,7 +112,7 @@ describe('CategoriesService', () => {
 
       mockPrismaService.category.create.mockResolvedValue({
         ...mockCategory,
-        slug: expect.stringMatching(/electronics-\d{6}/),
+        slug: 'electronics-123456',
       });
 
       const result = await service.create(createDto);
