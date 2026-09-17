@@ -33,12 +33,21 @@ export class CategoriesService {
 
   /**
    * Create a new category
+   * - Checks name uniqueness
    * - Auto-generates slug if not provided
    * - Ensures slug uniqueness
    * - Validates parent category existence
    */
   async create(createCategoryDto: CreateCategoryDto) {
     const { name, slug, description, parentId } = createCategoryDto;
+
+    // Check if category with this name already exists
+    const existingByName = await this.prisma.category.findUnique({
+      where: { name },
+    });
+    if (existingByName) {
+      throw new ConflictException(`Category with name '${name}' already exists`);
+    }
 
     // Generate slug if not provided
     let finalSlug = slug || this.generateSlug(name);
