@@ -23,7 +23,7 @@ import {
   HttpCode,
   HttpStatus,
 } from '@nestjs/common';
-import { ApiTags } from '@nestjs/swagger';
+import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 import { Request as ExpressRequest } from 'express';
 import { AuthService } from './auth.service';
 import { LoginDto } from './dto/login.dto';
@@ -92,6 +92,7 @@ export class AuthController {
    * Logout user (requires JWT)
    * Clears refresh token hash in DB
    */
+  @ApiBearerAuth('access-token')
   @UseGuards(JwtAuthGuard)
   @Post('logout')
   @HttpCode(HttpStatus.OK)
@@ -104,6 +105,7 @@ export class AuthController {
    * Get current user profile (requires JWT)
    * @returns User profile without password hash
    */
+  @ApiBearerAuth('access-token')
   @UseGuards(JwtAuthGuard)
   @Get('profile')
   async getProfile(@Request() req: AuthenticatedRequest) {
@@ -114,6 +116,7 @@ export class AuthController {
    * Example protected route - Admin only
    * Requires role ADMIN
    */
+  @ApiBearerAuth('access-token')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.ADMIN)
   @Get('admin')
@@ -128,6 +131,7 @@ export class AuthController {
    * Example protected route - Seller or Admin
    * Requires role SELLER or ADMIN
    */
+  @ApiBearerAuth('access-token')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.SELLER, UserRole.ADMIN)
   @Get('seller')
