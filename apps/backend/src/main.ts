@@ -14,7 +14,7 @@ import { ValidationPipe } from '@nestjs/common';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
-  // ✅ Global validation pipe
+  // Global validation pipe
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,
@@ -23,10 +23,10 @@ async function bootstrap() {
     })
   );
 
-  // ✅ API prefix
+  // API prefix
   app.setGlobalPrefix('api/v1');
 
-  // ✅ Swagger configuration
+  // Swagger configuration
   const config = new DocumentBuilder()
     .setTitle('E-Commerce API')
     .setDescription('Modern e-commerce platform API')
@@ -54,10 +54,15 @@ async function bootstrap() {
     },
   });
 
-  // ✅ Enable CORS
+  // Enable CORS - Allow both frontend and Swagger UI
   app.enableCors({
-    origin: process.env.FRONTEND_URL || 'http://localhost:3001',
+    origin: [
+      'http://localhost:3000', // Swagger UI
+      'http://localhost:3001', // Frontend
+    ],
     credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'Accept'],
   });
 
   const port = process.env.PORT || 3000;
