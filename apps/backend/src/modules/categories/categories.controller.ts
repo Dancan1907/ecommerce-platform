@@ -24,7 +24,7 @@ import {
   HttpCode,
   HttpStatus,
 } from '@nestjs/common';
-import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
+import { ApiTags, ApiBearerAuth, ApiOperation, ApiQuery, ApiResponse } from '@nestjs/swagger';
 import { CategoriesService } from './categories.service';
 import { CreateCategoryDto } from './dto/create-category.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
@@ -58,6 +58,14 @@ export class CategoriesController {
    */
   @Public()
   @Get()
+  @ApiOperation({ summary: 'Get all categories' })
+  @ApiQuery({
+    name: 'parentId',
+    required: false,
+    type: String,
+    description: 'Filter categories by parent category ID',
+  })
+  @ApiResponse({ status: 200, description: 'Categories retrieved successfully' })
   findAll(@Query('parentId') parentId?: string) {
     return this.categoriesService.findAll(parentId);
   }
