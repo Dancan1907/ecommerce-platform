@@ -63,7 +63,7 @@ export class QueryProductDto {
   @Type(() => Number)
   @IsNumber()
   @Min(1)
-  page: number = 1;
+  page?: number;
 
   @ApiPropertyOptional({ description: 'Items per page', default: 20 })
   @IsOptional()
@@ -71,5 +71,5 @@ export class QueryProductDto {
   @IsNumber()
   @Min(1)
   @Max(100)
-  limit: number = 20;
+  limit?: number;
 }
