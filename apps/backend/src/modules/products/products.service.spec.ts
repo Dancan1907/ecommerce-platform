@@ -16,13 +16,6 @@ import { PrismaService } from '../../prisma/prisma.service';
 import { NotFoundException, ConflictException, BadRequestException } from '@nestjs/common';
 import { promises as fs } from 'fs';
 
-// Mock fs module so delete doesn't try to touch real files
-jest.mock('fs', () => ({
-  promises: {
-    unlink: jest.fn().mockResolvedValue(undefined),
-  },
-}));
-
 describe('ProductsService', () => {
   let service: ProductsService;
 
@@ -93,6 +86,10 @@ describe('ProductsService', () => {
 
     // Reset all mocks before each test
     jest.clearAllMocks();
+
+    // Mock fs.promises.unlink without replacing the whole fs module
+    // (replacing fs breaks Prisma's internal fs.existsSync call)
+    jest.spyOn(fs, 'unlink').mockResolvedValue(undefined);
   });
 
   // ============ CREATE TESTS ============
@@ -109,7 +106,7 @@ describe('ProductsService', () => {
 
     it('should create a product successfully', async () => {
       mockPrismaService.category.findUnique.mockResolvedValue(mockCategory);
-      mockPrismaService.product.findUnique.mockResolvedValue(null); // no SKU conflict, no slug conflict
+      mockPrismaService.product.findUnique.mockResolvedValue(null);
       mockPrismaService.product.create.mockResolvedValue(mockProduct);
 
       const result = await service.create(createDto, mockSellerId);
@@ -129,14 +126,13 @@ describe('ProductsService', () => {
 
     it('should throw ConflictException if SKU already exists', async () => {
       mockPrismaService.category.findUnique.mockResolvedValue(mockCategory);
-      mockPrismaService.product.findUnique.mockResolvedValueOnce(mockProduct); // SKU exists
+      mockPrismaService.product.findUnique.mockResolvedValueOnce(mockProduct);
 
       await expect(service.create(createDto, mockSellerId)).rejects.toThrow(ConflictException);
     });
 
     it('should append suffix to slug if slug already exists', async () => {
       mockPrismaService.category.findUnique.mockResolvedValue(mockCategory);
-      // First call: no SKU conflict. Second call: slug conflict.
       mockPrismaService.product.findUnique
         .mockResolvedValueOnce(null) // SKU check passes
         .mockResolvedValueOnce(mockProduct); // Slug check fails
@@ -217,16 +213,16 @@ describe('ProductsService', () => {
 
     it('should compute pagination correctly', async () => {
       mockPrismaService.product.findMany.mockResolvedValue([mockProduct]);
-      mockPrismaService.product.count.mockResolvedValue(45); // 45 total
+      mockPrismaService.product.count.mockResolvedValue(45);
 
       const result = await service.findAll({ page: 3, limit: 10 });
 
       expect(result.page).toBe(3);
       expect(result.limit).toBe(10);
-      expect(result.totalPages).toBe(5); // ceil(45/10) = 5
+      expect(result.totalPages).toBe(5);
       expect(mockPrismaService.product.findMany).toHaveBeenCalledWith(
         expect.objectContaining({
-          skip: 20, // (3-1) * 10
+          skip: 20,
           take: 10,
         })
       );
@@ -301,8 +297,8 @@ describe('ProductsService', () => {
 
     it('should throw ConflictException if new SKU conflicts with another product', async () => {
       mockPrismaService.product.findUnique
-        .mockResolvedValueOnce(mockProduct) // existing lookup
-        .mockResolvedValueOnce({ ...mockProduct, id: 'other-id' }); // duplicate SKU
+        .mockResolvedValueOnce(mockProduct)
+        .mockResolvedValueOnce({ ...mockProduct, id: 'other-id' });
 
       await expect(service.update(mockProductId, { sku: 'CONFLICT-SKU' })).rejects.toThrow(
         ConflictException
@@ -311,8 +307,8 @@ describe('ProductsService', () => {
 
     it('should regenerate slug when name changes', async () => {
       mockPrismaService.product.findUnique
-        .mockResolvedValueOnce(mockProduct) // existing
-        .mockResolvedValueOnce(null); // new slug is free
+        .mockResolvedValueOnce(mockProduct)
+        .mockResolvedValueOnce(null);
       mockPrismaService.product.update.mockResolvedValue({
         ...mockProduct,
         name: 'New Headphones',
@@ -344,7 +340,7 @@ describe('ProductsService', () => {
       expect(mockPrismaService.product.delete).toHaveBeenCalledWith({
         where: { id: mockProductId },
       });
-      expect(fs.unlink).toHaveBeenCalledTimes(2); // both images unlinked
+      expect(fs.unlink).toHaveBeenCalledTimes(2);
       expect(result.message).toContain('deleted successfully');
     });
 
@@ -364,7 +360,7 @@ describe('ProductsService', () => {
         { filename: 'img2.jpg', originalname: 'img2.jpg', mimetype: 'image/jpeg' },
       ];
 
-      mockPrismaService.product.findUnique.mockResolvedValue(mockProduct); // no existing images
+      mockPrismaService.product.findUnique.mockResolvedValue(mockProduct);
       mockPrismaService.productImage.create.mockResolvedValue({
         id: 'img-uuid',
         url: '/uploads/products/img1.jpg',
