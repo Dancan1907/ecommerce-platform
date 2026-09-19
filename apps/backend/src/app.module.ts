@@ -14,7 +14,7 @@ import { AppService } from './app.service';
 import { AuthModule } from './modules/auth/auth.module';
 import { PrismaModule } from './prisma/prisma.module';
 import { CategoriesModule } from './modules/categories/categories.module';
-
+import { ProductsModule } from './modules/products/products.module';
 @Module({
   imports: [
     // ✅ Configuration module for environment variables
@@ -33,6 +33,7 @@ import { CategoriesModule } from './modules/categories/categories.module';
 
     // CategoriesModule → handles category CRUD and hierarchy
     CategoriesModule,
+    ProductsModule,
   ],
 
   // ✅ Root controller (optional, for app-level routes like health checks)
