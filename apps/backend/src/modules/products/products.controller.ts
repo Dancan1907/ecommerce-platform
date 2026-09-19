@@ -15,6 +15,7 @@ import {
   Param,
   Post,
   Put,
+  Query,
   Request,
   UploadedFiles,
   UseGuards,
@@ -31,6 +32,7 @@ import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { CreateProductDto } from './dto/create-product.dto';
+import { QueryProductDto } from './dto/query-product.dto';
 import { Public } from '../auth/decorators/public.decorator';
 import { UpdateProductDto } from './dto/update-product.dto';
 
@@ -90,12 +92,25 @@ export class ProductsController {
     return this.productsService.create(createProductsDto, req.user.id);
   }
 
-  /** List products with filters and pagination (public)*/
+  /**
+   * List products with filters and pagination (public)
+   */
   @Public()
-  @Get(':id')
-  @ApiOperation({ summary: 'Get product by ID' })
-  findOne(@Param('id') id: string) {
-    return this.productsService.findOne(id);
+  @Get()
+  @ApiOperation({ summary: 'List products with filters' })
+  findAll(@Query() query: QueryProductDto) {
+    return this.productsService.findAll(query);
+  }
+
+  /**
+   * Get product by slug (public)
+   * MUST come before /:id to avoid route conflict
+   */
+  @Public()
+  @Get('slug/:slug')
+  @ApiOperation({ summary: 'Get product by slug' })
+  findBySlug(@Param('slug') slug: string) {
+    return this.productsService.findBySlug(slug);
   }
 
   /**
@@ -106,16 +121,6 @@ export class ProductsController {
   @ApiOperation({ summary: 'Get product by ID' })
   findOne(@Param('id') id: string) {
     return this.productsService.findOne(id);
-  }
-
-  /**
-   * Get product by slug (public)
-   */
-  @Public()
-  @Get('slug/:slug')
-  @ApiOperation({ summary: 'Get product by slug' })
-  findBySlug(@Param('slug') slug: string) {
-    return this.productsService.findBySlug(slug);
   }
 
   /**
