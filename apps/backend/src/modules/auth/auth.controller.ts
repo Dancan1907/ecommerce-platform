@@ -23,6 +23,8 @@ import {
   HttpCode,
   HttpStatus,
 } from '@nestjs/common';
+import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
+import { Request as ExpressRequest } from 'express';
 import { AuthService } from './auth.service';
 import { LoginDto } from './dto/login.dto';
 import { RegisterDto } from './dto/register.dto';
@@ -33,6 +35,23 @@ import { Roles } from './decorators/roles.decorator';
 import { RolesGuard } from './guards/roles.guard';
 import { UserRole } from '@prisma/client';
 
+/**
+ * Shape of the authenticated request populated by JwtStrategy.validate(),
+ * which Passport attaches to req.user after a valid JWT is verified.
+ * Must match the `select` fields returned by JwtStrategy.validate().
+ */
+interface AuthenticatedRequest extends ExpressRequest {
+  user: {
+    id: string;
+    email: string;
+    firstName: string;
+    lastName: string;
+    role: UserRole;
+    isActive: boolean;
+  };
+}
+
+@ApiTags('Auth')
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
@@ -73,10 +92,11 @@ export class AuthController {
    * Logout user (requires JWT)
    * Clears refresh token hash in DB
    */
+  @ApiBearerAuth('access-token')
   @UseGuards(JwtAuthGuard)
   @Post('logout')
   @HttpCode(HttpStatus.OK)
-  async logout(@Request() req) {
+  async logout(@Request() req: AuthenticatedRequest) {
     await this.authService.logout(req.user.id);
     return { message: 'Logged out successfully' };
   }
@@ -85,9 +105,10 @@ export class AuthController {
    * Get current user profile (requires JWT)
    * @returns User profile without password hash
    */
+  @ApiBearerAuth('access-token')
   @UseGuards(JwtAuthGuard)
   @Get('profile')
-  async getProfile(@Request() req) {
+  async getProfile(@Request() req: AuthenticatedRequest) {
     return this.authService.getProfile(req.user.id);
   }
 
@@ -95,10 +116,11 @@ export class AuthController {
    * Example protected route - Admin only
    * Requires role ADMIN
    */
+  @ApiBearerAuth('access-token')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.ADMIN)
   @Get('admin')
-  async adminAccess(@Request() req) {
+  async adminAccess(@Request() req: AuthenticatedRequest) {
     return {
       message: 'You have admin access!',
       user: req.user,
@@ -109,10 +131,11 @@ export class AuthController {
    * Example protected route - Seller or Admin
    * Requires role SELLER or ADMIN
    */
+  @ApiBearerAuth('access-token')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.SELLER, UserRole.ADMIN)
   @Get('seller')
-  async sellerAccess(@Request() req) {
+  async sellerAccess(@Request() req: AuthenticatedRequest) {
     return {
       message: 'You have seller or admin access!',
       user: req.user,
