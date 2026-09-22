@@ -20,7 +20,7 @@ import { PrismaService } from '../../prisma/prisma.service';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { UpdateOrderStatusDto } from './dto/update-order-status.dto';
 import { QueryOrderDto } from './dto/query-order.dto';
-import { OrderStatus } from '@prisma/client';
+import { OrderStatus, PaymentMethod } from '@prisma/client';
 import { generateOrderNumber } from './utils/order-number.generator';
 
 // Flat-rate shipping cost in KES (MVP)
@@ -43,6 +43,15 @@ export class OrdersService {
    */
   async create(userId: string, dto: CreateOrderDto) {
     const { shippingAddress, paymentMethod = 'STRIPE' } = dto;
+
+    // Validate and cast paymentMethod to the Prisma enum
+    const validPaymentMethods = Object.values(PaymentMethod);
+    if (!validPaymentMethods.includes(paymentMethod as PaymentMethod)) {
+      throw new BadRequestException(
+        `Invalid payment method '${paymentMethod}'. Must be one of: ${validPaymentMethods.join(', ')}`
+      );
+    }
+    const paymentMethodEnum = paymentMethod as PaymentMethod;
 
     // Run inside a transaction
     return this.prisma.$transaction(async (tx) => {
@@ -94,7 +103,7 @@ export class OrdersService {
           total,
           status: OrderStatus.PENDING,
           shippingAddress,
-          paymentMethod,
+          paymentMethod: paymentMethodEnum,
           items: {
             create: cart.items.map((item) => ({
               productName: item.product.name,
