@@ -21,6 +21,11 @@ enum UserRole {
   USER
 }
 
+enum PaymentMethod {
+  STRIPE
+  MPESA
+}
+
 enum OrderStatus {
   PENDING
   PAID
@@ -189,7 +194,7 @@ model Order {
   status          OrderStatus @default(PENDING)
   shippingAddress String      @db.Text
   paymentId       String?
-  paymentMethod   String?
+  paymentMethod   PaymentMethod?
   paidAt          DateTime?
   shippedAt       DateTime?
   deliveredAt     DateTime?
