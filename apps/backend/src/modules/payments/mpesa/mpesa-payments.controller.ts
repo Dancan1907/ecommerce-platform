@@ -6,7 +6,16 @@
  *  - POST /payments/mpesa/callback (public, Safaricom-called)
  */
 
-import { Controller, Post, Body, UseGuards, Request, HttpCode, HttpStatus } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Body,
+  UseGuards,
+  Request,
+  HttpCode,
+  HttpStatus,
+  ValidationPipe,
+} from '@nestjs/common';
 import { ApiTags, ApiBearerAuth, ApiOperation, ApiExcludeEndpoint } from '@nestjs/swagger';
 import { MpesaPaymentsService } from './mpesa-payments.service';
 import { StkPushDto } from './dto/stk-push.dto';
@@ -44,7 +53,18 @@ export class MpesaPaymentsController {
   @Post('callback')
   @HttpCode(HttpStatus.OK)
   @ApiExcludeEndpoint()
-  handleCallback(@Body() dto: MpesaCallbackDto) {
+  handleCallback(
+    @Body(
+      new ValidationPipe({
+        whitelist: false,
+        forbidNonWhitelisted: false,
+        transform: false,
+        validateCustomDecorators: false,
+        skipMissingProperties: true,
+      })
+    )
+    dto: MpesaCallbackDto
+  ) {
     return this.mpesaPaymentsService.handleCallback(dto);
   }
 }
