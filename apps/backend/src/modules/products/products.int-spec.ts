@@ -112,6 +112,9 @@ describe('Products (Integration)', () => {
     });
 
     it('should return 404 for non-existent category', async () => {
+      // Use a valid UUID v4 format that doesn't exist in the DB
+      const nonExistentCategoryId = '11111111-1111-4111-8111-111111111111';
+
       await request(app.getHttpServer())
         .post('/api/v1/products')
         .set(authHeader(adminToken))
@@ -121,7 +124,7 @@ describe('Products (Integration)', () => {
           price: 500,
           stockQuantity: 1,
           sku: 'ORPHAN-001',
-          categoryId: '00000000-0000-0000-0000-000000000000',
+          categoryId: nonExistentCategoryId,
         })
         .expect(404);
     });
