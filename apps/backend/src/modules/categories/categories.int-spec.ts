@@ -117,7 +117,11 @@ describe('Categories (Integration)', () => {
 
     it('should filter by parentId', async () => {
       const parent = await createTestCategory(app, { name: 'Parent' });
-      await createTestCategory(app, { name: 'Child', slug: 'child-x' });
+      await createTestCategory(app, {
+        name: 'Child',
+        slug: 'child-x',
+        parentId: parent.id,
+      });
 
       const response = await request(app.getHttpServer())
         .get(`/api/v1/categories?parentId=${parent.id}`)
