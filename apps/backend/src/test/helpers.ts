@@ -9,7 +9,7 @@ import { INestApplication, ValidationPipe } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { AppModule } from '../app.module';
 import { PrismaService } from '../prisma/prisma.service';
-import * as request from 'supertest';
+import request from 'supertest';
 import * as bcrypt from 'bcrypt';
 import { UserRole } from '@prisma/client';
 
