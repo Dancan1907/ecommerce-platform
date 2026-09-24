@@ -48,7 +48,7 @@ describe('Payments - Stripe (Integration)', () => {
       .useValue(mockStripeService)
       .compile();
 
-    app = moduleRef.createNestApplication();
+    app = moduleRef.createNestApplication({ rawBody: true });
     app.useGlobalPipes(
       new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true, transform: true })
     );
