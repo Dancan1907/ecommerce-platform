@@ -133,7 +133,7 @@ export function authHeader(token: string) {
  */
 export async function createTestCategory(
   app: INestApplication,
-  overrides: Partial<{ name: string; slug: string }> = {}
+  overrides: Partial<{ name: string; slug: string; parentId: string }> = {}
 ) {
   const prisma = getPrisma(app);
   const name = overrides.name ?? `Category ${Date.now()}`;
@@ -141,6 +141,7 @@ export async function createTestCategory(
     data: {
       name,
       slug: overrides.slug ?? name.toLowerCase().replace(/\s+/g, '-'),
+      parentId: overrides.parentId,
     },
   });
 }
