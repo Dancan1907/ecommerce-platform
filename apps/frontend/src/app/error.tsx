@@ -32,8 +32,9 @@ export default function Error({
       </div>
       <h1 className="text-2xl md:text-3xl font-bold mb-3">Something went wrong</h1>
       <p className="text-gray-600 dark:text-gray-400 max-w-md mb-8">
-        We've encountered an unexpected error. Try again or head back to the home page.
+        We&apos;ve encountered an unexpected error. Try again or head back to the home page.
       </p>
+
       <div className="flex flex-col sm:flex-row gap-3">
         <Button size="lg" onClick={reset} leftIcon={<RefreshCw className="h-4 w-4" />}>
           Try Again
