@@ -1,8 +1,7 @@
 /**
  * Skeleton Component
  *
- * Loading placeholder with pulse animation.
- * Used while data is being fetched to avoid layout shift.
+ * Warm loading placeholder.
  */
 
 import { cn } from '@/lib/utils';
@@ -10,7 +9,7 @@ import { cn } from '@/lib/utils';
 export function Skeleton({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) {
   return (
     <div
-      className={cn('animate-pulse rounded-md bg-gray-200 dark:bg-gray-700/50', className)}
+      className={cn('animate-pulse rounded-md bg-cream-300 dark:bg-forest-800/60', className)}
       {...props}
     />
   );
