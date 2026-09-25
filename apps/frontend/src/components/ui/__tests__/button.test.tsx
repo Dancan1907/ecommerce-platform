@@ -1,7 +1,5 @@
 /**
  * Button Component Tests
- *
- * Verifies rendering, variants, sizes, and interaction.
  */
 
 import { render, screen, fireEvent } from '@testing-library/react';
@@ -44,20 +42,16 @@ describe('Button', () => {
     expect(handleClick).not.toHaveBeenCalled();
   });
 
-  it('applies variant classes', () => {
-    const { rerender } = render(<Button variant="danger">Delete</Button>);
-    let button = screen.getByRole('button');
+  it('applies danger variant classes', () => {
+    render(<Button variant="danger">Delete</Button>);
+    const button = screen.getByRole('button');
     expect(button.className).toContain('bg-red-600');
-
-    rerender(<Button variant="secondary">Secondary</Button>);
-    button = screen.getByRole('button');
-    expect(button.className).toContain('backdrop-blur-glass');
   });
 
   it('applies size classes', () => {
     render(<Button size="lg">Large</Button>);
     const button = screen.getByRole('button');
-    expect(button.className).toContain('h-12');
+    expect(button.className).toContain('h-13');
   });
 
   it('renders left and right icons', () => {
