@@ -1,8 +1,8 @@
 /**
  * Card Component
  *
- * Glass-morphism container with optional header, title, description, and footer.
- * Used throughout the app for product cards, forms, dashboard panels.
+ * Warm cream cards (light) / charcoal-emerald (dark).
+ * Rounded corners, soft shadows, subtle borders.
  */
 
 import { forwardRef, type HTMLAttributes } from 'react';
@@ -13,9 +13,10 @@ export const Card = forwardRef<HTMLDivElement, HTMLAttributes<HTMLDivElement>>(
     <div
       ref={ref}
       className={cn(
-        'rounded-xl border border-white/20 dark:border-white/10',
-        'bg-white/60 dark:bg-black/30 backdrop-blur-glass',
-        'shadow-lg shadow-black/5',
+        'rounded-xl border bg-white dark:bg-forest-900/50',
+        'border-cream-300 dark:border-forest-800',
+        'shadow-soft hover:shadow-soft-lg',
+        'transition-shadow duration-300',
         className
       )}
       {...props}
@@ -35,7 +36,7 @@ export const CardTitle = forwardRef<HTMLHeadingElement, HTMLAttributes<HTMLHeadi
   ({ className, ...props }, ref) => (
     <h3
       ref={ref}
-      className={cn('text-lg font-semibold text-gray-900 dark:text-white', className)}
+      className={cn('font-serif text-lg font-semibold text-ink-900 dark:text-mint-100', className)}
       {...props}
     />
   )
@@ -46,7 +47,7 @@ export const CardDescription = forwardRef<
   HTMLParagraphElement,
   HTMLAttributes<HTMLParagraphElement>
 >(({ className, ...props }, ref) => (
-  <p ref={ref} className={cn('text-sm text-gray-600 dark:text-gray-400', className)} {...props} />
+  <p ref={ref} className={cn('text-sm text-ink-600 dark:text-mint-300', className)} {...props} />
 ));
 CardDescription.displayName = 'CardDescription';
 
