@@ -17,7 +17,7 @@ export default function HomePage() {
           HERO SECTION
           ============================================ */}
       <section className="container-page py-12 md:py-20">
-        <Card className="overflow-hidden">
+        <Card variant="elevated" className="overflow-hidden">
           <div className="grid md:grid-cols-2 gap-0">
             {/* Left: Text */}
             <div className="p-8 md:p-12 flex flex-col justify-center">
@@ -63,36 +63,48 @@ export default function HomePage() {
           ============================================ */}
       <section className="container-page py-12">
         <div className="grid md:grid-cols-3 gap-6">
-          <Card>
+          <Card className="group">
             <CardContent className="pt-8 text-center">
               <div className="flex justify-center mb-4">
-                <Truck className="h-10 w-10 text-forest-700 dark:text-emerald-500" />
+                <div className="rounded-full bg-forest-50 dark:bg-emerald-950/40 p-4 transition-colors group-hover:bg-forest-100 dark:group-hover:bg-emerald-900/50">
+                  <Truck className="h-8 w-8 text-forest-700 dark:text-emerald-500" />
+                </div>
               </div>
-              <h3 className="font-serif text-xl font-semibold mb-2">Fast Delivery</h3>
+              <h3 className="font-serif text-xl font-semibold mb-2 text-ink-900 dark:text-mint-100">
+                Fast Delivery
+              </h3>
               <p className="text-sm text-ink-600 dark:text-mint-300 leading-relaxed">
                 Same-day delivery in Nairobi, next-day upcountry.
               </p>
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="group">
             <CardContent className="pt-8 text-center">
               <div className="flex justify-center mb-4">
-                <Shield className="h-10 w-10 text-forest-700 dark:text-emerald-500" />
+                <div className="rounded-full bg-forest-50 dark:bg-emerald-950/40 p-4 transition-colors group-hover:bg-forest-100 dark:group-hover:bg-emerald-900/50">
+                  <Shield className="h-8 w-8 text-forest-700 dark:text-emerald-500" />
+                </div>
               </div>
-              <h3 className="font-serif text-xl font-semibold mb-2">Secure Payments</h3>
+              <h3 className="font-serif text-xl font-semibold mb-2 text-ink-900 dark:text-mint-100">
+                Secure Payments
+              </h3>
               <p className="text-sm text-ink-600 dark:text-mint-300 leading-relaxed">
                 Pay securely with M-Pesa, card, or other methods.
               </p>
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="group">
             <CardContent className="pt-8 text-center">
               <div className="flex justify-center mb-4">
-                <Package className="h-10 w-10 text-forest-700 dark:text-emerald-500" />
+                <div className="rounded-full bg-forest-50 dark:bg-emerald-950/40 p-4 transition-colors group-hover:bg-forest-100 dark:group-hover:bg-emerald-900/50">
+                  <Package className="h-8 w-8 text-forest-700 dark:text-emerald-500" />
+                </div>
               </div>
-              <h3 className="font-serif text-xl font-semibold mb-2">Quality Products</h3>
+              <h3 className="font-serif text-xl font-semibold mb-2 text-ink-900 dark:text-mint-100">
+                Quality Products
+              </h3>
               <p className="text-sm text-ink-600 dark:text-mint-300 leading-relaxed">
                 Curated selection from trusted local sellers.
               </p>
