@@ -1,11 +1,8 @@
 /**
  * Input Component
  *
- * Glass-morphism text input with:
- *  - Label (always associated with the input via htmlFor/id)
- *  - Error message
- *  - Optional left/right icon
- *  - Forward ref for react-hook-form integration
+ * Warm cream inputs (light) / forest-emerald (dark).
+ * Label + error + icon support.
  */
 
 import { forwardRef, useId, type InputHTMLAttributes } from 'react';
@@ -20,9 +17,7 @@ export interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
 
 export const Input = forwardRef<HTMLInputElement, InputProps>(
   ({ className, type = 'text', label, error, leftIcon, rightIcon, id, ...props }, ref) => {
-    // Stable ID from React (SSR-safe)
     const generatedId = useId();
-    // Explicit id wins, then name, then generated
     const inputId = id ?? props.name ?? generatedId;
     const errorId = `${inputId}-error`;
 
@@ -31,14 +26,14 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
         {label && (
           <label
             htmlFor={inputId}
-            className="block text-sm font-medium text-gray-700 dark:text-gray-300"
+            className="block text-sm font-medium text-forest-800 dark:text-mint-200"
           >
             {label}
           </label>
         )}
         <div className="relative">
           {leftIcon && (
-            <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
+            <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-forest-500 dark:text-mint-300">
               {leftIcon}
             </span>
           )}
@@ -47,13 +42,13 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
             id={inputId}
             type={type}
             className={cn(
-              'flex h-10 w-full rounded-lg border bg-white/60 dark:bg-black/30 px-3 py-2 text-sm',
-              'backdrop-blur-glass',
-              'border-gray-300 dark:border-gray-700',
-              'placeholder:text-gray-400',
-              'text-gray-900 dark:text-white',
+              'flex h-11 w-full rounded-lg border px-3 py-2 text-sm',
+              'bg-white dark:bg-forest-900/60',
+              'border-cream-400 dark:border-forest-700',
+              'placeholder:text-ink-400 dark:placeholder:text-mint-300/60',
+              'text-ink-900 dark:text-mint-100',
               'transition-colors',
-              'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:border-indigo-500',
+              'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:border-emerald-500',
               'disabled:cursor-not-allowed disabled:opacity-50',
               leftIcon && 'pl-10',
               rightIcon && 'pr-10',
@@ -65,7 +60,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
             {...props}
           />
           {rightIcon && (
-            <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-gray-400">
+            <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-forest-500 dark:text-mint-300">
               {rightIcon}
             </span>
           )}
