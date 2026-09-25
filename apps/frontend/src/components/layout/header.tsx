@@ -3,18 +3,12 @@
 /**
  * Header
  *
- * Global site header with:
- *  - Logo
- *  - Navigation links
- *  - Cart icon with item count badge
- *  - Theme toggle
- *  - Auth dropdown (Login/Register or user menu)
- *
- * Sticky at the top with glass-morphism backdrop blur.
+ * Solid forest green header with cream text.
+ * Matches the artisanal reference design.
  */
 
 import Link from 'next/link';
-import { ShoppingCart, User as UserIcon, Menu } from 'lucide-react';
+import { ShoppingCart, User as UserIcon } from 'lucide-react';
 import { useAuthStore } from '@/stores/auth-store';
 import { useCartStore } from '@/stores/cart-store';
 import { ThemeToggle } from './theme-toggle';
@@ -25,70 +19,82 @@ export function Header() {
   const itemCount = useCartStore((s) => s.cart?.itemCount ?? 0);
 
   return (
-    <header className="sticky top-0 z-40 w-full border-b border-white/20 dark:border-white/10 bg-white/60 dark:bg-black/30 backdrop-blur-glass">
-      <div className="container mx-auto flex h-16 items-center justify-between px-4">
+    <header className="sticky top-0 z-40 w-full bg-forest-800 dark:bg-forest-900 shadow-soft">
+      <div className="container-page flex h-16 items-center justify-between">
         {/* Logo */}
-        <Link href="/" className="flex items-center gap-2 font-bold text-lg">
-          <span className="rounded-lg bg-indigo-600 px-2 py-1 text-white">E</span>
-          <span className="hidden sm:inline">E-Commerce</span>
+        <Link href="/" className="flex items-center gap-2">
+          <span className="font-serif text-2xl font-semibold text-cream-200">E</span>
+          <span className="font-serif text-lg font-medium text-cream-200 tracking-wide">
+            E-Commerce
+          </span>
         </Link>
 
         {/* Navigation */}
-        <nav className="hidden md:flex items-center gap-6 text-sm font-medium">
-          <Link href="/products" className="hover:text-indigo-600 transition-colors">
+        <nav className="hidden md:flex items-center gap-8">
+          <Link
+            href="/products"
+            className="font-serif text-cream-200 hover:text-emerald-400 transition-colors"
+          >
             Products
           </Link>
-          <Link href="/categories" className="hover:text-indigo-600 transition-colors">
+          <Link
+            href="/categories"
+            className="font-serif text-cream-200 hover:text-emerald-400 transition-colors"
+          >
             Categories
           </Link>
         </nav>
 
         {/* Right side actions */}
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-3">
           <ThemeToggle />
 
-          {/* Cart with badge */}
-          <Link href="/cart" aria-label="Cart">
-            <Button variant="ghost" size="icon" className="relative">
+          {/* Cart */}
+          <Link href="/cart" aria-label="Cart" className="relative">
+            <button className="p-2 text-cream-200 hover:text-emerald-400 transition-colors">
               <ShoppingCart className="h-5 w-5" />
               {itemCount > 0 && (
-                <span className="absolute -top-1 -right-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-indigo-600 px-1.5 text-[10px] font-bold text-white">
+                <span className="absolute -top-1 -right-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-emerald-500 px-1.5 text-[10px] font-bold text-white">
                   {itemCount > 99 ? '99+' : itemCount}
                 </span>
               )}
-            </Button>
+            </button>
           </Link>
 
-          {/* Auth area */}
+          {/* Auth */}
           {isAuthenticated ? (
             <div className="flex items-center gap-2">
               <Link href="/dashboard">
-                <Button variant="ghost" size="sm">
-                  <UserIcon className="h-4 w-4 mr-1.5" />
-                  <span className="hidden sm:inline">{user?.firstName ?? 'Account'}</span>
-                </Button>
+                <button className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 text-sm text-cream-200 hover:text-emerald-400 transition-colors">
+                  <UserIcon className="h-4 w-4" />
+                  {user?.firstName ?? 'Account'}
+                </button>
               </Link>
-              <Button variant="outline" size="sm" onClick={() => logout()}>
+              <Button
+                variant="secondary"
+                size="sm"
+                onClick={() => logout()}
+                className="border-cream-200 text-cream-200 hover:bg-cream-200/10"
+              >
                 Logout
               </Button>
             </div>
           ) : (
             <div className="flex items-center gap-2">
-              <Link href="/login" className="hidden sm:inline">
-                <Button variant="ghost" size="sm">
-                  Login
-                </Button>
+              <Link
+                href="/login"
+                className="hidden sm:inline font-serif text-cream-200 hover:text-emerald-400 transition-colors px-3"
+              >
+                Login
               </Link>
-              <Link href="/register">
-                <Button size="sm">Sign Up</Button>
+              <Link
+                href="/register"
+                className="rounded-lg bg-cream-200 px-4 py-2 font-serif text-forest-800 hover:bg-cream-100 transition-colors"
+              >
+                Sign Up
               </Link>
             </div>
           )}
-
-          {/* Mobile menu */}
-          <Button variant="ghost" size="icon" className="md:hidden" aria-label="Menu">
-            <Menu className="h-5 w-5" />
-          </Button>
         </div>
       </div>
     </header>
