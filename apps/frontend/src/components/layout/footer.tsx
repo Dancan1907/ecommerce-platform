@@ -2,7 +2,7 @@
  * Footer
  *
  * Solid forest green footer with cream text.
- * Matches the artisanal reference design.
+ * Refined with subtle top border for visual separation in dark mode.
  */
 
 import Link from 'next/link';
@@ -11,7 +11,7 @@ export function Footer() {
   const year = new Date().getFullYear();
 
   return (
-    <footer className="mt-auto bg-forest-800 dark:bg-forest-900 text-cream-200">
+    <footer className="mt-auto bg-forest-800 dark:bg-forest-900 border-t border-forest-700 dark:border-emerald-900/30 text-cream-200">
       <div className="container-page py-12">
         <div className="grid grid-cols-2 gap-8 md:grid-cols-4">
           {/* Brand */}
