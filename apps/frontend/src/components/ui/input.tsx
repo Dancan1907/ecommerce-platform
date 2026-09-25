@@ -2,13 +2,13 @@
  * Input Component
  *
  * Glass-morphism text input with:
- *  - Label
+ *  - Label (always associated with the input via htmlFor/id)
  *  - Error message
  *  - Optional left/right icon
  *  - Forward ref for react-hook-form integration
  */
 
-import { forwardRef, type InputHTMLAttributes } from 'react';
+import { forwardRef, useId, type InputHTMLAttributes } from 'react';
 import { cn } from '@/lib/utils';
 
 export interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
@@ -20,7 +20,11 @@ export interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
 
 export const Input = forwardRef<HTMLInputElement, InputProps>(
   ({ className, type = 'text', label, error, leftIcon, rightIcon, id, ...props }, ref) => {
-    const inputId = id ?? props.name;
+    // Stable ID from React (SSR-safe)
+    const generatedId = useId();
+    // Explicit id wins, then name, then generated
+    const inputId = id ?? props.name ?? generatedId;
+    const errorId = `${inputId}-error`;
 
     return (
       <div className="w-full space-y-1.5">
@@ -57,7 +61,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
               className
             )}
             aria-invalid={error ? 'true' : undefined}
-            aria-describedby={error ? `${inputId}-error` : undefined}
+            aria-describedby={error ? errorId : undefined}
             {...props}
           />
           {rightIcon && (
@@ -67,11 +71,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
           )}
         </div>
         {error && (
-          <p
-            id={`${inputId}-error`}
-            className="text-xs text-red-600 dark:text-red-400"
-            role="alert"
-          >
+          <p id={errorId} className="text-xs text-red-600 dark:text-red-400" role="alert">
             {error}
           </p>
         )}
