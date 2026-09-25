@@ -7,26 +7,41 @@ import globals from 'globals';
 import tseslint from 'typescript-eslint';
 
 export default [
-  // 1. Base ESLint recommended rules
-  js.configs.recommended,
-
-  // 2. TypeScript support
-  ...tseslint.configs.recommended,
-
-  // 3. Main configuration
+  // ============================================
+  // 1. GLOBAL IGNORES
+  // (Standalone object — globally ignores these files)
+  // ============================================
   {
-    files: ['**/*.{js,ts,jsx,tsx}'],
     ignores: [
       'node_modules/**',
       'dist/**',
       'build/**',
       '.next/**',
       'coverage/**',
-      '*.config.js',
-      '*.config.ts',
+      '**/*.config.js',
+      '**/*.config.ts',
       '.eslintrc.*',
-      '*.d.ts',
+      '**/*.d.ts',
+      '**/jest.setup.ts',
+      '**/jest-integration.config.js',
     ],
+  },
+
+  // ============================================
+  // 2. Base ESLint recommended rules
+  // ============================================
+  js.configs.recommended,
+
+  // ============================================
+  // 3. TypeScript support
+  // ============================================
+  ...tseslint.configs.recommended,
+
+  // ============================================
+  // 4. Main configuration for TS/TSX files
+  // ============================================
+  {
+    files: ['**/*.{ts,tsx}'],
     languageOptions: {
       globals: {
         ...globals.browser,
@@ -55,9 +70,11 @@ export default [
     },
   },
 
-  // 4. Test file rules
+  // ============================================
+  // 5. Test file rules
+  // ============================================
   {
-    files: ['**/*.test.ts', '**/*.spec.ts'],
+    files: ['**/*.test.{ts,tsx}', '**/*.spec.{ts,tsx}', '**/*.int-spec.ts'],
     rules: {
       '@typescript-eslint/no-explicit-any': 'off',
       'no-console': 'off',
