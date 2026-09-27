@@ -10,7 +10,7 @@ import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { toast } from 'sonner';
-import { Mail, Lock } from 'lucide-react';
+import { Mail, Lock, Eye, EyeOff } from 'lucide-react';
 import { Button, Input } from '@/components/ui';
 import { useAuthStore } from '@/stores/auth-store';
 import { loginSchema, type LoginInput } from '@/lib/validation/auth-schemas';
@@ -19,6 +19,7 @@ export default function LoginPage() {
   const router = useRouter();
   const login = useAuthStore((s) => s.login);
   const [submitting, setSubmitting] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   const {
     register,
@@ -38,7 +39,7 @@ export default function LoginPage() {
       toast.success('Welcome back!');
       router.push('/');
     } else {
-      toast.error('Invalid email or password');
+      toast.error('Invalid email or password', { duration: 6000 });
     }
   }
 
@@ -66,9 +67,20 @@ export default function LoginPage() {
 
         <Input
           label="Password"
-          type="password"
+          type={showPassword ? 'text' : 'password'}
           placeholder="••••••••"
           leftIcon={<Lock className="h-4 w-4" />}
+          rightIcon={
+            <button
+              type="button"
+              onClick={() => setShowPassword((s) => !s)}
+              aria-label={showPassword ? 'Hide password' : 'Show password'}
+              className="pointer-events-auto text-forest-500 dark:text-mint-300 hover:text-forest-800 dark:hover:text-mint-100 transition-colors"
+              tabIndex={-1}
+            >
+              {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+            </button>
+          }
           error={errors.password?.message}
           autoComplete="current-password"
           {...register('password')}
