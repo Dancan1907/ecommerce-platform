@@ -1,14 +1,12 @@
 /**
  * Jest Configuration for Integration Tests
  *
- * Integration tests:
- *  - Use a real PostgreSQL database (ecommerce_test_db)
- *  - Boot a real NestJS app
- *  - Send real HTTP requests via supertest
- *  - Mock external services (Stripe, M-Pesa Daraja)
- *
- * Files: *.int-spec.ts
+ * Integration tests use .env.test (ecommerce_test_db).
+ * Set NODE_ENV=test BEFORE Jest loads any modules
+ * so ConfigModule picks the right env file.
  */
+
+process.env.NODE_ENV = 'test';
 
 module.exports = {
   preset: 'ts-jest',
@@ -18,17 +16,9 @@ module.exports = {
   moduleNameMapper: {
     '^@/(.*)$': '<rootDir>/src/$1',
   },
+  setupFiles: ['<rootDir>/src/test/set-env.ts'],
   setupFilesAfterEnv: ['<rootDir>/src/test/integration-setup.ts'],
-  testTimeout: 60000, // 60s — real DB operations are slower
-  maxWorkers: 1, // Run tests serially — they share the same test DB
+  testTimeout: 60000,
+  maxWorkers: 1,
   verbose: true,
-  collectCoverageFrom: [
-    'src/**/*.{ts,tsx}',
-    '!src/**/*.d.ts',
-    '!src/**/*.module.ts',
-    '!src/main.ts',
-    '!src/test/**',
-    '!src/**/*.spec.ts',
-    '!src/**/*.int-spec.ts',
-  ],
 };
