@@ -2,6 +2,10 @@
 
 /**
  * Login Page
+ *
+ * - React Hook Form + Zod validation
+ * - Password visibility toggle
+ * - Persistent error banner (survives toast fade)
  */
 
 import { useState } from 'react';
@@ -10,7 +14,7 @@ import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { toast } from 'sonner';
-import { Mail, Lock, Eye, EyeOff } from 'lucide-react';
+import { Mail, Lock, Eye, EyeOff, AlertCircle } from 'lucide-react';
 import { Button, Input } from '@/components/ui';
 import { useAuthStore } from '@/stores/auth-store';
 import { loginSchema, type LoginInput } from '@/lib/validation/auth-schemas';
@@ -20,6 +24,7 @@ export default function LoginPage() {
   const login = useAuthStore((s) => s.login);
   const [submitting, setSubmitting] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [loginError, setLoginError] = useState<string | null>(null);
 
   const {
     register,
@@ -32,6 +37,8 @@ export default function LoginPage() {
 
   async function onSubmit(data: LoginInput) {
     setSubmitting(true);
+    setLoginError(null);
+
     const success = await login(data.email, data.password);
     setSubmitting(false);
 
@@ -39,6 +46,7 @@ export default function LoginPage() {
       toast.success('Welcome back!');
       router.push('/');
     } else {
+      setLoginError('Invalid email or password. Please try again.');
       toast.error('Invalid email or password', { duration: 6000 });
     }
   }
@@ -53,6 +61,16 @@ export default function LoginPage() {
           Sign in to your account to continue.
         </p>
       </div>
+
+      {loginError && (
+        <div
+          role="alert"
+          className="mb-5 flex items-start gap-2.5 rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-800 dark:border-red-900 dark:bg-red-950/40 dark:text-red-300"
+        >
+          <AlertCircle className="mt-0.5 h-4 w-4 flex-shrink-0" />
+          <span>{loginError}</span>
+        </div>
+      )}
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
         <Input
