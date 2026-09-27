@@ -1,16 +1,42 @@
 /**
  * Home Page
  *
- * Artisanal marketplace landing page.
- * Warm, editorial layout with serif hero and hero image.
+ * Artisanal marketplace landing page with:
+ *  - Editorial hero (serif + hero image)
+ *  - Featured categories
+ *  - Featured products (latest arrivals)
+ *  - Trust features
  */
 
 import Image from 'next/image';
 import Link from 'next/link';
 import { ArrowRight, Truck, Shield, Package } from 'lucide-react';
 import { Button, Card, CardContent } from '@/components/ui';
+import { ProductCard } from '@/components/products/product-card';
+import { fetchCategories, fetchProducts } from '@/lib/products';
+import type { Category, Product } from '@/types/product';
 
-export default function HomePage() {
+// Revalidate every 60 seconds
+export const revalidate = 60;
+
+export default async function HomePage() {
+  let featuredProducts: Product[];
+  let topCategories: Category[];
+
+  // Fetch in parallel
+  try {
+    const [productsRes, categoriesRes] = await Promise.all([
+      fetchProducts({ limit: 8, sortBy: 'createdAt', sortOrder: 'desc', isActive: true }),
+      fetchCategories(),
+    ]);
+    featuredProducts = productsRes.data;
+    topCategories = categoriesRes.slice(0, 4);
+  } catch {
+    // Fail gracefully — show empty home page
+    featuredProducts = [];
+    topCategories = [];
+  }
+
   return (
     <div>
       {/* ============================================
@@ -47,7 +73,7 @@ export default function HomePage() {
             <div className="relative h-64 md:h-auto md:min-h-[500px]">
               <Image
                 src="https://images.unsplash.com/photo-1610701596007-11502861dcfa?w=1200&q=80"
-                alt="Curated collection of artisanal goods: baskets, pottery, notebooks"
+                alt="Curated collection of artisanal goods"
                 fill
                 priority
                 className="object-cover"
@@ -59,9 +85,93 @@ export default function HomePage() {
       </section>
 
       {/* ============================================
-          FEATURE CARDS
+          FEATURED CATEGORIES
+          ============================================ */}
+      {topCategories.length > 0 && (
+        <section className="container-page py-12">
+          <div className="mb-8 flex items-end justify-between">
+            <div>
+              <span className="label-caps mb-2 block">Explore</span>
+              <h2 className="font-serif text-3xl md:text-4xl font-semibold text-ink-900 dark:text-mint-100">
+                Shop by category
+              </h2>
+            </div>
+            <Link
+              href="/categories"
+              className="hidden sm:inline-flex items-center gap-1.5 text-sm font-medium text-forest-700 dark:text-emerald-500 hover:underline"
+            >
+              View all
+              <ArrowRight className="h-4 w-4" />
+            </Link>
+          </div>
+
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            {topCategories.map((category) => (
+              <Link key={category.id} href={`/categories/${category.slug}`} className="group">
+                <Card className="overflow-hidden h-full">
+                  <div className="relative aspect-square bg-gradient-to-br from-forest-700 via-forest-800 to-forest-900 dark:from-forest-800 dark:via-forest-900 dark:to-forest-950 flex items-center justify-center">
+                    <Package className="h-12 w-12 text-cream-200/40" />
+                    <div className="absolute bottom-3 left-3 right-3">
+                      <h3 className="font-serif text-lg font-semibold text-cream-100 truncate">
+                        {category.name}
+                      </h3>
+                    </div>
+                  </div>
+                </Card>
+              </Link>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {/* ============================================
+          FEATURED PRODUCTS
           ============================================ */}
       <section className="container-page py-12">
+        <div className="mb-8 flex items-end justify-between">
+          <div>
+            <span className="label-caps mb-2 block">New Arrivals</span>
+            <h2 className="font-serif text-3xl md:text-4xl font-semibold text-ink-900 dark:text-mint-100">
+              Fresh finds, just for you
+            </h2>
+          </div>
+          <Link
+            href="/products"
+            className="hidden sm:inline-flex items-center gap-1.5 text-sm font-medium text-forest-700 dark:text-emerald-500 hover:underline"
+          >
+            Shop all
+            <ArrowRight className="h-4 w-4" />
+          </Link>
+        </div>
+
+        {featuredProducts.length === 0 ? (
+          <div className="text-center py-12">
+            <p className="text-sm text-ink-600 dark:text-mint-300 mb-4">
+              No products available yet. Check back soon!
+            </p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
+            {featuredProducts.map((product) => (
+              <ProductCard key={product.id} product={product} />
+            ))}
+          </div>
+        )}
+
+        {/* Mobile "View all" link */}
+        <div className="mt-8 text-center sm:hidden">
+          <Link href="/products">
+            <Button variant="secondary" rightIcon={<ArrowRight className="h-4 w-4" />}>
+              Shop all products
+            </Button>
+          </Link>
+        </div>
+      </section>
+
+      {/* ============================================
+          TRUST FEATURES
+          ============================================ */}
+      <section className="container-page py-12 md:py-16">
         <div className="grid md:grid-cols-3 gap-6">
           <Card className="group">
             <CardContent className="pt-8 text-center">
