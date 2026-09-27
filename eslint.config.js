@@ -1,15 +1,14 @@
 /**
  * ESLint v9+ Flat Configuration
- * Required for ESLint v9 and above
  */
 import js from '@eslint/js';
 import globals from 'globals';
 import tseslint from 'typescript-eslint';
+import reactHooks from 'eslint-plugin-react-hooks';
 
 export default [
   // ============================================
-  // 1. GLOBAL IGNORES
-  // (Standalone object — globally ignores these files)
+  // 1. GLOBAL IGNORES (standalone object)
   // ============================================
   {
     ignores: [
@@ -27,18 +26,14 @@ export default [
     ],
   },
 
-  // ============================================
-  // 2. Base ESLint recommended rules
-  // ============================================
+  // 2. Base ESLint recommended
   js.configs.recommended,
 
-  // ============================================
   // 3. TypeScript support
-  // ============================================
   ...tseslint.configs.recommended,
 
   // ============================================
-  // 4. Main configuration for TS/TSX files
+  // 4. Main config for TS/TSX files
   // ============================================
   {
     files: ['**/*.{ts,tsx}'],
@@ -56,22 +51,27 @@ export default [
     },
     plugins: {
       '@typescript-eslint': tseslint.plugin,
+      'react-hooks': reactHooks,
     },
     rules: {
-      // TypeScript specific rules
+      // TypeScript rules
       '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
       '@typescript-eslint/explicit-function-return-type': 'off',
       '@typescript-eslint/explicit-module-boundary-types': 'off',
       '@typescript-eslint/no-explicit-any': 'warn',
 
-      // General rules
+      // React Hooks rules
+      'react-hooks/rules-of-hooks': 'error',
+      'react-hooks/exhaustive-deps': 'warn',
+
+      // General
       'no-console': 'warn',
       'prefer-const': 'error',
     },
   },
 
   // ============================================
-  // 5. Test file rules
+  // 5. Test file overrides
   // ============================================
   {
     files: ['**/*.test.{ts,tsx}', '**/*.spec.{ts,tsx}', '**/*.int-spec.ts'],
