@@ -4,7 +4,7 @@
  * Header
  *
  * Solid forest green header with cream text.
- * Matches the artisanal reference design.
+ * Navigation differs based on authentication state.
  */
 
 import Link from 'next/link';
@@ -12,7 +12,6 @@ import { ShoppingCart, User as UserIcon } from 'lucide-react';
 import { useAuthStore } from '@/stores/auth-store';
 import { useCartStore } from '@/stores/cart-store';
 import { ThemeToggle } from './theme-toggle';
-import { Button } from '@/components/ui';
 
 export function Header() {
   const { user, isAuthenticated, logout } = useAuthStore();
@@ -43,6 +42,14 @@ export function Header() {
           >
             Categories
           </Link>
+          {isAuthenticated && (
+            <Link
+              href="/orders"
+              className="font-serif text-cream-200 hover:text-emerald-400 transition-colors"
+            >
+              My Orders
+            </Link>
+          )}
         </nav>
 
         {/* Right side actions */}
@@ -64,20 +71,19 @@ export function Header() {
           {/* Auth */}
           {isAuthenticated ? (
             <div className="flex items-center gap-2">
-              <Link href="/dashboard">
-                <button className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 text-sm text-cream-200 hover:text-emerald-400 transition-colors">
-                  <UserIcon className="h-4 w-4" />
-                  {user?.firstName ?? 'Account'}
-                </button>
+              <Link
+                href="/orders"
+                className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 text-sm text-cream-200 hover:text-emerald-400 transition-colors"
+              >
+                <UserIcon className="h-4 w-4" />
+                {user?.firstName ?? 'Account'}
               </Link>
-              <Button
-                variant="secondary"
-                size="sm"
+              <button
                 onClick={() => logout()}
-                className="border-cream-200 text-cream-200 hover:bg-cream-200/10"
+                className="rounded-lg border border-cream-200/40 px-3 py-1.5 text-sm font-medium text-cream-200 hover:bg-cream-200/10 transition-colors"
               >
                 Logout
-              </Button>
+              </button>
             </div>
           ) : (
             <div className="flex items-center gap-2">
