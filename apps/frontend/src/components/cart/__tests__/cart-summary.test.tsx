@@ -13,9 +13,9 @@ jest.mock('next/link', () => ({
 describe('CartSummary', () => {
   it('renders subtotal and shipping', () => {
     render(<CartSummary subtotal={5000} itemCount={2} />);
-    expect(screen.getByText(/5,000/)).toBeInTheDocument();
-    expect(screen.getByText(/250/)).toBeInTheDocument();
-    expect(screen.getByText(/5,250/)).toBeInTheDocument();
+    expect(screen.getByText('KSh 5,000')).toBeInTheDocument();
+    expect(screen.getByText('KSh 250')).toBeInTheDocument();
+    expect(screen.getByText('KSh 5,250')).toBeInTheDocument();
   });
 
   it('hides shipping when cart is empty', () => {
