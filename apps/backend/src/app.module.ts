@@ -2,9 +2,9 @@
  * Root Application Module
  *
  * Entry point for the NestJS application.
- * - Loads environment variables globally
- * - Imports feature modules (Auth, Prisma, Categories)
- * - Registers root-level controllers and providers
+ * Loads env vars based on NODE_ENV:
+ *   - test → .env.test (integration test database)
+ *   - else → .env (development database)
  */
 
 import { Module } from '@nestjs/common';
@@ -21,32 +21,19 @@ import { PaymentsModule } from './modules/payments/payments.module';
 
 @Module({
   imports: [
-    // ✅ Configuration module for environment variables
-    // Makes .env values available globally via ConfigService
     ConfigModule.forRoot({
       isGlobal: true,
-      envFilePath: '.env',
+      envFilePath: process.env.NODE_ENV === 'test' ? '.env.test' : '.env',
     }),
-
-    // ✅ Feature modules
-    // AuthModule → handles authentication (login, register, guards, strategies)
     AuthModule,
-
-    // PrismaModule → provides PrismaService for database access
     PrismaModule,
-
-    // CategoriesModule → handles category CRUD and hierarchy
     CategoriesModule,
     ProductsModule,
     CartModule,
     OrdersModule,
     PaymentsModule,
   ],
-
-  // ✅ Root controller (optional, for app-level routes like health checks)
   controllers: [AppController],
-
-  // ✅ Root service (optional, for app-level logic)
   providers: [AppService],
 })
 export class AppModule {}
