@@ -50,6 +50,14 @@ export function Header() {
               My Orders
             </Link>
           )}
+          {isAuthenticated && user?.role === 'ADMIN' && (
+            <Link
+              href="/admin"
+              className="font-serif text-emerald-400 hover:text-emerald-300 transition-colors font-semibold"
+            >
+              Admin
+            </Link>
+          )}
         </nav>
 
         {/* Right side actions */}
