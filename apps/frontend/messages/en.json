@@ -1,0 +1,155 @@
+{
+  "common": {
+    "loading": "Loading...",
+    "error": "Something went wrong",
+    "retry": "Try Again",
+    "back": "Back",
+    "backToHome": "Back to Home",
+    "search": "Search",
+    "cancel": "Cancel",
+    "save": "Save",
+    "delete": "Delete",
+    "edit": "Edit",
+    "create": "Create",
+    "close": "Close",
+    "yes": "Yes",
+    "no": "No"
+  },
+  "nav": {
+    "home": "Home",
+    "products": "Products",
+    "categories": "Categories",
+    "cart": "Cart",
+    "orders": "My Orders",
+    "login": "Login",
+    "register": "Sign Up",
+    "logout": "Logout",
+    "admin": "Admin",
+    "dashboard": "Dashboard"
+  },
+  "home": {
+    "hero": {
+      "eyebrow": "Curated in Kenya",
+      "title": "Discover curated local treasures.",
+      "subtitle": "Shop quality, artisanal goods, delivered fast. Experience unique products from talented local creators. Secure payments, including direct M-Pesa.",
+      "shopNow": "Shop Now",
+      "browseCategories": "Browse Categories"
+    },
+    "features": {
+      "delivery": {
+        "title": "Fast Delivery",
+        "description": "Same-day delivery in Nairobi, next-day upcountry."
+      },
+      "payments": {
+        "title": "Secure Payments",
+        "description": "Pay securely with M-Pesa, card, or other methods."
+      },
+      "quality": {
+        "title": "Quality Products",
+        "description": "Curated selection from trusted local sellers."
+      }
+    }
+  },
+  "products": {
+    "title": "All Products",
+    "found_one": "{count} product found",
+    "found_other": "{count} products found",
+    "noResults": "No products found",
+    "outOfStock": "Out of Stock",
+    "lowStock": "Only {count} left",
+    "inStock": "In Stock",
+    "addToCart": "Add to Cart",
+    "quantity": "Quantity"
+  },
+  "cart": {
+    "title": "Shopping Cart",
+    "empty": "Your cart is empty",
+    "emptyDescription": "Looks like you haven't added anything yet. Explore our curated selection of local treasures.",
+    "startShopping": "Start Shopping",
+    "continueShopping": "Continue shopping",
+    "summary": "Order Summary",
+    "subtotal": "Subtotal",
+    "shipping": "Shipping",
+    "total": "Total",
+    "checkout": "Proceed to Checkout"
+  },
+  "checkout": {
+    "title": "Checkout",
+    "shippingAddress": "Shipping Address",
+    "paymentMethod": "Payment Method",
+    "cardPayment": "Card Payment",
+    "mpesaPayment": "M-Pesa",
+    "orderReview": "Order Review",
+    "continueToPayment": "Continue to Payment"
+  },
+  "auth": {
+    "login": {
+      "title": "Welcome back",
+      "subtitle": "Sign in to your account to continue.",
+      "email": "Email",
+      "password": "Password",
+      "forgotPassword": "Forgot password?",
+      "signIn": "Sign In",
+      "noAccount": "Don't have an account?",
+      "signUp": "Sign up"
+    },
+    "register": {
+      "title": "Create your account",
+      "subtitle": "Join us to shop curated local treasures.",
+      "firstName": "First name",
+      "lastName": "Last name",
+      "email": "Email",
+      "password": "Password",
+      "confirmPassword": "Confirm password",
+      "createAccount": "Create account",
+      "haveAccount": "Already have an account?",
+      "signIn": "Sign in"
+    }
+  },
+  "footer": {
+    "tagline": "Curated local treasures, delivered fast across Kenya.",
+    "shop": "Shop",
+    "account": "Account",
+    "legal": "Legal",
+    "allProducts": "All Products",
+    "categories": "Categories",
+    "cart": "Cart",
+    "dashboard": "Dashboard",
+    "login": "Login",
+    "register": "Sign Up",
+    "terms": "Terms",
+    "privacy": "Privacy",
+    "copyright": "© {year} E-Commerce Platform. All rights reserved."
+  },
+  "dashboard": {
+    "overview": "Overview",
+    "profile": "Profile",
+    "password": "Change Password",
+    "addresses": "Addresses",
+    "myOrders": "My Orders",
+    "administration": "Administration",
+    "adminDashboard": "Admin Dashboard",
+    "welcomeBack": "Welcome back, {name}!",
+    "quickLook": "Here's a quick look at your account.",
+    "totalOrders": "Total Orders",
+    "activeOrders": "Active Orders",
+    "totalSpent": "Total Spent",
+    "recentOrders": "Recent Orders",
+    "viewAll": "View all"
+  },
+  "admin": {
+    "title": "Admin Dashboard",
+    "backToStore": "Back to store",
+    "products": "Products",
+    "categories": "Categories",
+    "orders": "Orders",
+    "users": "Users",
+    "revenue": "Total Revenue",
+    "totalOrders": "Total Orders",
+    "totalUsers": "Users",
+    "totalProducts": "Products",
+    "lowStock": "Low Stock Alert",
+    "topProducts": "Top Selling Products",
+    "recentOrders": "Recent Orders"
+  }
+}
