@@ -5,12 +5,21 @@
  *
  * Two-column layout with sidebar navigation + content area.
  * Wrapped in ProtectedRoute so only authenticated users can access.
+ * Admins see an additional link to the Admin Dashboard.
  */
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { LayoutDashboard, User as UserIcon, Lock, MapPin, ShoppingBag } from 'lucide-react';
+import {
+  LayoutDashboard,
+  User as UserIcon,
+  Lock,
+  MapPin,
+  ShoppingBag,
+  ShieldCheck,
+} from 'lucide-react';
 import { ProtectedRoute } from '@/components/auth';
+import { useAuthStore } from '@/stores/auth-store';
 import { cn } from '@/lib/utils';
 
 const NAV_ITEMS = [
@@ -23,13 +32,16 @@ const NAV_ITEMS = [
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
+  const user = useAuthStore((s) => s.user);
+  const isAdmin = user?.role === 'ADMIN';
 
   return (
     <ProtectedRoute>
       <div className="container-page py-8 md:py-12">
         <div className="grid lg:grid-cols-[240px_1fr] gap-8">
           {/* Sidebar */}
-          <aside className="lg:sticky lg:top-24 h-fit">
+          <aside className="lg:sticky lg:top-24 h-fit space-y-6">
+            {/* Main nav */}
             <nav className="space-y-1">
               {NAV_ITEMS.map((item) => {
                 const isActive = pathname === item.href;
@@ -52,6 +64,22 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                 );
               })}
             </nav>
+
+            {/* Admin section (admin only) */}
+            {isAdmin && (
+              <div className="pt-6 border-t border-cream-300 dark:border-forest-800">
+                <span className="label-caps text-[10px] mb-3 block text-forest-700 dark:text-emerald-500">
+                  Administration
+                </span>
+                <Link
+                  href="/admin"
+                  className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors bg-emerald-50 dark:bg-emerald-950/40 text-emerald-800 dark:text-emerald-400 hover:bg-emerald-100 dark:hover:bg-emerald-900/50"
+                >
+                  <ShieldCheck className="h-4 w-4" />
+                  Admin Dashboard
+                </Link>
+              </div>
+            )}
           </aside>
 
           {/* Content */}
