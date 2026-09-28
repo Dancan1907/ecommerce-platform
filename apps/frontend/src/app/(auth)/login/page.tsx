@@ -6,11 +6,12 @@
  * - React Hook Form + Zod validation
  * - Password visibility toggle
  * - Persistent error banner (survives toast fade)
+ * - Redirects to ?next= URL after login (admins land on /admin by default)
  */
 
-import { useState } from 'react';
+import { Suspense, useState } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { toast } from 'sonner';
@@ -19,12 +20,17 @@ import { Button, Input } from '@/components/ui';
 import { useAuthStore } from '@/stores/auth-store';
 import { loginSchema, type LoginInput } from '@/lib/validation/auth-schemas';
 
-export default function LoginPage() {
+function LoginForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const login = useAuthStore((s) => s.login);
   const [submitting, setSubmitting] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [loginError, setLoginError] = useState<string | null>(null);
+
+  // Only allow same-origin relative paths (prevents open-redirect via ?next=)
+  const rawNext = searchParams.get('next');
+  const nextUrl = rawNext && rawNext.startsWith('/') && !rawNext.startsWith('//') ? rawNext : '/';
 
   const {
     register,
@@ -44,7 +50,13 @@ export default function LoginPage() {
 
     if (success) {
       toast.success('Welcome back!');
-      router.push('/');
+      // Redirect admins to admin dashboard, others to home or next URL
+      const currentUser = useAuthStore.getState().user;
+      if (currentUser?.role === 'ADMIN' && nextUrl === '/') {
+        router.push('/admin');
+      } else {
+        router.push(nextUrl);
+      }
     } else {
       setLoginError('Invalid email or password. Please try again.');
       toast.error('Invalid email or password', { duration: 6000 });
@@ -128,5 +140,13 @@ export default function LoginPage() {
         </Link>
       </p>
     </div>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={null}>
+      <LoginForm />
+    </Suspense>
   );
 }

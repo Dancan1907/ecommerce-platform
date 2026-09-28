@@ -5,6 +5,7 @@
  *
  * Solid forest green header with cream text.
  * Navigation differs based on authentication state.
+ * Username links to /admin for admins, /dashboard for regular users.
  */
 
 import Link from 'next/link';
@@ -72,7 +73,7 @@ export function Header() {
           {isAuthenticated ? (
             <div className="flex items-center gap-2">
               <Link
-                href="/orders"
+                href={user?.role === 'ADMIN' ? '/admin' : '/dashboard'}
                 className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 text-sm text-cream-200 hover:text-emerald-400 transition-colors"
               >
                 <UserIcon className="h-4 w-4" />

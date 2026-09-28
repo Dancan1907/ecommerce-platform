@@ -2,7 +2,7 @@
  * Input Component
  *
  * Warm cream inputs (light) / forest-emerald (dark).
- * Label + error + icon support.
+ * Label + error + hint + icon support.
  */
 
 import { forwardRef, useId, type InputHTMLAttributes } from 'react';
@@ -11,15 +11,19 @@ import { cn } from '@/lib/utils';
 export interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
   label?: string;
   error?: string;
+  hint?: string;
   leftIcon?: React.ReactNode;
   rightIcon?: React.ReactNode;
 }
 
 export const Input = forwardRef<HTMLInputElement, InputProps>(
-  ({ className, type = 'text', label, error, leftIcon, rightIcon, id, ...props }, ref) => {
+  ({ className, type = 'text', label, error, hint, leftIcon, rightIcon, id, ...props }, ref) => {
     const generatedId = useId();
     const inputId = id ?? props.name ?? generatedId;
     const errorId = `${inputId}-error`;
+    const hintId = `${inputId}-hint`;
+
+    const describedBy = error ? errorId : hint ? hintId : undefined;
 
     return (
       <div className="w-full space-y-1.5">
@@ -56,7 +60,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
               className
             )}
             aria-invalid={error ? 'true' : undefined}
-            aria-describedby={error ? errorId : undefined}
+            aria-describedby={describedBy}
             {...props}
           />
           {rightIcon && (
@@ -68,6 +72,11 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
         {error && (
           <p id={errorId} className="text-xs text-red-600 dark:text-red-400" role="alert">
             {error}
+          </p>
+        )}
+        {!error && hint && (
+          <p id={hintId} className="text-xs text-ink-500 dark:text-mint-300/70">
+            {hint}
           </p>
         )}
       </div>
