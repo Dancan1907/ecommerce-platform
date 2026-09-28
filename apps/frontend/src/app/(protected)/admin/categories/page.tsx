@@ -12,31 +12,23 @@ import { Button, Card, Badge, Skeleton } from '@/components/ui';
 import { CategoryFormModal } from '@/components/admin/category-form-modal';
 import { ConfirmDeleteModal } from '@/components/admin/confirm-delete-modal';
 import { api, extractErrorMessage } from '@/lib/api';
-
-interface CategoryRow {
-  id: string;
-  name: string;
-  slug: string;
-  description?: string | null;
-  parentId?: string | null;
-  children?: CategoryRow[];
-}
+import type { Category } from '@/types/product';
 
 export default function AdminCategoriesPage() {
-  const [categories, setCategories] = useState<CategoryRow[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [total, setTotal] = useState(0);
 
   const [formModalOpen, setFormModalOpen] = useState(false);
-  const [editingCategory, setEditingCategory] = useState<CategoryRow | null>(null);
-  const [deletingCategory, setDeletingCategory] = useState<CategoryRow | null>(null);
+  const [editingCategory, setEditingCategory] = useState<Category | null>(null);
+  const [deletingCategory, setDeletingCategory] = useState<Category | null>(null);
 
   const loadCategories = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
-      const res = await api.get<CategoryRow[]>('/categories');
+      const res = await api.get<Category[]>('/categories');
       setCategories(res.data);
       setTotal(res.data.length);
     } catch (err) {
@@ -55,14 +47,13 @@ export default function AdminCategoriesPage() {
     setFormModalOpen(true);
   }
 
-  function openEditModal(cat: CategoryRow) {
+  function openEditModal(cat: Category) {
     setEditingCategory(cat);
     setFormModalOpen(true);
   }
 
   return (
     <div className="space-y-6">
-      {/* Header */}
       <div className="flex items-start justify-between flex-wrap gap-4">
         <div>
           <span className="label-caps mb-2 block">Catalog</span>
@@ -78,7 +69,6 @@ export default function AdminCategoriesPage() {
         </Button>
       </div>
 
-      {/* Error */}
       {error && (
         <Card className="p-4 border-red-200 bg-red-50 dark:bg-red-950/30">
           <div className="flex items-start gap-2.5">
@@ -88,7 +78,6 @@ export default function AdminCategoriesPage() {
         </Card>
       )}
 
-      {/* Content */}
       {loading ? (
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {Array.from({ length: 6 }).map((_, i) => (
@@ -153,7 +142,6 @@ export default function AdminCategoriesPage() {
         </div>
       )}
 
-      {/* Modals */}
       <CategoryFormModal
         isOpen={formModalOpen}
         onClose={() => {
