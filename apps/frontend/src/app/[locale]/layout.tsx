@@ -1,14 +1,17 @@
 import type { Metadata } from 'next';
 import { Fraunces, Plus_Jakarta_Sans } from 'next/font/google';
+import { NextIntlClientProvider } from 'next-intl';
+import { getMessages } from 'next-intl/server';
+import { notFound } from 'next/navigation';
 import { AppProviders } from '@/providers/app-providers';
 import { Header } from '@/components/layout/header';
 import { Footer } from '@/components/layout/footer';
+import { locales, type Locale } from '@/i18n/config';
 import './globals.css';
 
 // ============================================
 // FONTS
 // ============================================
-// Fraunces — warm, artisanal serif for headings
 const fraunces = Fraunces({
   subsets: ['latin'],
   display: 'swap',
@@ -16,7 +19,6 @@ const fraunces = Fraunces({
   axes: ['SOFT', 'WONK', 'opsz'],
 });
 
-// Plus Jakarta Sans — clean, modern body font
 const plusJakarta = Plus_Jakarta_Sans({
   subsets: ['latin'],
   display: 'swap',
@@ -24,7 +26,14 @@ const plusJakarta = Plus_Jakarta_Sans({
 });
 
 // ============================================
-// SEO METADATA
+// STATIC PARAMS
+// ============================================
+export function generateStaticParams() {
+  return locales.map((locale) => ({ locale }));
+}
+
+// ============================================
+// METADATA
 // ============================================
 export const metadata: Metadata = {
   title: {
@@ -32,25 +41,42 @@ export const metadata: Metadata = {
     template: '%s | E-Commerce Platform',
   },
   description: 'Discover curated local treasures. Shop quality, artisanal goods, delivered fast.',
-  keywords: ['ecommerce', 'kenya', 'artisanal', 'handmade', 'local'],
 };
 
 // ============================================
-// ROOT LAYOUT
+// LAYOUT
 // ============================================
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default async function LocaleLayout({
+  children,
+  params,
+}: {
+  children: React.ReactNode;
+  params: { locale: string };
+}) {
+  const { locale } = params;
+
+  // Validate locale
+  if (!locales.includes(locale as Locale)) {
+    notFound();
+  }
+
+  // Load messages for the locale
+  const messages = await getMessages();
+
   return (
     <html
-      lang="en"
+      lang={locale}
       suppressHydrationWarning
       className={`${fraunces.variable} ${plusJakarta.variable}`}
     >
       <body className="font-sans flex min-h-screen flex-col bg-cream-200 text-ink-900 dark:bg-forest-950 dark:text-mint-200 transition-colors">
-        <AppProviders>
-          <Header />
-          <main className="flex-1">{children}</main>
-          <Footer />
-        </AppProviders>
+        <NextIntlClientProvider messages={messages}>
+          <AppProviders>
+            <Header />
+            <main className="flex-1">{children}</main>
+            <Footer />
+          </AppProviders>
+        </NextIntlClientProvider>
       </body>
     </html>
   );
