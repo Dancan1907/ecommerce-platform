@@ -28,28 +28,7 @@ export function Header() {
             E-Commerce
           </span>
         </Link>
-        <nav className="hidden md:flex items-center gap-8">
-          <Link
-            href="/products"
-            className="font-serif text-cream-200 hover:text-emerald-400 transition-colors"
-          >
-            Products
-          </Link>
-          <Link
-            href="/categories"
-            className="font-serif text-cream-200 hover:text-emerald-400 transition-colors"
-          >
-            Categories
-          </Link>
-          {isAuthenticated && (
-            <Link
-              href="/orders"
-              className="font-serif text-cream-200 hover:text-emerald-400 transition-colors"
-            >
-              My Orders
-            </Link>
-          )}
-        </nav>
+
         {/* Navigation */}
         <nav className="hidden md:flex items-center gap-8">
           <Link
@@ -70,14 +49,6 @@ export function Header() {
               className="font-serif text-cream-200 hover:text-emerald-400 transition-colors"
             >
               My Orders
-            </Link>
-          )}
-          {isAuthenticated && user?.role === 'ADMIN' && (
-            <Link
-              href="/admin"
-              className="font-serif text-emerald-400 hover:text-emerald-300 transition-colors font-semibold"
-            >
-              Admin
             </Link>
           )}
         </nav>
