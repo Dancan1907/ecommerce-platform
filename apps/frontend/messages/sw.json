@@ -1,0 +1,155 @@
+{
+  "common": {
+    "loading": "Inapakia...",
+    "error": "Kuna kitu kilienda vibaya",
+    "retry": "Jaribu Tena",
+    "back": "Rudi",
+    "backToHome": "Rudi Nyumbani",
+    "search": "Tafuta",
+    "cancel": "Ghairi",
+    "save": "Hifadhi",
+    "delete": "Futa",
+    "edit": "Hariri",
+    "create": "Unda",
+    "close": "Funga",
+    "yes": "Ndiyo",
+    "no": "Hapana"
+  },
+  "nav": {
+    "home": "Nyumbani",
+    "products": "Bidhaa",
+    "categories": "Kategoria",
+    "cart": "Kikapu",
+    "orders": "Oda Zangu",
+    "login": "Ingia",
+    "register": "Jisajili",
+    "logout": "Toka",
+    "admin": "Msimamizi",
+    "dashboard": "Dashibodi"
+  },
+  "home": {
+    "hero": {
+      "eyebrow": "Imechaguliwa Kenya",
+      "title": "Gundua hazina za ndani zilizochaguliwa.",
+      "subtitle": "Nunua bidhaa bora za ufundi, zinazofikishwa haraka. Pata uzoefu wa bidhaa za kipekee kutoka kwa wabunifu wa ndani. Malipo salama, ikiwa ni pamoja na M-Pesa moja kwa moja.",
+      "shopNow": "Nunua Sasa",
+      "browseCategories": "Vinjari Kategoria"
+    },
+    "features": {
+      "delivery": {
+        "title": "Uwasilishaji wa Haraka",
+        "description": "Uwasilishaji wa siku hiyo Nairobi, siku inayofuata mashambani."
+      },
+      "payments": {
+        "title": "Malipo Salama",
+        "description": "Lipa kwa usalama kwa M-Pesa, kadi, au njia nyingine."
+      },
+      "quality": {
+        "title": "Bidhaa Bora",
+        "description": "Uteuzi uliochaguliwa kutoka kwa wauzaji wa ndani wanaoaminika."
+      }
+    }
+  },
+  "products": {
+    "title": "Bidhaa Zote",
+    "found_one": "Bidhaa {count} imepatikana",
+    "found_other": "Bidhaa {count} zimepatikana",
+    "noResults": "Hakuna bidhaa zilizopatikana",
+    "outOfStock": "Haipatikani",
+    "lowStock": "Zimebaki {count} tu",
+    "inStock": "Inapatikana",
+    "addToCart": "Ongeza kwenye Kikapu",
+    "quantity": "Idadi"
+  },
+  "cart": {
+    "title": "Kikapu cha Ununuzi",
+    "empty": "Kikapu chako ni kitupu",
+    "emptyDescription": "Inaonekana haujaongeza chochote bado. Chunguza uteuzi wetu wa hazina za ndani.",
+    "startShopping": "Anza Kununua",
+    "continueShopping": "Endelea kununua",
+    "summary": "Muhtasari wa Oda",
+    "subtotal": "Jumla Ndogo",
+    "shipping": "Usafirishaji",
+    "total": "Jumla",
+    "checkout": "Endelea Malipo"
+  },
+  "checkout": {
+    "title": "Malipo",
+    "shippingAddress": "Anwani ya Usafirishaji",
+    "paymentMethod": "Njia ya Malipo",
+    "cardPayment": "Malipo ya Kadi",
+    "mpesaPayment": "M-Pesa",
+    "orderReview": "Kagua Oda",
+    "continueToPayment": "Endelea kwa Malipo"
+  },
+  "auth": {
+    "login": {
+      "title": "Karibu tena",
+      "subtitle": "Ingia kwenye akaunti yako kuendelea.",
+      "email": "Barua pepe",
+      "password": "Nenosiri",
+      "forgotPassword": "Umesahau nenosiri?",
+      "signIn": "Ingia",
+      "noAccount": "Hauna akaunti?",
+      "signUp": "Jisajili"
+    },
+    "register": {
+      "title": "Unda akaunti yako",
+      "subtitle": "Jiunge nasi kununua hazina za ndani zilizochaguliwa.",
+      "firstName": "Jina la kwanza",
+      "lastName": "Jina la mwisho",
+      "email": "Barua pepe",
+      "password": "Nenosiri",
+      "confirmPassword": "Thibitisha nenosiri",
+      "createAccount": "Unda akaunti",
+      "haveAccount": "Tayari una akaunti?",
+      "signIn": "Ingia"
+    }
+  },
+  "footer": {
+    "tagline": "Hazina za ndani zilizochaguliwa, zinazofikishwa haraka kote Kenya.",
+    "shop": "Nunua",
+    "account": "Akaunti",
+    "legal": "Kisheria",
+    "allProducts": "Bidhaa Zote",
+    "categories": "Kategoria",
+    "cart": "Kikapu",
+    "dashboard": "Dashibodi",
+    "login": "Ingia",
+    "register": "Jisajili",
+    "terms": "Masharti",
+    "privacy": "Faragha",
+    "copyright": "© {year} Jukwaa la Biashara. Haki zote zimehifadhiwa."
+  },
+  "dashboard": {
+    "overview": "Muhtasari",
+    "profile": "Wasifu",
+    "password": "Badilisha Nenosiri",
+    "addresses": "Anwani",
+    "myOrders": "Oda Zangu",
+    "administration": "Utawala",
+    "adminDashboard": "Dashibodi ya Msimamizi",
+    "welcomeBack": "Karibu tena, {name}!",
+    "quickLook": "Hapa kuna muhtasari wa akaunti yako.",
+    "totalOrders": "Oda Zote",
+    "activeOrders": "Oda Zinazoendelea",
+    "totalSpent": "Jumla Iliyotumika",
+    "recentOrders": "Oda za Hivi Karibuni",
+    "viewAll": "Ona zote"
+  },
+  "admin": {
+    "title": "Dashibodi ya Msimamizi",
+    "backToStore": "Rudi kwa duka",
+    "products": "Bidhaa",
+    "categories": "Kategoria",
+    "orders": "Oda",
+    "users": "Watumiaji",
+    "revenue": "Mapato Yote",
+    "totalOrders": "Oda Zote",
+    "totalUsers": "Watumiaji",
+    "totalProducts": "Bidhaa",
+    "lowStock": "Tahadhari ya Hisa Ndogo",
+    "topProducts": "Bidhaa Zinazouzwa Zaidi",
+    "recentOrders": "Oda za Hivi Karibuni"
+  }
+}
