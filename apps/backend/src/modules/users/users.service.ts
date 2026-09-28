@@ -5,6 +5,10 @@
  *  - Get own profile
  *  - Update own profile
  *  - Change own password
+ *
+ * Admin user management:
+ *  - List users
+ *  - Update user role / active status
  */
 
 import { Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
@@ -16,6 +20,82 @@ import * as bcrypt from 'bcrypt';
 @Injectable()
 export class UsersService {
   constructor(private readonly prisma: PrismaService) {}
+
+  /**
+   * List all users (Admin only).
+   */
+  async findAll(query: { search?: string; role?: string; limit?: number }) {
+    const { search, role, limit = 50 } = query;
+
+    const where: any = { deletedAt: null };
+    if (role) where.role = role;
+    if (search) {
+      where.OR = [
+        { email: { contains: search, mode: 'insensitive' } },
+        { firstName: { contains: search, mode: 'insensitive' } },
+        { lastName: { contains: search, mode: 'insensitive' } },
+      ];
+    }
+
+    const [data, total] = await Promise.all([
+      this.prisma.user.findMany({
+        where,
+        select: {
+          id: true,
+          email: true,
+          firstName: true,
+          lastName: true,
+          role: true,
+          isActive: true,
+          isEmailVerified: true,
+          createdAt: true,
+          lastLoginAt: true,
+        },
+        orderBy: { createdAt: 'desc' },
+        take: limit,
+      }),
+      this.prisma.user.count({ where }),
+    ]);
+
+    return {
+      data,
+      total,
+      page: 1,
+      limit,
+      totalPages: Math.ceil(total / limit),
+    };
+  }
+
+  /**
+   * Update a user (Admin only).
+   */
+  async updateUser(targetUserId: string, data: { role?: string; isActive?: boolean }) {
+    const existing = await this.prisma.user.findUnique({
+      where: { id: targetUserId },
+    });
+    if (!existing) {
+      throw new NotFoundException('User not found');
+    }
+
+    return this.prisma.user.update({
+      where: { id: targetUserId },
+      data: {
+        ...(data.role !== undefined && { role: data.role as any }),
+        ...(data.isActive !== undefined && { isActive: data.isActive }),
+      },
+      select: {
+        id: true,
+        email: true,
+        firstName: true,
+        lastName: true,
+        role: true,
+        isActive: true,
+        isEmailVerified: true,
+        createdAt: true,
+        lastLoginAt: true,
+      },
+    });
+  }
 
   /**
    * Get user's own profile (without password).
