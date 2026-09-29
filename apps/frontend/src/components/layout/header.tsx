@@ -4,11 +4,11 @@
  * Header
  *
  * Solid forest green header with cream text.
- * Navigation differs based on authentication state.
- * Username links to /admin for admins, /dashboard for regular users.
+ * Navigation labels are translated via next-intl.
  */
 
 import { Link } from '@/i18n/navigation';
+import { useTranslations } from 'next-intl';
 import { ShoppingCart, User as UserIcon } from 'lucide-react';
 import { useAuthStore } from '@/stores/auth-store';
 import { useCartStore } from '@/stores/cart-store';
@@ -18,6 +18,7 @@ import { LocaleSwitcher } from './locale-switcher';
 export function Header() {
   const { user, isAuthenticated, logout } = useAuthStore();
   const itemCount = useCartStore((s) => s.cart?.itemCount ?? 0);
+  const t = useTranslations('nav');
 
   return (
     <header className="sticky top-0 z-40 w-full bg-forest-800 dark:bg-forest-900 shadow-soft">
@@ -36,20 +37,20 @@ export function Header() {
             href="/products"
             className="font-serif text-cream-200 hover:text-emerald-400 transition-colors"
           >
-            Products
+            {t('products')}
           </Link>
           <Link
             href="/categories"
             className="font-serif text-cream-200 hover:text-emerald-400 transition-colors"
           >
-            Categories
+            {t('categories')}
           </Link>
           {isAuthenticated && (
             <Link
               href="/orders"
               className="font-serif text-cream-200 hover:text-emerald-400 transition-colors"
             >
-              My Orders
+              {t('orders')}
             </Link>
           )}
         </nav>
@@ -60,7 +61,7 @@ export function Header() {
           <ThemeToggle />
 
           {/* Cart */}
-          <Link href="/cart" aria-label="Cart" className="relative">
+          <Link href="/cart" aria-label={t('cart')} className="relative">
             <button className="p-2 text-cream-200 hover:text-emerald-400 transition-colors">
               <ShoppingCart className="h-5 w-5" />
               {itemCount > 0 && (
@@ -79,13 +80,13 @@ export function Header() {
                 className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 text-sm text-cream-200 hover:text-emerald-400 transition-colors"
               >
                 <UserIcon className="h-4 w-4" />
-                {user?.firstName ?? 'Account'}
+                {user?.firstName ?? t('dashboard')}
               </Link>
               <button
                 onClick={() => logout()}
                 className="rounded-lg border border-cream-200/40 px-3 py-1.5 text-sm font-medium text-cream-200 hover:bg-cream-200/10 transition-colors"
               >
-                Logout
+                {t('logout')}
               </button>
             </div>
           ) : (
@@ -94,13 +95,13 @@ export function Header() {
                 href="/login"
                 className="hidden sm:inline font-serif text-cream-200 hover:text-emerald-400 transition-colors px-3"
               >
-                Login
+                {t('login')}
               </Link>
               <Link
                 href="/register"
                 className="rounded-lg bg-cream-200 px-4 py-2 font-serif text-forest-800 hover:bg-cream-100 transition-colors"
               >
-                Sign Up
+                {t('register')}
               </Link>
             </div>
           )}
