@@ -13,6 +13,7 @@ import { ShoppingCart, User as UserIcon } from 'lucide-react';
 import { useAuthStore } from '@/stores/auth-store';
 import { useCartStore } from '@/stores/cart-store';
 import { ThemeToggle } from './theme-toggle';
+import { LocaleSwitcher } from './locale-switcher';
 
 export function Header() {
   const { user, isAuthenticated, logout } = useAuthStore();
@@ -55,6 +56,7 @@ export function Header() {
 
         {/* Right side actions */}
         <div className="flex items-center gap-3">
+          <LocaleSwitcher />
           <ThemeToggle />
 
           {/* Cart */}
