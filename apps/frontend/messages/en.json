@@ -48,7 +48,9 @@
         "title": "Quality Products",
         "description": "Curated selection from trusted local sellers."
       }
-    }
+    },
+    "explore": "Explore",
+    "newArrivals": "New Arrivals"
   },
   "products": {
     "title": "All Products",
