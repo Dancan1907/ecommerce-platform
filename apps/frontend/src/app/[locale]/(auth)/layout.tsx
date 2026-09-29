@@ -8,7 +8,7 @@
  * Mobile: Single column (form only)
  */
 
-import Link from 'next/link';
+import { Link } from '@/i18n/navigation';
 import { Card } from '@/components/ui';
 
 export default function AuthLayout({ children }: { children: React.ReactNode }) {

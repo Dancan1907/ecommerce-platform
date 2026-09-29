@@ -7,7 +7,7 @@
  */
 
 import { useEffect, useState } from 'react';
-import Link from 'next/link';
+import { Link } from '@/i18n/navigation';
 import { useParams } from 'next/navigation';
 import { CheckCircle2, Package, Truck, Home, FileText, Loader2, AlertCircle } from 'lucide-react';
 import { Button, Card, Badge } from '@/components/ui';

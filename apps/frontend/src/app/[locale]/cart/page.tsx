@@ -7,7 +7,7 @@
  */
 
 import { useEffect } from 'react';
-import Link from 'next/link';
+import { Link } from '@/i18n/navigation';
 import { ArrowLeft, ShoppingBag } from 'lucide-react';
 import { Button, Card, Skeleton } from '@/components/ui';
 import { CartItemRow } from '@/components/cart/cart-item-row';

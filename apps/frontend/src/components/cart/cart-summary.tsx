@@ -10,7 +10,7 @@
  *  - Checkout button
  */
 
-import Link from 'next/link';
+import { Link } from '@/i18n/navigation';
 import { ArrowRight, Truck } from 'lucide-react';
 import { Button, Card } from '@/components/ui';
 import { formatKES } from '@/lib/utils';

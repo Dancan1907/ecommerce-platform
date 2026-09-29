@@ -5,7 +5,7 @@
  */
 
 import { useCallback, useEffect, useState } from 'react';
-import Link from 'next/link';
+import { Link } from '@/i18n/navigation';
 import { Search, AlertCircle, ShoppingBag, Eye } from 'lucide-react';
 import { Input, Select, Card, Badge, Skeleton } from '@/components/ui';
 import { api, extractErrorMessage } from '@/lib/api';

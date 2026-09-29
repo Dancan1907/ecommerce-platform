@@ -9,7 +9,7 @@
  */
 
 import Image from 'next/image';
-import Link from 'next/link';
+import { Link } from '@/i18n/navigation';
 import { ArrowRight, Truck, Shield, Package } from 'lucide-react';
 import { Button, Card, CardContent } from '@/components/ui';
 import { ProductCard } from '@/components/products/product-card';

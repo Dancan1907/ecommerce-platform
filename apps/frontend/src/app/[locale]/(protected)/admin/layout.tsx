@@ -7,8 +7,8 @@
  * Protected by ADMIN role.
  */
 
-import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { Link } from '@/i18n/navigation';
+import { usePathname } from '@/i18n/navigation';
 import { LayoutDashboard, Package, FolderTree, ShoppingBag, Users, ArrowLeft } from 'lucide-react';
 import { ProtectedRoute } from '@/components/auth';
 import { cn } from '@/lib/utils';

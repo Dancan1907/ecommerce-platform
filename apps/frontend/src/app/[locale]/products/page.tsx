@@ -8,7 +8,8 @@
  */
 
 import { Suspense, useEffect, useState, useCallback } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useRouter } from '@/i18n/navigation';
+import { useSearchParams } from 'next/navigation';
 import { Skeleton, Badge } from '@/components/ui';
 import { ProductGrid } from '@/components/products/product-grid';
 import { Pagination } from '@/components/products/pagination';

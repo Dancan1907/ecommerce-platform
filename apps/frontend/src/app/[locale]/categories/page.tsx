@@ -5,7 +5,7 @@
  * Clicking a category goes to its filtered products page.
  */
 
-import Link from 'next/link';
+import { Link } from '@/i18n/navigation';
 import { ArrowRight, Package } from 'lucide-react';
 import { Card } from '@/components/ui';
 import { fetchCategoryTree } from '@/lib/products';

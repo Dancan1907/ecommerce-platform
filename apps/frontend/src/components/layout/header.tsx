@@ -8,7 +8,7 @@
  * Username links to /admin for admins, /dashboard for regular users.
  */
 
-import Link from 'next/link';
+import { Link } from '@/i18n/navigation';
 import { ShoppingCart, User as UserIcon } from 'lucide-react';
 import { useAuthStore } from '@/stores/auth-store';
 import { useCartStore } from '@/stores/cart-store';

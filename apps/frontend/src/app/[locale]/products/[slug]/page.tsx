@@ -12,9 +12,10 @@
  */
 
 import { useEffect, useState } from 'react';
-import Link from 'next/link';
+import { Link } from '@/i18n/navigation';
 import Image from 'next/image';
-import { useParams, useRouter } from 'next/navigation';
+import { useParams } from 'next/navigation';
+import { useRouter } from '@/i18n/navigation';
 import { ChevronRight, Package, ShoppingCart, Minus, Plus, Store, ArrowLeft } from 'lucide-react';
 import { toast } from 'sonner';
 import { Button, Badge, Card, Skeleton } from '@/components/ui';

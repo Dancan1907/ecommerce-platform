@@ -7,7 +7,7 @@
  */
 
 import { useEffect, useState } from 'react';
-import Link from 'next/link';
+import { Link } from '@/i18n/navigation';
 import { Package, ShoppingBag, CheckCircle2, Clock, ArrowRight } from 'lucide-react';
 import { Card, Badge, Skeleton } from '@/components/ui';
 import { api, extractErrorMessage } from '@/lib/api';

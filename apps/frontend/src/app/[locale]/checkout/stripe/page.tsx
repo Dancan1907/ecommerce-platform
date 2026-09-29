@@ -9,8 +9,9 @@
  */
 
 import { Suspense, useEffect, useState } from 'react';
-import Link from 'next/link';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { Link } from '@/i18n/navigation';
+import { useRouter } from '@/i18n/navigation';
+import { useSearchParams } from 'next/navigation';
 import { toast } from 'sonner';
 import { ArrowLeft, CreditCard, CheckCircle2, AlertCircle, Loader2 } from 'lucide-react';
 import { Button, Card } from '@/components/ui';

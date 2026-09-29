@@ -5,7 +5,7 @@
  * Refined with subtle top border for visual separation in dark mode.
  */
 
-import Link from 'next/link';
+import { Link } from '@/i18n/navigation';
 
 export function Footer() {
   const year = new Date().getFullYear();

@@ -8,13 +8,13 @@
  */
 
 import { useEffect, useState } from 'react';
-import Link from 'next/link';
+import { Link } from '@/i18n/navigation';
 import { Package, ChevronRight } from 'lucide-react';
 import { Button, Card, Badge, Skeleton } from '@/components/ui';
 import { api, extractErrorMessage } from '@/lib/api';
 import { formatKES, formatDate } from '@/lib/utils';
 import { useAuthStore } from '@/stores/auth-store';
-import { useRouter } from 'next/navigation';
+import { useRouter } from '@/i18n/navigation';
 
 interface OrderItem {
   id: string;

@@ -8,7 +8,7 @@
  */
 
 import { useState } from 'react';
-import Link from 'next/link';
+import { Link } from '@/i18n/navigation';
 import Image from 'next/image';
 import { ShoppingCart, Package } from 'lucide-react';
 import { toast } from 'sonner';
@@ -18,7 +18,7 @@ import { cn } from '@/lib/utils';
 import type { Product } from '@/types/product';
 import { useCartStore } from '@/stores/cart-store';
 import { useAuthStore } from '@/stores/auth-store';
-import { useRouter } from 'next/navigation';
+import { useRouter } from '@/i18n/navigation';
 
 export interface ProductCardProps {
   product: Product;
