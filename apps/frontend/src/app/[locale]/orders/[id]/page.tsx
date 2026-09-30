@@ -3,10 +3,11 @@
 /**
  * Order Detail Page
  *
- * Full order view with items, shipping, totals, and cancel action.
+ * Full order view with progress timeline and translations.
  */
 
 import { useEffect, useState } from 'react';
+import { useTranslations } from 'next-intl';
 import { Link } from '@/i18n/navigation';
 import { useParams } from 'next/navigation';
 import {
@@ -62,18 +63,23 @@ const STATUS_VARIANTS: Record<
   CANCELLED: 'neutral',
 };
 
+const TIMELINE_STEPS = [
+  { key: 'placed', field: 'createdAt' },
+  { key: 'paid', field: 'paidAt' },
+  { key: 'shipped', field: 'shippedAt' },
+  { key: 'delivered', field: 'deliveredAt' },
+] as const;
+
 export default function OrderDetailPage() {
   const params = useParams();
   const orderId = params.id as string;
+  const t = useTranslations('orders');
 
   const [order, setOrder] = useState<Order | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [cancelling, setCancelling] = useState(false);
 
-  // ============================================
-  // FETCH ORDER
-  // ============================================
   useEffect(() => {
     let cancelled = false;
     setLoading(true);
@@ -95,18 +101,15 @@ export default function OrderDetailPage() {
     };
   }, [orderId]);
 
-  // ============================================
-  // CANCEL ORDER
-  // ============================================
   async function handleCancel() {
     if (!order) return;
-    if (!window.confirm('Are you sure you want to cancel this order?')) return;
+    if (!window.confirm(t('cancelConfirm'))) return;
 
     setCancelling(true);
     try {
       const res = await api.post(`/orders/${order.id}/cancel`);
       setOrder(res.data);
-      toast.success('Order cancelled');
+      toast.success(t('cancelSuccess'));
     } catch (err) {
       toast.error(extractErrorMessage(err));
     } finally {
@@ -114,41 +117,35 @@ export default function OrderDetailPage() {
     }
   }
 
-  // ============================================
   // LOADING
-  // ============================================
   if (loading) {
     return (
       <div className="container-page py-20 text-center">
         <Loader2 className="mx-auto h-10 w-10 animate-spin text-forest-700 dark:text-emerald-500 mb-4" />
-        <p className="text-sm text-ink-600 dark:text-mint-300">Loading order…</p>
+        <p className="text-sm text-ink-600 dark:text-mint-300">Loading…</p>
       </div>
     );
   }
 
-  // ============================================
   // ERROR
-  // ============================================
   if (error || !order) {
     return (
       <div className="container-page py-20 text-center max-w-md mx-auto">
         <AlertCircle className="mx-auto h-16 w-16 text-red-600 mb-4" />
-        <h1 className="font-serif text-2xl font-semibold mb-3">Order not found</h1>
+        <h1 className="font-serif text-2xl font-semibold mb-3">{t('notFound')}</h1>
         <p className="text-sm text-ink-600 dark:text-mint-300 mb-8">
-          {error ?? "We couldn't load this order."}
+          {error ?? t('notFoundDescription')}
         </p>
         <Link href="/orders">
-          <Button leftIcon={<ArrowLeft className="h-4 w-4" />}>Back to orders</Button>
+          <Button leftIcon={<ArrowLeft className="h-4 w-4" />}>{t('backToOrders')}</Button>
         </Link>
       </div>
     );
   }
 
+  const isCancelled = order.status === 'CANCELLED';
   const canCancel = order.status === 'PENDING' || order.status === 'PAID';
 
-  // ============================================
-  // MAIN RENDER
-  // ============================================
   return (
     <div className="container-page py-8 md:py-12 max-w-3xl mx-auto">
       {/* Back */}
@@ -157,27 +154,29 @@ export default function OrderDetailPage() {
         className="inline-flex items-center gap-1.5 text-sm text-ink-600 dark:text-mint-300 hover:text-forest-700 dark:hover:text-emerald-400 mb-6 transition-colors"
       >
         <ArrowLeft className="h-4 w-4" />
-        All orders
+        {t('backToOrders')}
       </Link>
 
       {/* Header */}
       <div className="mb-8">
-        <span className="label-caps mb-2 block">Order</span>
+        <span className="label-caps mb-2 block">{t('orderNumber')}</span>
         <h1 className="font-serif text-3xl md:text-4xl font-semibold text-ink-900 dark:text-mint-100 mb-2">
           {order.orderNumber}
         </h1>
         <p className="text-sm text-ink-600 dark:text-mint-300 flex items-center gap-1.5 mb-3">
           <Calendar className="h-3.5 w-3.5" />
-          Placed {formatDate(order.createdAt)}
+          {t('placedOn', { date: formatDate(order.createdAt) })}
         </p>
-        <Badge variant={STATUS_VARIANTS[order.status] ?? 'neutral'}>{order.status}</Badge>
+        <Badge variant={STATUS_VARIANTS[order.status] ?? 'neutral'}>
+          {t(`status.${order.status}` as never)}
+        </Badge>
       </div>
 
       {/* Items */}
       <Card className="p-6 mb-6">
         <h2 className="font-serif text-lg font-semibold text-ink-900 dark:text-mint-100 mb-5 flex items-center gap-2">
           <Package className="h-5 w-5 text-forest-700 dark:text-emerald-500" />
-          Items ({order.items.length})
+          {t('items')} ({order.items.length})
         </h2>
         <div className="space-y-4">
           {order.items.map((item) => (
@@ -187,9 +186,14 @@ export default function OrderDetailPage() {
             >
               <div className="min-w-0">
                 <p className="font-medium text-ink-900 dark:text-mint-100">{item.productName}</p>
-                <p className="text-xs text-ink-500 dark:text-mint-300/70">SKU: {item.productSku}</p>
+                <p className="text-xs text-ink-500 dark:text-mint-300/70">
+                  {t('skus', { sku: item.productSku })}
+                </p>
                 <p className="text-sm text-ink-600 dark:text-mint-300 mt-1">
-                  {formatKES(item.price)} × {item.quantity}
+                  {t('itemQuantity', {
+                    quantity: item.quantity,
+                    price: formatKES(item.price),
+                  })}
                 </p>
               </div>
               <span className="font-medium text-ink-900 dark:text-mint-100 whitespace-nowrap">
@@ -204,7 +208,7 @@ export default function OrderDetailPage() {
       <Card className="p-6 mb-6">
         <h2 className="font-serif text-lg font-semibold text-ink-900 dark:text-mint-100 mb-4 flex items-center gap-2">
           <MapPin className="h-5 w-5 text-forest-700 dark:text-emerald-500" />
-          Shipping Address
+          {t('shippingAddress')}
         </h2>
         <p className="text-sm text-ink-700 dark:text-mint-300 whitespace-pre-line leading-relaxed">
           {order.shippingAddress}
@@ -215,26 +219,26 @@ export default function OrderDetailPage() {
       <Card className="p-6 mb-6">
         <h2 className="font-serif text-lg font-semibold text-ink-900 dark:text-mint-100 mb-4 flex items-center gap-2">
           <CreditCard className="h-5 w-5 text-forest-700 dark:text-emerald-500" />
-          Payment
+          {t('payment')}
         </h2>
         <div className="space-y-2 text-sm">
           <div className="flex justify-between">
-            <span className="text-ink-600 dark:text-mint-300">Method</span>
+            <span className="text-ink-600 dark:text-mint-300">{t('method')}</span>
             <span className="text-ink-900 dark:text-mint-100 font-medium">
               {order.paymentMethod ?? '—'}
             </span>
           </div>
           <div className="flex justify-between">
-            <span className="text-ink-600 dark:text-mint-300">Subtotal</span>
+            <span className="text-ink-600 dark:text-mint-300">{t('subtotal')}</span>
             <span className="text-ink-900 dark:text-mint-100">{formatKES(order.subtotal)}</span>
           </div>
           <div className="flex justify-between">
-            <span className="text-ink-600 dark:text-mint-300">Shipping</span>
+            <span className="text-ink-600 dark:text-mint-300">{t('shipping')}</span>
             <span className="text-ink-900 dark:text-mint-100">{formatKES(order.shippingCost)}</span>
           </div>
           <div className="flex justify-between pt-3 border-t border-cream-300 dark:border-forest-800">
             <span className="font-serif text-base font-semibold text-ink-900 dark:text-mint-100">
-              Total
+              {t('total')}
             </span>
             <span className="font-serif text-base font-semibold text-forest-800 dark:text-emerald-400">
               {formatKES(order.total)}
@@ -243,40 +247,56 @@ export default function OrderDetailPage() {
         </div>
       </Card>
 
-      {/* Timestamps */}
+      {/* Timeline */}
       <Card className="p-6 mb-6">
         <h2 className="font-serif text-lg font-semibold text-ink-900 dark:text-mint-100 mb-4">
-          Timeline
+          {t('timeline')}
         </h2>
-        <div className="space-y-2 text-sm text-ink-600 dark:text-mint-300">
-          <p>
-            <strong className="text-ink-900 dark:text-mint-100">Placed:</strong>{' '}
-            {formatDate(order.createdAt)}
-          </p>
-          <p>
-            <strong className="text-ink-900 dark:text-mint-100">Paid:</strong>{' '}
-            {order.paidAt ? formatDateTime(order.paidAt) : '—'}
-          </p>
-          <p>
-            <strong className="text-ink-900 dark:text-mint-100">Shipped:</strong>{' '}
-            {order.shippedAt ? formatDateTime(order.shippedAt) : '—'}
-          </p>
-          <p>
-            <strong className="text-ink-900 dark:text-mint-100">Delivered:</strong>{' '}
-            {order.deliveredAt ? formatDateTime(order.deliveredAt) : '—'}
-          </p>
+        <div className="space-y-3 text-sm text-ink-600 dark:text-mint-300">
+          {TIMELINE_STEPS.map((step) => {
+            const value = order[step.field as keyof Order] as string | null;
+            const isComplete = value !== null;
+
+            return (
+              <div key={step.key} className="flex justify-between">
+                <span className={isComplete ? 'text-ink-900 dark:text-mint-100' : ''}>
+                  {t(step.key)}
+                </span>
+                <span>
+                  {value
+                    ? step.field === 'createdAt'
+                      ? formatDate(value)
+                      : formatDateTime(value)
+                    : '—'}
+                </span>
+              </div>
+            );
+          })}
         </div>
       </Card>
 
-      {/* Actions */}
+      {/* Cancelled banner */}
+      {isCancelled && (
+        <Card className="p-5 mb-6 border-red-200 dark:border-red-900 bg-red-50 dark:bg-red-950/30">
+          <div className="flex items-start gap-3">
+            <XCircle className="h-5 w-5 text-red-600 dark:text-red-400 flex-shrink-0 mt-0.5" />
+            <div>
+              <p className="font-medium text-red-800 dark:text-red-300">{t('cancelledBanner')}</p>
+              <p className="text-sm text-red-700 dark:text-red-300/80 mt-1">
+                {t('cancelledBannerDescription')}
+              </p>
+            </div>
+          </div>
+        </Card>
+      )}
+
+      {/* Cancel action */}
       {canCancel && (
         <Card className="p-6">
           <h2 className="font-serif text-lg font-semibold text-ink-900 dark:text-mint-100 mb-3">
-            Need to cancel?
+            {t('needToCancel')}
           </h2>
-          <p className="text-xs text-ink-600 dark:text-mint-300 mb-4">
-            You can cancel this order before it ships. Stock will be restored automatically.
-          </p>
+          <p className="text-xs text-ink-600 dark:text-mint-300 mb-4">{t('cancelExplanation')}</p>
           <Button
             variant="outline"
             className="w-full text-red-600 hover:bg-red-50 dark:hover:bg-red-950/40 border-red-200 dark:border-red-900"
@@ -284,7 +304,7 @@ export default function OrderDetailPage() {
             isLoading={cancelling}
             leftIcon={!cancelling ? <XCircle className="h-4 w-4" /> : undefined}
           >
-            Cancel Order
+            {t('cancelOrder')}
           </Button>
         </Card>
       )}
