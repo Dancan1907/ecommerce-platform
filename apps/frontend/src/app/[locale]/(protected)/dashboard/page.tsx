@@ -3,10 +3,11 @@
 /**
  * User Dashboard Overview
  *
- * Shows quick stats + recent activity for the logged-in user.
+ * Shows quick stats + recent activity with translations.
  */
 
 import { useEffect, useState } from 'react';
+import { useTranslations } from 'next-intl';
 import { Link } from '@/i18n/navigation';
 import { Package, ShoppingBag, CheckCircle2, Clock, ArrowRight } from 'lucide-react';
 import { Card, Badge, Skeleton } from '@/components/ui';
@@ -40,6 +41,9 @@ const STATUS_VARIANTS: Record<
 
 export default function DashboardPage() {
   const user = useAuthStore((s) => s.user);
+  const t = useTranslations('dashboard');
+  const tOrders = useTranslations('orders');
+
   const [orders, setOrders] = useState<Order[]>([]);
   const [totalOrders, setTotalOrders] = useState(0);
   const [totalSpent, setTotalSpent] = useState(0);
@@ -77,9 +81,6 @@ export default function DashboardPage() {
     (o) => o.status === 'PENDING' || o.status === 'PAID' || o.status === 'SHIPPED'
   ).length;
 
-  // ============================================
-  // LOADING
-  // ============================================
   if (loading) {
     return (
       <div className="space-y-6">
@@ -96,15 +97,12 @@ export default function DashboardPage() {
 
   return (
     <div className="space-y-8">
-      {/* Header */}
       <div>
-        <span className="label-caps mb-2 block">Dashboard</span>
+        <span className="label-caps mb-2 block">{t('eyebrow')}</span>
         <h1 className="font-serif text-3xl md:text-4xl font-semibold text-ink-900 dark:text-mint-100 mb-2">
-          Welcome back, {user?.firstName ?? 'there'}!
+          {t('welcomeBack', { name: user?.firstName ?? 'there' })}
         </h1>
-        <p className="text-sm text-ink-600 dark:text-mint-300">
-          Here&apos;s a quick look at your account.
-        </p>
+        <p className="text-sm text-ink-600 dark:text-mint-300">{t('quickLook')}</p>
       </div>
 
       {error && (
@@ -113,39 +111,35 @@ export default function DashboardPage() {
         </Card>
       )}
 
-      {/* Stats */}
       <div className="grid sm:grid-cols-3 gap-4">
-        <StatCard icon={ShoppingBag} label="Total Orders" value={totalOrders.toString()} />
-        <StatCard icon={Clock} label="Active Orders" value={activeOrders.toString()} />
-        <StatCard icon={CheckCircle2} label="Total Spent" value={formatKES(totalSpent)} />
+        <StatCard icon={ShoppingBag} label={t('totalOrders')} value={totalOrders.toString()} />
+        <StatCard icon={Clock} label={t('activeOrders')} value={activeOrders.toString()} />
+        <StatCard icon={CheckCircle2} label={t('totalSpent')} value={formatKES(totalSpent)} />
       </div>
 
-      {/* Recent Orders */}
       <Card className="p-6">
         <div className="flex items-center justify-between mb-5">
           <h2 className="font-serif text-xl font-semibold text-ink-900 dark:text-mint-100 flex items-center gap-2">
             <Package className="h-5 w-5 text-forest-700 dark:text-emerald-500" />
-            Recent Orders
+            {t('recentOrders')}
           </h2>
           <Link
             href="/orders"
             className="text-sm font-medium text-forest-700 dark:text-emerald-500 hover:underline inline-flex items-center gap-1"
           >
-            View all
+            {t('viewAll')}
             <ArrowRight className="h-3.5 w-3.5" />
           </Link>
         </div>
 
         {orders.length === 0 ? (
           <div className="text-center py-8">
-            <p className="text-sm text-ink-600 dark:text-mint-300 mb-4">
-              You haven&apos;t placed any orders yet.
-            </p>
+            <p className="text-sm text-ink-600 dark:text-mint-300 mb-4">{t('noOrders')}</p>
             <Link
               href="/products"
               className="text-sm font-medium text-forest-700 dark:text-emerald-500 hover:underline"
             >
-              Start shopping →
+              {t('startShopping')}
             </Link>
           </div>
         ) : (
@@ -166,7 +160,9 @@ export default function DashboardPage() {
                   <span className="text-sm font-medium text-ink-900 dark:text-mint-100">
                     {formatKES(order.total)}
                   </span>
-                  <Badge variant={STATUS_VARIANTS[order.status] ?? 'neutral'}>{order.status}</Badge>
+                  <Badge variant={STATUS_VARIANTS[order.status] ?? 'neutral'}>
+                    {tOrders(`status.${order.status}` as never)}
+                  </Badge>
                 </div>
               </Link>
             ))}
@@ -177,9 +173,6 @@ export default function DashboardPage() {
   );
 }
 
-/**
- * Stat card component
- */
 function StatCard({
   icon: Icon,
   label,
