@@ -10,8 +10,8 @@ import './[locale]/globals.css';
 
 export const metadata: Metadata = {
   title: {
-    default: 'E-Commerce Platform — Curated Local Treasures',
-    template: '%s | E-Commerce Platform',
+    default: 'The Racing Shop — Curated Local Treasures',
+    template: '%s | The Racing Shop',
   },
   description: 'Discover curated local treasures. Shop quality, artisanal goods, delivered fast.',
 };

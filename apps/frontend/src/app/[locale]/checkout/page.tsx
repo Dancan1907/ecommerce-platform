@@ -39,7 +39,7 @@ export default function CheckoutPage() {
   const cart = useCartStore((s) => s.cart);
   const clearCart = useCartStore((s) => s.clearCart);
 
-  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('STRIPE');
+  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('MPESA');
   const [submitting, setSubmitting] = useState(false);
   const [checkoutError, setCheckoutError] = useState<string | null>(null);
 
@@ -174,32 +174,7 @@ export default function CheckoutPage() {
               </div>
 
               <div className="space-y-3">
-                <button
-                  type="button"
-                  onClick={() => setPaymentMethod('STRIPE')}
-                  className={cn(
-                    'w-full text-left rounded-lg border-2 p-4 transition-all',
-                    paymentMethod === 'STRIPE'
-                      ? 'border-emerald-600 dark:border-emerald-500 bg-emerald-50 dark:bg-emerald-950/30'
-                      : 'border-cream-300 dark:border-forest-800 hover:border-forest-500'
-                  )}
-                >
-                  <div className="flex items-center gap-3">
-                    <CreditCard className="h-6 w-6 text-forest-700 dark:text-emerald-500" />
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2">
-                        <span className="font-medium text-ink-900 dark:text-mint-100">
-                          {t('cardPayment')}
-                        </span>
-                        <Badge variant="default">Stripe</Badge>
-                      </div>
-                      <p className="text-xs text-ink-600 dark:text-mint-300 mt-0.5">
-                        {t('cardPaymentDescription')}
-                      </p>
-                    </div>
-                  </div>
-                </button>
-
+                {/* M-Pesa first (default) */}
                 <button
                   type="button"
                   onClick={() => setPaymentMethod('MPESA')}
@@ -221,6 +196,33 @@ export default function CheckoutPage() {
                       </div>
                       <p className="text-xs text-ink-600 dark:text-mint-300 mt-0.5">
                         {t('mpesaPaymentDescription')}
+                      </p>
+                    </div>
+                  </div>
+                </button>
+
+                {/* Card second */}
+                <button
+                  type="button"
+                  onClick={() => setPaymentMethod('STRIPE')}
+                  className={cn(
+                    'w-full text-left rounded-lg border-2 p-4 transition-all',
+                    paymentMethod === 'STRIPE'
+                      ? 'border-emerald-600 dark:border-emerald-500 bg-emerald-50 dark:bg-emerald-950/30'
+                      : 'border-cream-300 dark:border-forest-800 hover:border-forest-500'
+                  )}
+                >
+                  <div className="flex items-center gap-3">
+                    <CreditCard className="h-6 w-6 text-forest-700 dark:text-emerald-500" />
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2">
+                        <span className="font-medium text-ink-900 dark:text-mint-100">
+                          {t('cardPayment')}
+                        </span>
+                        <Badge variant="default">Stripe</Badge>
+                      </div>
+                      <p className="text-xs text-ink-600 dark:text-mint-300 mt-0.5">
+                        {t('cardPaymentDescription')}
                       </p>
                     </div>
                   </div>

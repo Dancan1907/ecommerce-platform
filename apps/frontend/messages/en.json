@@ -29,11 +29,11 @@
   },
   "home": {
     "hero": {
-      "eyebrow": "Curated in Kenya",
-      "title": "Discover curated local treasures.",
-      "subtitle": "Shop quality, artisanal goods, delivered fast. Experience unique products from talented local creators. Secure payments, including direct M-Pesa.",
+      "eyebrow": "Formula 1 Merchandise",
+      "title": "Gear for every lap.",
+      "subtitle": "Shop premium F1 apparel, accessories, and collectibles. Fast delivery across Kenya. Secure payments, your way.",
       "shopNow": "Shop Now",
-      "browseCategories": "Browse Categories"
+      "browseCategories": "Browse Collections"
     },
     "features": {
       "delivery": {
@@ -42,11 +42,11 @@
       },
       "payments": {
         "title": "Secure Payments",
-        "description": "Pay securely with M-Pesa, card, or other methods."
+        "description": "Pay securely by card or mobile money."
       },
       "quality": {
-        "title": "Quality Products",
-        "description": "Curated selection from trusted local sellers."
+        "title": "Authentic Merch",
+        "description": "Quality F1 apparel and collectibles for true fans."
       }
     },
     "explore": "Explore",
@@ -97,7 +97,7 @@
   "cart": {
     "title": "Shopping Cart",
     "empty": "Your cart is empty",
-    "emptyDescription": "Looks like you haven't added anything yet. Explore our curated selection of local treasures.",
+    "emptyDescription": "Looks like you haven't added anything yet. Explore our latest F1 gear.",
     "startShopping": "Start Shopping",
     "continueShopping": "Continue shopping",
     "summary": "Order Summary",
@@ -225,8 +225,8 @@
   "auth": {
     "layout": {
       "welcome": "Welcome",
-      "tagline": "Curated local treasures, delivered fast.",
-      "description": "Shop quality, artisanal goods from talented creators across Kenya. Secure payments including M-Pesa."
+      "tagline": "Premium F1 merch, delivered fast.",
+      "description": "Shop Formula 1 apparel, accessories, and collectibles. Fast delivery across Kenya."
     },
     "login": {
       "eyebrow": "Sign In",
@@ -317,7 +317,7 @@
     }
   },
   "footer": {
-    "tagline": "Curated local treasures, delivered fast across Kenya.",
+    "tagline": "Premium F1 merch, delivered fast across Kenya.",
     "shop": "Shop",
     "account": "Account",
     "legal": "Legal",
@@ -329,7 +329,7 @@
     "register": "Sign Up",
     "terms": "Terms",
     "privacy": "Privacy",
-    "copyright": "© {year} E-Commerce Platform. All rights reserved."
+    "copyright": "© {year} The Racing Shop. All rights reserved."
   },
   "dashboard": {
     "overview": "Overview",

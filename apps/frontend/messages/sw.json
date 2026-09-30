@@ -29,11 +29,11 @@
   },
   "home": {
     "hero": {
-      "eyebrow": "Imechaguliwa Kenya",
-      "title": "Gundua hazina za ndani zilizochaguliwa.",
-      "subtitle": "Nunua bidhaa bora za ufundi, zinazofikishwa haraka. Pata uzoefu wa bidhaa za kipekee kutoka kwa wabunifu wa ndani. Malipo salama, ikiwa ni pamoja na M-Pesa moja kwa moja.",
+      "eyebrow": "Bidhaa za Formula 1",
+      "title": "Vifaa kwa kila mzunguko.",
+      "subtitle": "Nunua nguo, vifaa, na makusanyo ya F1 hapa Kenya. Usafirishaji wa haraka. Malipo salama, jinsi unavyopendelea.",
       "shopNow": "Nunua Sasa",
-      "browseCategories": "Vinjari Kategoria"
+      "browseCategories": "Angalia Makusanyo"
     },
     "features": {
       "delivery": {
@@ -42,11 +42,11 @@
       },
       "payments": {
         "title": "Malipo Salama",
-        "description": "Lipa kwa usalama kwa M-Pesa, kadi, au njia nyingine."
+        "description": "Lipa kwa usalama kwa kadi au pesa za simu."
       },
       "quality": {
-        "title": "Bidhaa Bora",
-        "description": "Uteuzi uliochaguliwa kutoka kwa wauzaji wa ndani wanaoaminika."
+        "title": "Bidhaa Halisi",
+        "description": "Nguo na makusanyo ya F1 ya hali ya juu kwa mashabiki wa kweli."
       }
     },
     "explore": "Chunguza",
@@ -97,7 +97,7 @@
   "cart": {
     "title": "Kikapu cha Ununuzi",
     "empty": "Kikapu chako ni kitupu",
-    "emptyDescription": "Inaonekana haujaongeza chochote bado. Chunguza uteuzi wetu wa hazina za ndani.",
+    "emptyDescription": "Inaonekana haujaongeza chochote bado. Chunguza vifaa vyetu vipya vya F1.",
     "startShopping": "Anza Kununua",
     "continueShopping": "Endelea kununua",
     "summary": "Muhtasari wa Oda",
@@ -225,8 +225,8 @@
   "auth": {
     "layout": {
       "welcome": "Karibu",
-      "tagline": "Hazina za ndani zilizochaguliwa, zinazofikishwa haraka.",
-      "description": "Nunua bidhaa bora za ufundi kutoka kwa wabunifu wa Kenya. Malipo salama ikiwa ni pamoja na M-Pesa."
+      "tagline": "Bidhaa bora za F1, zinazofikishwa haraka.",
+      "description": "Nunua nguo, vifaa, na makusanyo ya Formula 1. Usafirishaji wa haraka kote Kenya."
     },
     "login": {
       "eyebrow": "Ingia",
@@ -317,7 +317,7 @@
     }
   },
   "footer": {
-    "tagline": "Hazina za ndani zilizochaguliwa, zinazofikishwa haraka kote Kenya.",
+    "tagline": "Bidhaa bora za F1, zinazofikishwa haraka kote Kenya.",
     "shop": "Nunua",
     "account": "Akaunti",
     "legal": "Kisheria",
@@ -329,7 +329,7 @@
     "register": "Jisajili",
     "terms": "Masharti",
     "privacy": "Faragha",
-    "copyright": "© {year} Jukwaa la Biashara. Haki zote zimehifadhiwa."
+    "copyright": "© {year} The Racing Shop. Haki zote zimehifadhiwa."
   },
   "dashboard": {
     "overview": "Muhtasari",

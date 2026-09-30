@@ -1,7 +1,7 @@
 /**
  * Home Page
  *
- * Artisanal marketplace landing page with translations.
+ * F1 merchandise landing page with translations.
  */
 
 import Image from 'next/image';
@@ -66,8 +66,8 @@ export default async function HomePage() {
 
             <div className="relative h-64 md:h-auto md:min-h-[500px]">
               <Image
-                src="https://images.unsplash.com/photo-1610701596007-11502861dcfa?w=1200&q=80"
-                alt="Curated collection of artisanal goods"
+                src="https://images.unsplash.com/photo-1541443131876-44b03de101c5?w=1200&q=80"
+                alt="Formula 1 racing car on track"
                 fill
                 priority
                 className="object-cover"
