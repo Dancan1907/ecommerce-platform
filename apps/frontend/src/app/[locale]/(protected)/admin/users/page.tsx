@@ -3,18 +3,16 @@
 /**
  * Admin Users Page
  *
- * List users, view their roles, and change roles.
+ * List users, view roles, and change roles with translations.
  */
 
 import { useCallback, useEffect, useState } from 'react';
+import { useTranslations } from 'next-intl';
 import { Search, AlertCircle, Users, CheckCircle2, XCircle } from 'lucide-react';
 import { Input, Select, Card, Badge, Skeleton } from '@/components/ui';
 import { api, extractErrorMessage } from '@/lib/api';
 import { formatDate, truncate, getInitials } from '@/lib/utils';
 
-// ============================================
-// TYPES
-// ============================================
 type UserRole = 'ADMIN' | 'SELLER' | 'USER';
 
 interface User {
@@ -37,9 +35,6 @@ interface UsersResponse {
   totalPages: number;
 }
 
-// ============================================
-// CONSTANTS
-// ============================================
 const ROLE_VARIANTS: Record<
   UserRole,
   'default' | 'success' | 'warning' | 'danger' | 'info' | 'neutral'
@@ -51,10 +46,9 @@ const ROLE_VARIANTS: Record<
 
 const ALL_ROLES: UserRole[] = ['ADMIN', 'SELLER', 'USER'];
 
-// ============================================
-// COMPONENT
-// ============================================
 export default function AdminUsersPage() {
+  const t = useTranslations('admin.users');
+
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -63,9 +57,6 @@ export default function AdminUsersPage() {
   const [total, setTotal] = useState(0);
   const [updatingId, setUpdatingId] = useState<string | null>(null);
 
-  // ============================================
-  // FETCH
-  // ============================================
   const loadUsers = useCallback(async () => {
     setLoading(true);
     setError(null);
@@ -89,9 +80,6 @@ export default function AdminUsersPage() {
     loadUsers();
   }, [loadUsers]);
 
-  // ============================================
-  // UPDATE ROLE
-  // ============================================
   async function updateRole(userId: string, newRole: UserRole) {
     setUpdatingId(userId);
     try {
@@ -104,34 +92,29 @@ export default function AdminUsersPage() {
     }
   }
 
-  // ============================================
-  // RENDER
-  // ============================================
   return (
     <div className="space-y-6">
-      {/* Header */}
       <div>
-        <span className="label-caps mb-2 block">Accounts</span>
+        <span className="label-caps mb-2 block">{t('eyebrow')}</span>
         <h1 className="font-serif text-3xl md:text-4xl font-semibold text-ink-900 dark:text-mint-100 mb-2">
-          Users
+          {t('title')}
         </h1>
         <p className="text-sm text-ink-600 dark:text-mint-300">
-          {total} {total === 1 ? 'user' : 'users'} total
+          {t('countSuffix', { count: total })}
         </p>
       </div>
 
-      {/* Filters */}
       <Card className="p-4">
         <div className="grid sm:grid-cols-[1fr_200px] gap-3">
           <Input
             type="text"
-            placeholder="Search by name or email…"
+            placeholder={t('searchPlaceholder')}
             leftIcon={<Search className="h-4 w-4" />}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
           <Select value={roleFilter} onChange={(e) => setRoleFilter(e.target.value)}>
-            <option value="">All roles</option>
+            <option value="">{t('allRoles')}</option>
             {ALL_ROLES.map((r) => (
               <option key={r} value={r}>
                 {r}
@@ -141,7 +124,6 @@ export default function AdminUsersPage() {
         </div>
       </Card>
 
-      {/* Error */}
       {error && (
         <Card className="p-4 border-red-200 bg-red-50 dark:bg-red-950/30">
           <div className="flex items-start gap-2.5">
@@ -151,7 +133,6 @@ export default function AdminUsersPage() {
         </Card>
       )}
 
-      {/* Table */}
       <Card className="overflow-hidden">
         {loading ? (
           <div className="p-6 space-y-4">
@@ -165,7 +146,7 @@ export default function AdminUsersPage() {
               <Users className="h-8 w-8 text-forest-600 dark:text-emerald-500" />
             </div>
             <h3 className="font-serif text-lg font-semibold text-ink-900 dark:text-mint-100 mb-2">
-              {search || roleFilter ? 'No users match your filters' : 'No users yet'}
+              {t('empty')}
             </h3>
           </div>
         ) : (
@@ -173,16 +154,20 @@ export default function AdminUsersPage() {
             <table className="w-full text-sm">
               <thead className="bg-cream-50 dark:bg-forest-900/40">
                 <tr className="border-b border-cream-200 dark:border-forest-800">
-                  <th className="text-left px-4 py-3 label-caps text-[10px] font-semibold">User</th>
                   <th className="text-left px-4 py-3 label-caps text-[10px] font-semibold">
-                    Joined
+                    {t('columns.user')}
                   </th>
                   <th className="text-left px-4 py-3 label-caps text-[10px] font-semibold">
-                    Verified
+                    {t('columns.joined')}
                   </th>
-                  <th className="text-left px-4 py-3 label-caps text-[10px] font-semibold">Role</th>
+                  <th className="text-left px-4 py-3 label-caps text-[10px] font-semibold">
+                    {t('columns.verified')}
+                  </th>
+                  <th className="text-left px-4 py-3 label-caps text-[10px] font-semibold">
+                    {t('columns.role')}
+                  </th>
                   <th className="text-right px-4 py-3 label-caps text-[10px] font-semibold">
-                    Change Role
+                    {t('columns.changeRole')}
                   </th>
                 </tr>
               </thead>
@@ -214,12 +199,12 @@ export default function AdminUsersPage() {
                       {user.isEmailVerified ? (
                         <Badge variant="success">
                           <CheckCircle2 className="h-3 w-3 mr-1" />
-                          Verified
+                          {t('verified')}
                         </Badge>
                       ) : (
                         <Badge variant="warning">
                           <XCircle className="h-3 w-3 mr-1" />
-                          Pending
+                          {t('pending')}
                         </Badge>
                       )}
                     </td>
