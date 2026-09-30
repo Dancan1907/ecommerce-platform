@@ -3,37 +3,36 @@
 /**
  * Admin Dashboard Layout
  *
- * Separate layout for admin pages.
- * Protected by ADMIN role.
+ * Separate layout for admin pages with translated sidebar.
  */
 
-import { Link } from '@/i18n/navigation';
-import { usePathname } from '@/i18n/navigation';
+import { useTranslations } from 'next-intl';
+import { Link, usePathname } from '@/i18n/navigation';
 import { LayoutDashboard, Package, FolderTree, ShoppingBag, Users, ArrowLeft } from 'lucide-react';
 import { ProtectedRoute } from '@/components/auth';
 import { cn } from '@/lib/utils';
 
-const NAV_ITEMS = [
-  { href: '/admin', label: 'Overview', icon: LayoutDashboard },
-  { href: '/admin/products', label: 'Products', icon: Package },
-  { href: '/admin/categories', label: 'Categories', icon: FolderTree },
-  { href: '/admin/orders', label: 'Orders', icon: ShoppingBag },
-  { href: '/admin/users', label: 'Users', icon: Users },
-];
-
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
+  const t = useTranslations('admin');
+
+  const NAV_ITEMS = [
+    { href: '/admin', label: t('nav.overview'), icon: LayoutDashboard },
+    { href: '/admin/products', label: t('nav.products'), icon: Package },
+    { href: '/admin/categories', label: t('nav.categories'), icon: FolderTree },
+    { href: '/admin/orders', label: t('nav.orders'), icon: ShoppingBag },
+    { href: '/admin/users', label: t('nav.users'), icon: Users },
+  ];
 
   return (
     <ProtectedRoute requiredRole="ADMIN">
       <div className="min-h-screen bg-cream-100 dark:bg-forest-950">
         <div className="container-page py-8 md:py-12">
-          {/* Header */}
           <div className="mb-8 flex items-center justify-between flex-wrap gap-4">
             <div>
-              <span className="label-caps mb-2 block">Admin</span>
+              <span className="label-caps mb-2 block">{t('eyebrow')}</span>
               <h1 className="font-serif text-3xl md:text-4xl font-semibold text-ink-900 dark:text-mint-100">
-                Admin Dashboard
+                {t('title')}
               </h1>
             </div>
             <Link
@@ -41,17 +40,14 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               className="inline-flex items-center gap-1.5 text-sm text-ink-600 dark:text-mint-300 hover:text-forest-700 dark:hover:text-emerald-400 transition-colors"
             >
               <ArrowLeft className="h-4 w-4" />
-              Back to store
+              {t('backToStore')}
             </Link>
           </div>
 
-          {/* Layout */}
           <div className="grid lg:grid-cols-[220px_1fr] gap-8">
-            {/* Sidebar */}
             <aside className="lg:sticky lg:top-24 h-fit">
               <nav className="space-y-1">
                 {NAV_ITEMS.map((item) => {
-                  // Match exact for /admin, startsWith for sub-routes
                   const isActive =
                     item.href === '/admin' ? pathname === '/admin' : pathname.startsWith(item.href);
                   const Icon = item.icon;
@@ -75,7 +71,6 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               </nav>
             </aside>
 
-            {/* Content */}
             <div>{children}</div>
           </div>
         </div>
