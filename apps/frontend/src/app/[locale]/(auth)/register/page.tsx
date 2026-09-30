@@ -3,15 +3,12 @@
 /**
  * Register Page
  *
- * - React Hook Form + Zod validation (names, email, password, confirm)
- * - Password visibility toggles for both password fields
- * - Auto-login on success, redirect home
- * - Persistent error banner on failure
+ * Create account with auto-login and translations.
  */
 
 import { useState } from 'react';
-import { Link } from '@/i18n/navigation';
-import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
+import { Link, useRouter } from '@/i18n/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { toast } from 'sonner';
@@ -24,6 +21,8 @@ export default function RegisterPage() {
   const router = useRouter();
   const registerUser = useAuthStore((s) => s.register);
   const login = useAuthStore((s) => s.login);
+  const t = useTranslations('auth.register');
+  const tCommon = useTranslations('auth.common');
 
   const [submitting, setSubmitting] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
@@ -49,7 +48,6 @@ export default function RegisterPage() {
     setSubmitting(true);
     setRegisterError(null);
 
-    // Step 1: Register
     const success = await registerUser({
       email: data.email,
       password: data.password,
@@ -59,21 +57,19 @@ export default function RegisterPage() {
 
     if (!success) {
       setSubmitting(false);
-      setRegisterError('Registration failed. This email may already be in use.');
-      toast.error('Registration failed', { duration: 6000 });
+      setRegisterError(t('failureMessage'));
+      toast.error(t('failureMessage'), { duration: 6000 });
       return;
     }
 
-    // Step 2: Auto-login
     const loginSuccess = await login(data.email, data.password);
     setSubmitting(false);
 
     if (loginSuccess) {
-      toast.success('Welcome! Your account is ready.');
+      toast.success(t('welcomeMessage'));
       router.push('/');
     } else {
-      // Registration worked but login failed — rare, but handle it
-      toast.success('Account created! Please sign in.');
+      toast.success(t('welcomeMessage'));
       router.push('/login');
     }
   }
@@ -81,12 +77,11 @@ export default function RegisterPage() {
   return (
     <div>
       <div className="mb-8">
+        <span className="label-caps mb-2 block">{t('eyebrow')}</span>
         <h1 className="font-serif text-3xl font-semibold text-ink-900 dark:text-mint-100 mb-2">
-          Create your account
+          {t('title')}
         </h1>
-        <p className="text-sm text-ink-600 dark:text-mint-300">
-          Join us to shop curated local treasures.
-        </p>
+        <p className="text-sm text-ink-600 dark:text-mint-300">{t('subtitle')}</p>
       </div>
 
       {registerError && (
@@ -100,49 +95,46 @@ export default function RegisterPage() {
       )}
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
-        {/* Name row */}
         <div className="grid grid-cols-2 gap-3">
           <Input
-            label="First name"
+            label={t('firstName')}
             type="text"
-            placeholder="Jane"
+            placeholder={t('firstNamePlaceholder')}
             leftIcon={<User className="h-4 w-4" />}
             error={errors.firstName?.message}
             autoComplete="given-name"
             {...register('firstName')}
           />
           <Input
-            label="Last name"
+            label={t('lastName')}
             type="text"
-            placeholder="Doe"
+            placeholder={t('lastNamePlaceholder')}
             error={errors.lastName?.message}
             autoComplete="family-name"
             {...register('lastName')}
           />
         </div>
 
-        {/* Email */}
         <Input
-          label="Email"
+          label={t('email')}
           type="email"
-          placeholder="you@example.com"
+          placeholder={t('emailPlaceholder')}
           leftIcon={<Mail className="h-4 w-4" />}
           error={errors.email?.message}
           autoComplete="email"
           {...register('email')}
         />
 
-        {/* Password */}
         <Input
-          label="Password"
+          label={t('password')}
           type={showPassword ? 'text' : 'password'}
-          placeholder="At least 8 characters"
+          placeholder={t('passwordPlaceholder')}
           leftIcon={<Lock className="h-4 w-4" />}
           rightIcon={
             <button
               type="button"
               onClick={() => setShowPassword((s) => !s)}
-              aria-label={showPassword ? 'Hide password' : 'Show password'}
+              aria-label={showPassword ? tCommon('hidePassword') : tCommon('showPassword')}
               className="pointer-events-auto text-forest-500 dark:text-mint-300 hover:text-forest-800 dark:hover:text-mint-100 transition-colors"
               tabIndex={-1}
             >
@@ -154,17 +146,16 @@ export default function RegisterPage() {
           {...register('password')}
         />
 
-        {/* Confirm password */}
         <Input
-          label="Confirm password"
+          label={t('confirmPassword')}
           type={showConfirm ? 'text' : 'password'}
-          placeholder="Re-enter your password"
+          placeholder={t('confirmPasswordPlaceholder')}
           leftIcon={<Lock className="h-4 w-4" />}
           rightIcon={
             <button
               type="button"
               onClick={() => setShowConfirm((s) => !s)}
-              aria-label={showConfirm ? 'Hide password' : 'Show password'}
+              aria-label={showConfirm ? tCommon('hidePassword') : tCommon('showPassword')}
               className="pointer-events-auto text-forest-500 dark:text-mint-300 hover:text-forest-800 dark:hover:text-mint-100 transition-colors"
               tabIndex={-1}
             >
@@ -177,17 +168,17 @@ export default function RegisterPage() {
         />
 
         <Button type="submit" size="lg" className="w-full" isLoading={submitting}>
-          Create account
+          {t('createAccount')}
         </Button>
       </form>
 
       <p className="mt-6 text-center text-sm text-ink-600 dark:text-mint-300">
-        Already have an account?{' '}
+        {t('haveAccount')}{' '}
         <Link
           href="/login"
           className="text-forest-800 dark:text-emerald-500 font-medium hover:underline"
         >
-          Sign in
+          {t('signIn')}
         </Link>
       </p>
     </div>
