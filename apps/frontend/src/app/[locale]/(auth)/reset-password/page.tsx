@@ -3,13 +3,13 @@
 /**
  * Reset Password Page
  *
- * User arrives here from an email link: /reset-password?token=xxx
- * Sets a new password using the token.
+ * User arrives from email link: /reset-password?token=xxx
+ * Fully translated with next-intl.
  */
 
 import { Suspense, useState } from 'react';
-import { Link } from '@/i18n/navigation';
-import { useRouter } from '@/i18n/navigation';
+import { useTranslations } from 'next-intl';
+import { Link, useRouter } from '@/i18n/navigation';
 import { useSearchParams } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -22,10 +22,12 @@ import { resetPasswordSchema, type ResetPasswordInput } from '@/lib/validation/a
 // ============================================
 // INNER COMPONENT (uses useSearchParams)
 // ============================================
-function ResetPasswordForm() {
+function ResetPasswordContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const token = searchParams.get('token');
+  const t = useTranslations('auth.resetPassword');
+  const tCommon = useTranslations('auth.common');
 
   const [submitting, setSubmitting] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
@@ -44,7 +46,7 @@ function ResetPasswordForm() {
 
   async function onSubmit(data: ResetPasswordInput) {
     if (!token) {
-      setResetError('Missing reset token. Please use the link from your email.');
+      setResetError(t('missingToken'));
       return;
     }
 
@@ -57,12 +59,11 @@ function ResetPasswordForm() {
         password: data.password,
       });
       setDone(true);
-      toast.success('Password reset! You can now sign in.');
-      // Redirect to login after 2 seconds
+      toast.success(t('successToast'));
       setTimeout(() => router.push('/login'), 2000);
     } catch (err) {
       setResetError(extractErrorMessage(err));
-      toast.error('Failed to reset password');
+      toast.error(t('failureToast'));
     } finally {
       setSubmitting(false);
     }
@@ -78,13 +79,11 @@ function ResetPasswordForm() {
           <AlertCircle className="h-8 w-8 text-red-600 dark:text-red-400" />
         </div>
         <h1 className="font-serif text-3xl font-semibold text-ink-900 dark:text-mint-100 mb-3">
-          Invalid reset link
+          {t('invalidTitle')}
         </h1>
-        <p className="text-sm text-ink-600 dark:text-mint-300 mb-8">
-          The password reset link is missing or invalid. Please request a new one.
-        </p>
+        <p className="text-sm text-ink-600 dark:text-mint-300 mb-8">{t('invalidMessage')}</p>
         <Link href="/forgot-password">
-          <Button>Request new link</Button>
+          <Button>{t('requestNewLink')}</Button>
         </Link>
       </div>
     );
@@ -100,13 +99,11 @@ function ResetPasswordForm() {
           <CheckCircle2 className="h-8 w-8 text-emerald-600 dark:text-emerald-400" />
         </div>
         <h1 className="font-serif text-3xl font-semibold text-ink-900 dark:text-mint-100 mb-3">
-          Password reset!
+          {t('successTitle')}
         </h1>
-        <p className="text-sm text-ink-600 dark:text-mint-300 mb-8">
-          Your password has been updated. Redirecting you to sign in…
-        </p>
+        <p className="text-sm text-ink-600 dark:text-mint-300 mb-8">{t('successMessage')}</p>
         <Link href="/login">
-          <Button>Go to sign in</Button>
+          <Button>{t('goToSignIn')}</Button>
         </Link>
       </div>
     );
@@ -118,12 +115,11 @@ function ResetPasswordForm() {
   return (
     <div>
       <div className="mb-8">
+        <span className="label-caps mb-2 block">{t('eyebrow')}</span>
         <h1 className="font-serif text-3xl font-semibold text-ink-900 dark:text-mint-100 mb-2">
-          Set a new password
+          {t('title')}
         </h1>
-        <p className="text-sm text-ink-600 dark:text-mint-300">
-          Choose a strong password you haven&apos;t used before.
-        </p>
+        <p className="text-sm text-ink-600 dark:text-mint-300">{t('subtitle')}</p>
       </div>
 
       {resetError && (
@@ -138,15 +134,15 @@ function ResetPasswordForm() {
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
         <Input
-          label="New password"
+          label={t('newPassword')}
           type={showPassword ? 'text' : 'password'}
-          placeholder="At least 8 characters"
+          placeholder={t('newPasswordPlaceholder')}
           leftIcon={<Lock className="h-4 w-4" />}
           rightIcon={
             <button
               type="button"
               onClick={() => setShowPassword((s) => !s)}
-              aria-label={showPassword ? 'Hide password' : 'Show password'}
+              aria-label={showPassword ? tCommon('hidePassword') : tCommon('showPassword')}
               className="pointer-events-auto text-forest-500 dark:text-mint-300 hover:text-forest-800 dark:hover:text-mint-100 transition-colors"
               tabIndex={-1}
             >
@@ -160,15 +156,15 @@ function ResetPasswordForm() {
         />
 
         <Input
-          label="Confirm new password"
+          label={t('confirmPassword')}
           type={showConfirm ? 'text' : 'password'}
-          placeholder="Re-enter your password"
+          placeholder={t('confirmPasswordPlaceholder')}
           leftIcon={<Lock className="h-4 w-4" />}
           rightIcon={
             <button
               type="button"
               onClick={() => setShowConfirm((s) => !s)}
-              aria-label={showConfirm ? 'Hide password' : 'Show password'}
+              aria-label={showConfirm ? tCommon('hidePassword') : tCommon('showPassword')}
               className="pointer-events-auto text-forest-500 dark:text-mint-300 hover:text-forest-800 dark:hover:text-mint-100 transition-colors"
               tabIndex={-1}
             >
@@ -181,7 +177,7 @@ function ResetPasswordForm() {
         />
 
         <Button type="submit" size="lg" className="w-full" isLoading={submitting}>
-          Reset password
+          {t('resetButton')}
         </Button>
       </form>
     </div>
@@ -189,18 +185,12 @@ function ResetPasswordForm() {
 }
 
 // ============================================
-// PAGE WRAPPER (Suspense for useSearchParams)
+// PAGE WRAPPER
 // ============================================
 export default function ResetPasswordPage() {
   return (
-    <Suspense
-      fallback={
-        <div className="flex justify-center py-12">
-          <div className="h-8 w-8 animate-spin rounded-full border-4 border-forest-800 dark:border-emerald-500 border-t-transparent" />
-        </div>
-      }
-    >
-      <ResetPasswordForm />
+    <Suspense fallback={<div className="py-8" />}>
+      <ResetPasswordContent />
     </Suspense>
   );
 }
