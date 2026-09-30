@@ -38,6 +38,15 @@ export class CreateCategoryDto {
   description?: string;
 
   @ApiProperty({
+    example: '/uploads/categories/helmets.jpg',
+    description: 'Category image URL (optional)',
+    required: false,
+  })
+  @IsOptional()
+  @IsString({ message: 'Image URL must be a string' })
+  imageUrl?: string;
+
+  @ApiProperty({
     example: 'uuid-parent-id',
     description: 'Parent category ID for nested categories (optional)',
     required: false,
