@@ -3,10 +3,11 @@
 /**
  * Confirm Delete Modal
  *
- * Reusable confirmation dialog for destructive actions.
+ * Reusable destructive action confirmation with translations.
  */
 
 import { useState } from 'react';
+import { useTranslations } from 'next-intl';
 import { toast } from 'sonner';
 import { AlertTriangle, Trash2 } from 'lucide-react';
 import { Button, Modal } from '@/components/ui';
@@ -16,13 +17,9 @@ export interface ConfirmDeleteModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSuccess: () => void;
-  /** API endpoint to DELETE (e.g., /products/123) */
   endpoint: string;
-  /** Item name for display */
   itemName: string;
-  /** What kind of item (product, category, etc.) */
   itemType: string;
-  /** Optional description override */
   description?: string;
 }
 
@@ -35,13 +32,14 @@ export function ConfirmDeleteModal({
   itemType,
   description,
 }: ConfirmDeleteModalProps) {
+  const t = useTranslations('admin.common');
   const [submitting, setSubmitting] = useState(false);
 
   async function handleDelete() {
     setSubmitting(true);
     try {
       await api.delete(endpoint);
-      toast.success(`${itemType} deleted`);
+      toast.success(t('deleteSuccess', { type: itemType }));
       onSuccess();
       onClose();
     } catch (err) {
@@ -55,7 +53,7 @@ export function ConfirmDeleteModal({
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-      title={`Delete ${itemType}?`}
+      title={t('confirmDelete', { type: itemType })}
       size="sm"
       closeOnBackdrop={false}
     >
@@ -65,20 +63,14 @@ export function ConfirmDeleteModal({
         </div>
         <div>
           <p className="text-sm text-ink-700 dark:text-mint-300">
-            {description ?? (
-              <>
-                You&apos;re about to delete{' '}
-                <strong className="text-ink-900 dark:text-mint-100">{itemName}</strong>. This action
-                cannot be undone.
-              </>
-            )}
+            {description ?? t('deleteWarning', { name: itemName })}
           </p>
         </div>
       </div>
 
       <div className="flex justify-end gap-3">
         <Button type="button" variant="outline" onClick={onClose} disabled={submitting}>
-          Cancel
+          {t('cancel')}
         </Button>
         <Button
           type="button"
@@ -87,7 +79,7 @@ export function ConfirmDeleteModal({
           isLoading={submitting}
           leftIcon={!submitting ? <Trash2 className="h-4 w-4" /> : undefined}
         >
-          Delete
+          {t('delete')}
         </Button>
       </div>
     </Modal>
