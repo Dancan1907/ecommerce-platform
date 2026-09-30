@@ -13,7 +13,7 @@ import Image from 'next/image';
 import { ShoppingCart, Package } from 'lucide-react';
 import { toast } from 'sonner';
 import { Card, Badge } from '@/components/ui';
-import { formatKES, cn } from '@/lib/utils';
+import { formatKES, cn, resolveImageUrl } from '@/lib/utils';
 import type { Product } from '@/types/product';
 import { useCartStore } from '@/stores/cart-store';
 import { useAuthStore } from '@/stores/auth-store';
@@ -67,7 +67,7 @@ export function ProductCard({ product, className }: ProductCardProps) {
         <div className="relative aspect-square overflow-hidden bg-cream-100 dark:bg-forest-900">
           {mainImage ? (
             <Image
-              src={mainImage.url}
+              src={resolveImageUrl(mainImage.url)}
               alt={product.name}
               fill
               sizes="(max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
