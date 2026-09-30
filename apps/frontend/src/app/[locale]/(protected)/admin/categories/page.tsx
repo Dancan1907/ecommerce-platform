@@ -107,7 +107,7 @@ export default function AdminCategoriesPage() {
               {/* Image header */}
               <div className="relative aspect-[16/9] bg-cream-100 dark:bg-forest-900">
                 {cat.imageUrl ? (
-                  // eslint-disable-next-line @next/next/no-img-element
+                  // Plain <img> is intentional (blob preview / external URL)
                   <img
                     src={resolveImageUrl(cat.imageUrl)}
                     alt={cat.name}
