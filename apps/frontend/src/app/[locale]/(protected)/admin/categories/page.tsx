@@ -4,6 +4,7 @@
  * Admin Categories Page
  *
  * List, create, edit, and delete categories with translations.
+ * Shows a thumbnail header per category when an image is set.
  */
 
 import { useCallback, useEffect, useState } from 'react';
@@ -13,6 +14,7 @@ import { Button, Card, Badge, Skeleton } from '@/components/ui';
 import { CategoryFormModal } from '@/components/admin/category-form-modal';
 import { ConfirmDeleteModal } from '@/components/admin/confirm-delete-modal';
 import { api, extractErrorMessage } from '@/lib/api';
+import { resolveImageUrl } from '@/lib/utils';
 import type { Category } from '@/types/product';
 
 export default function AdminCategoriesPage() {
@@ -82,7 +84,7 @@ export default function AdminCategoriesPage() {
       {loading ? (
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {Array.from({ length: 6 }).map((_, i) => (
-            <Skeleton key={i} className="h-32" />
+            <Skeleton key={i} className="h-64" />
           ))}
         </div>
       ) : categories.length === 0 ? (
@@ -101,40 +103,59 @@ export default function AdminCategoriesPage() {
       ) : (
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {categories.map((cat) => (
-            <Card key={cat.id} className="p-5 flex flex-col">
-              <div className="flex items-start justify-between gap-3 mb-3">
-                <div className="flex-1 min-w-0">
-                  <h3 className="font-serif text-lg font-semibold text-ink-900 dark:text-mint-100 truncate">
-                    {cat.name}
-                  </h3>
-                  <p className="text-xs text-ink-500 dark:text-mint-300/70 font-mono mt-0.5 truncate">
-                    /{cat.slug}
-                  </p>
-                </div>
+            <Card key={cat.id} className="overflow-hidden flex flex-col">
+              {/* Image header */}
+              <div className="relative aspect-[16/9] bg-cream-100 dark:bg-forest-900">
+                {cat.imageUrl ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={resolveImageUrl(cat.imageUrl)}
+                    alt={cat.name}
+                    className="h-full w-full object-cover"
+                  />
+                ) : (
+                  <div className="flex h-full w-full items-center justify-center text-cream-400 dark:text-forest-700">
+                    <FolderTree className="h-10 w-10" />
+                  </div>
+                )}
                 {(cat.children?.length ?? 0) > 0 && (
-                  <Badge variant="neutral">{t('subSuffix', { count: cat.children!.length })}</Badge>
+                  <div className="absolute top-3 right-3">
+                    <Badge variant="neutral">
+                      {t('subSuffix', { count: cat.children!.length })}
+                    </Badge>
+                  </div>
                 )}
               </div>
 
-              <p className="text-sm text-ink-600 dark:text-mint-300 line-clamp-2 mb-4 flex-1">
-                {cat.description || t('noDescription')}
-              </p>
+              {/* Content */}
+              <div className="p-5 flex flex-col flex-1">
+                <h3 className="font-serif text-lg font-semibold text-ink-900 dark:text-mint-100 truncate">
+                  {cat.name}
+                </h3>
+                <p className="text-xs text-ink-500 dark:text-mint-300/70 font-mono mt-0.5 mb-3 truncate">
+                  /{cat.slug}
+                </p>
 
-              <div className="flex items-center gap-1 justify-end pt-3 border-t border-cream-200 dark:border-forest-800">
-                <button
-                  onClick={() => openEditModal(cat)}
-                  aria-label={`Edit ${cat.name}`}
-                  className="p-2 rounded-lg text-ink-600 dark:text-mint-300 hover:bg-forest-100 dark:hover:bg-forest-800 transition-colors"
-                >
-                  <Pencil className="h-4 w-4" />
-                </button>
-                <button
-                  onClick={() => setDeletingCategory(cat)}
-                  aria-label={`Delete ${cat.name}`}
-                  className="p-2 rounded-lg text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/40 transition-colors"
-                >
-                  <Trash2 className="h-4 w-4" />
-                </button>
+                <p className="text-sm text-ink-600 dark:text-mint-300 line-clamp-2 mb-4 flex-1">
+                  {cat.description || t('noDescription')}
+                </p>
+
+                <div className="flex items-center gap-1 justify-end pt-3 border-t border-cream-200 dark:border-forest-800">
+                  <button
+                    onClick={() => openEditModal(cat)}
+                    aria-label={`Edit ${cat.name}`}
+                    className="p-2 rounded-lg text-ink-600 dark:text-mint-300 hover:bg-forest-100 dark:hover:bg-forest-800 transition-colors"
+                  >
+                    <Pencil className="h-4 w-4" />
+                  </button>
+                  <button
+                    onClick={() => setDeletingCategory(cat)}
+                    aria-label={`Delete ${cat.name}`}
+                    className="p-2 rounded-lg text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/40 transition-colors"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </button>
+                </div>
               </div>
             </Card>
           ))}

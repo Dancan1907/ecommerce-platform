@@ -5,6 +5,7 @@ import js from '@eslint/js';
 import globals from 'globals';
 import tseslint from 'typescript-eslint';
 import reactHooks from 'eslint-plugin-react-hooks';
+import nextPlugin from '@next/eslint-plugin-next';
 
 export default [
   // ============================================
@@ -52,6 +53,7 @@ export default [
     plugins: {
       '@typescript-eslint': tseslint.plugin,
       'react-hooks': reactHooks,
+      '@next/next': nextPlugin,
     },
     rules: {
       // TypeScript rules
@@ -63,6 +65,10 @@ export default [
       // React Hooks rules
       'react-hooks/rules-of-hooks': 'error',
       'react-hooks/exhaustive-deps': 'warn',
+
+      // Next.js rules
+      '@next/next/no-img-element': 'warn',
+      '@next/next/no-html-link-for-pages': 'off',
 
       // General
       'no-console': 'warn',
