@@ -3,13 +3,14 @@
 /**
  * Product Listing Page
  *
- * Combines filter sidebar + product grid + pagination.
- * Syncs filter state with URL query params for shareable links.
+ * Combines filters + grid + pagination.
+ * Fully translated with next-intl.
  */
 
 import { Suspense, useEffect, useState, useCallback } from 'react';
-import { useRouter } from '@/i18n/navigation';
+import { useTranslations } from 'next-intl';
 import { useSearchParams } from 'next/navigation';
+import { useRouter } from '@/i18n/navigation';
 import { Skeleton, Badge } from '@/components/ui';
 import { ProductGrid } from '@/components/products/product-grid';
 import { Pagination } from '@/components/products/pagination';
@@ -23,6 +24,7 @@ import type { Category, Product } from '@/types/product';
 function ProductListingContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const t = useTranslations('products');
 
   const [products, setProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
@@ -126,14 +128,12 @@ function ProductListingContent() {
     <div className="container-page py-8 md:py-12">
       {/* Header */}
       <div className="mb-8">
-        <span className="label-caps mb-2 block">Shop</span>
+        <span className="label-caps mb-2 block">{t('title')}</span>
         <h1 className="font-serif text-4xl md:text-5xl font-semibold text-ink-900 dark:text-mint-100 mb-3">
-          All Products
+          {t('title')}
         </h1>
         {!loading && (
-          <p className="text-sm text-ink-600 dark:text-mint-300">
-            {total} {total === 1 ? 'product' : 'products'} found
-          </p>
+          <p className="text-sm text-ink-600 dark:text-mint-300">{t('found', { count: total })}</p>
         )}
       </div>
 
@@ -153,12 +153,14 @@ function ProductListingContent() {
             <div className="mb-6 flex flex-wrap gap-2">
               {filters.categoryId && (
                 <Badge variant="neutral">
-                  Category:{' '}
-                  {categories.find((c) => c.id === filters.categoryId)?.name ?? 'Filtered'}
+                  {t('categories')}:{' '}
+                  {categories.find((c) => c.id === filters.categoryId)?.name ?? '—'}
                 </Badge>
               )}
               {filters.search && (
-                <Badge variant="neutral">Search: &ldquo;{filters.search}&rdquo;</Badge>
+                <Badge variant="neutral">
+                  {t('search')}: &ldquo;{filters.search}&rdquo;
+                </Badge>
               )}
             </div>
           )}
@@ -167,7 +169,7 @@ function ProductListingContent() {
             <ProductGridSkeleton />
           ) : (
             <>
-              <ProductGrid products={products} emptyMessage="No products match your filters" />
+              <ProductGrid products={products} emptyMessage={t('noResults')} />
               {totalPages > 1 && (
                 <Pagination
                   className="mt-10"
