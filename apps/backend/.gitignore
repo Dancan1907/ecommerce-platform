@@ -6,3 +6,9 @@ uploads/*
 !uploads/products/*.jpeg
 !uploads/products/*.png
 !uploads/products/*.webp
+# …except demo/seed category images, which ship with the repo
+!uploads/categories/
+!uploads/categories/*.jpg
+!uploads/categories/*.jpeg
+!uploads/categories/*.png
+!uploads/categories/*.webp
