@@ -3,19 +3,18 @@
  *
  * Uses:
  *  - jsdom environment (browser-like globals)
- *  - ts-jest for TypeScript support
  *  - React Testing Library for component tests
  *
- * ESM handling:
- *  - pnpm stores packages under node_modules/.pnpm/<pkg>@<version>/node_modules/<pkg>
- *  - next-intl, use-intl, sonner, and @formatjs ship as ESM
- *  - Jest must transform them (cannot run ESM natively in CJS mode)
+ * Note: next/jest supplies its own transformIgnorePatterns, which
+ * overrides anything set inside the object passed to createJestConfig.
+ * We therefore reassign transformIgnorePatterns AFTER createJestConfig
+ * returns, so ESM-only deps (next-intl, use-intl, sonner, @formatjs)
+ * get transformed by Babel/SWC.
  */
 
 const nextJest = require('next/jest');
 
 const createJestConfig = nextJest({
-  // Path to Next.js app — used to load next.config.js and .env files
   dir: './',
 });
 
@@ -29,9 +28,6 @@ const customJestConfig = {
   testMatch: ['**/*.test.{ts,tsx}', '**/__tests__/**/*.{ts,tsx}'],
   modulePathIgnorePatterns: ['<rootDir>/.next/', '<rootDir>/node_modules/'],
   testPathIgnorePatterns: ['<rootDir>/.next/', '<rootDir>/node_modules/'],
-  transformIgnorePatterns: [
-    'node_modules/(?!(.pnpm|next-intl|use-intl|sonner|@formatjs|intl-messageformat)/)',
-  ],
   collectCoverageFrom: [
     'src/**/*.{ts,tsx}',
     '!src/**/*.d.ts',
@@ -43,4 +39,13 @@ const customJestConfig = {
   verbose: true,
 };
 
-module.exports = createJestConfig(customJestConfig);
+module.exports = async () => {
+  // Build the config Next.js wants, then override the transform allowlist.
+  const config = await createJestConfig(customJestConfig)();
+
+  config.transformIgnorePatterns = [
+    'node_modules/(?!(.pnpm|next-intl|use-intl|sonner|@formatjs|intl-messageformat)/)',
+  ];
+
+  return config;
+};
