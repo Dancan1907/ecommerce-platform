@@ -2,18 +2,22 @@
  * One-time cleanup: remove two demo users and their owned data.
  *
  * Targets:
- *   - admin@ecommerce.com
+ *   - admin@ecommerce.com   (its products are reassigned first)
  *   - user@ecommerce.com
  *
- * Deletes in dependency order:
- *   OrderItem → Order → CartItem → Cart → Review → Product (if seller) → User
+ * Strategy:
+ *   1. Reassign products owned by admin@ecommerce.com to the real
+ *      admin (dancankalerwa@gmail.com) — otherwise the FK RESTRICT on
+ *      Product.sellerId blocks user deletion.
+ *   2. Delete orders, order items, carts, cart items, reviews.
+ *   3. Delete the two users.
  *
  * Does NOT touch:
- *   - dancankalerwa@gmail.com
+ *   - dancankalerwa@gmail.com (real admin — takes ownership of products)
  *   - maxverstappen@ecommerce.com
- *   - any other user, order, product, or review
+ *   - any other data
  *
- * Safe to re-run — reports what's missing and exits cleanly.
+ * Safe to re-run.
  *
  * Run with:
  *   cd apps/backend
@@ -25,12 +29,27 @@ import { PrismaClient } from '@prisma/client';
 const prisma = new PrismaClient();
 
 const TARGET_EMAILS = ['admin@ecommerce.com', 'user@ecommerce.com'];
+const NEW_SELLER_EMAIL = 'dancankalerwa@gmail.com';
 
 async function main() {
   console.log('🧹 Cleaning up demo users...\n');
-  console.log(`Targets: ${TARGET_EMAILS.join(', ')}\n`);
+  console.log(`Targets:      ${TARGET_EMAILS.join(', ')}`);
+  console.log(`New seller:   ${NEW_SELLER_EMAIL}\n`);
 
-  // -------- Look up the two users --------
+  // -------- Look up new seller (must exist) --------
+  const newSeller = await prisma.user.findUnique({
+    where: { email: NEW_SELLER_EMAIL },
+    select: { id: true, email: true, firstName: true, lastName: true },
+  });
+  if (!newSeller) {
+    console.error(`❌ New seller ${NEW_SELLER_EMAIL} not found. Aborting.`);
+    process.exit(1);
+  }
+  console.log(
+    `Found new seller: ${newSeller.email} (${newSeller.firstName} ${newSeller.lastName})\n`
+  );
+
+  // -------- Look up target users --------
   const users = await prisma.user.findMany({
     where: { email: { in: TARGET_EMAILS } },
     select: { id: true, email: true, firstName: true, lastName: true },
@@ -46,33 +65,49 @@ async function main() {
   users.forEach((u) => console.log(`  • ${u.email} (${u.firstName} ${u.lastName})`));
   console.log('');
 
-  // -------- 1. Orders + their items --------
+  // -------- 1. Reassign products owned by target users --------
+  const ownedProducts = await prisma.product.findMany({
+    where: { sellerId: { in: userIds } },
+    select: { id: true, name: true },
+  });
+
+  if (ownedProducts.length > 0) {
+    console.log(`🔁 Reassigning ${ownedProducts.length} product(s) to ${NEW_SELLER_EMAIL}:`);
+    await prisma.product.updateMany({
+      where: { sellerId: { in: userIds } },
+      data: { sellerId: newSeller.id },
+    });
+    ownedProducts.forEach((p) => console.log(`   ↪ ${p.name}`));
+    console.log('');
+  } else {
+    console.log('ℹ️  No products to reassign.\n');
+  }
+
+  // -------- 2. Orders + their items --------
   const orders = await prisma.order.findMany({
     where: { userId: { in: userIds } },
     select: { id: true, orderNumber: true },
   });
   console.log(`Found ${orders.length} order(s) to remove.`);
-
   for (const order of orders) {
     const itemsDeleted = await prisma.orderItem.deleteMany({ where: { orderId: order.id } });
     await prisma.order.delete({ where: { id: order.id } });
     console.log(`  🗑️  Deleted order ${order.orderNumber} (+${itemsDeleted.count} items)`);
   }
 
-  // -------- 2. Carts + their items --------
+  // -------- 3. Carts + their items --------
   const carts = await prisma.cart.findMany({
     where: { userId: { in: userIds } },
     select: { id: true },
   });
   console.log(`\nFound ${carts.length} cart(s) to remove.`);
-
   for (const cart of carts) {
     const itemsDeleted = await prisma.cartItem.deleteMany({ where: { cartId: cart.id } });
     await prisma.cart.delete({ where: { id: cart.id } });
     console.log(`  🗑️  Deleted cart (+${itemsDeleted.count} items)`);
   }
 
-  // -------- 3. Reviews --------
+  // -------- 4. Reviews --------
   const reviewsDeleted = await prisma.review.deleteMany({
     where: { userId: { in: userIds } },
   });
@@ -80,29 +115,15 @@ async function main() {
     console.log(`\n🗑️  Deleted ${reviewsDeleted.count} review(s).`);
   }
 
-  // -------- 4. Products they own (if any) --------
-  // NOTE: only deletes products where the seller is one of the target users.
-  // If a product has order history from other users, deletion may fail and
-  // you'll see the error — that's intentional (don't silently orphan orders).
-  const ownedProducts = await prisma.product.findMany({
-    where: { sellerId: { in: userIds } },
-    select: { id: true, name: true },
-  });
-  if (ownedProducts.length > 0) {
-    console.log(`\nFound ${ownedProducts.length} product(s) owned by target users:`);
-    for (const p of ownedProducts) {
-      console.log(`  ⚠️  ${p.name} — skipping (reassign or delete via admin UI)`);
-    }
-  }
-
   // -------- 5. Finally, the users --------
+  console.log('');
   for (const email of TARGET_EMAILS) {
     try {
       const deleted = await prisma.user.delete({ where: { email } });
-      console.log(`\n🗑️  Deleted user: ${deleted.email}`);
+      console.log(`🗑️  Deleted user: ${deleted.email}`);
     } catch (err) {
       const msg = err instanceof Error ? err.message : String(err);
-      console.log(`\n⚠️  Could not delete ${email}: ${msg}`);
+      console.log(`⚠️  Could not delete ${email}: ${msg}`);
     }
   }
 
