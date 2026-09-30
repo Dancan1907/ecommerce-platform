@@ -3,13 +3,13 @@
 /**
  * M-Pesa Payment Page
  *
- * User enters phone number → STK Push initiated → waiting state → success/error
- * Frontend polls payment status while waiting for M-Pesa callback.
+ * User enters phone → STK Push initiated → waiting → success/error.
+ * Fully translated with next-intl.
  */
 
 import { Suspense, useEffect, useRef, useState } from 'react';
-import { Link } from '@/i18n/navigation';
-import { useRouter } from '@/i18n/navigation';
+import { useTranslations } from 'next-intl';
+import { Link, useRouter } from '@/i18n/navigation';
 import { useSearchParams } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -19,9 +19,6 @@ import { ArrowLeft, Smartphone, AlertCircle, CheckCircle2, Loader2, Phone } from
 import { Button, Input, Card } from '@/components/ui';
 import { api, extractErrorMessage } from '@/lib/api';
 
-// ============================================
-// VALIDATION
-// ============================================
 const mpesaSchema = z.object({
   phoneNumber: z
     .string()
@@ -30,13 +27,13 @@ const mpesaSchema = z.object({
 });
 
 type MpesaInput = z.infer<typeof mpesaSchema>;
-
 type Stage = 'form' | 'waiting' | 'success' | 'error';
 
 function MpesaPaymentContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const orderId = searchParams.get('orderId');
+  const t = useTranslations('checkout');
 
   const [stage, setStage] = useState<Stage>('form');
   const [error, setError] = useState<string | null>(null);
@@ -53,21 +50,15 @@ function MpesaPaymentContent() {
     defaultValues: { phoneNumber: '' },
   });
 
-  // ============================================
-  // CLEANUP
-  // ============================================
   useEffect(() => {
     return () => {
       if (pollTimerRef.current) clearInterval(pollTimerRef.current);
     };
   }, []);
 
-  // ============================================
-  // SUBMIT — INITIATE STK PUSH
-  // ============================================
   async function onSubmit(data: MpesaInput) {
     if (!orderId) {
-      setError('Missing order ID');
+      setError(t('missingOrder'));
       return;
     }
 
@@ -79,51 +70,42 @@ function MpesaPaymentContent() {
         orderId,
         phoneNumber: data.phoneNumber,
       });
-
-      // Move to waiting state + start polling
       setStage('waiting');
-      toast.success('Check your phone for the M-Pesa prompt');
+      toast.success(t('mpesaPromptSent'));
       startPolling();
     } catch (err) {
       setError(extractErrorMessage(err));
-      toast.error('Failed to initiate M-Pesa payment');
+      toast.error(t('failedToInitiateMpesa'));
     } finally {
       setSubmitting(false);
     }
   }
 
-  // ============================================
-  // POLLING — CHECK IF PAYMENT COMPLETED
-  // ============================================
   function startPolling() {
     pollCountRef.current = 0;
 
     pollTimerRef.current = setInterval(async () => {
       pollCountRef.current += 1;
 
-      // Give up after 60 polls (2 minutes at 2s intervals)
       if (pollCountRef.current > 60) {
         stopPolling();
         setStage('error');
-        setError(
-          'Payment timed out. If you entered your PIN, check your M-Pesa messages and order history.'
-        );
+        setError(t('paymentTimedOut'));
         return;
       }
 
       try {
         const res = await api.get(`/payments/order/${orderId}`);
-        // If order status is PAID, we're done
         if (res.data.status === 'PAID') {
           stopPolling();
           setStage('success');
-          toast.success('Payment received!');
+          toast.success(t('paymentReceived'));
           setTimeout(() => {
             router.push(`/orders/${orderId}/confirmation`);
           }, 1500);
         }
       } catch {
-        // Ignore transient errors during polling
+        // ignore transient errors
       }
     }, 2000);
   }
@@ -142,16 +124,16 @@ function MpesaPaymentContent() {
     return (
       <div className="container-page py-20 text-center max-w-md mx-auto">
         <AlertCircle className="mx-auto h-16 w-16 text-red-600 mb-4" />
-        <h1 className="font-serif text-2xl font-semibold mb-3">Missing order</h1>
+        <h1 className="font-serif text-2xl font-semibold mb-3">{t('missingOrder')}</h1>
         <Link href="/checkout">
-          <Button>Back to checkout</Button>
+          <Button>{t('backToCheckout')}</Button>
         </Link>
       </div>
     );
   }
 
   // ============================================
-  // WAITING STATE
+  // WAITING
   // ============================================
   if (stage === 'waiting') {
     return (
@@ -160,19 +142,18 @@ function MpesaPaymentContent() {
           <Smartphone className="h-10 w-10 text-forest-700 dark:text-emerald-500" />
         </div>
         <h1 className="font-serif text-2xl font-semibold text-ink-900 dark:text-mint-100 mb-3">
-          Check your phone
+          {t('checkPhoneTitle')}
         </h1>
         <p className="text-sm text-ink-600 dark:text-mint-300 mb-6 leading-relaxed">
-          We&apos;ve sent an M-Pesa request to your phone. Open the prompt and enter your PIN to
-          complete the payment.
+          {t('checkPhoneMessage')}
         </p>
         <div className="flex items-center justify-center gap-2 text-sm text-ink-500 dark:text-mint-300/70 mb-8">
           <Loader2 className="h-4 w-4 animate-spin" />
-          Waiting for confirmation…
+          {t('waitingForConfirmation')}
         </div>
         <Link href="/orders">
           <Button variant="secondary" size="sm">
-            Skip — check later
+            {t('skipCheckLater')}
           </Button>
         </Link>
       </div>
@@ -180,7 +161,7 @@ function MpesaPaymentContent() {
   }
 
   // ============================================
-  // SUCCESS STATE
+  // SUCCESS
   // ============================================
   if (stage === 'success') {
     return (
@@ -189,17 +170,15 @@ function MpesaPaymentContent() {
           <CheckCircle2 className="h-10 w-10 text-emerald-600 dark:text-emerald-400" />
         </div>
         <h1 className="font-serif text-2xl font-semibold text-ink-900 dark:text-mint-100 mb-3">
-          Payment received!
+          {t('paymentReceived')}
         </h1>
-        <p className="text-sm text-ink-600 dark:text-mint-300">
-          Redirecting to your order confirmation…
-        </p>
+        <p className="text-sm text-ink-600 dark:text-mint-300">{t('redirectingToConfirmation')}</p>
       </div>
     );
   }
 
   // ============================================
-  // FORM STATE (or ERROR)
+  // FORM
   // ============================================
   return (
     <div className="container-page py-8 md:py-12 max-w-md mx-auto">
@@ -209,14 +188,12 @@ function MpesaPaymentContent() {
           className="inline-flex items-center gap-1.5 text-sm text-ink-600 dark:text-mint-300 hover:text-forest-700 dark:hover:text-emerald-400 mb-4 transition-colors"
         >
           <ArrowLeft className="h-4 w-4" />
-          Back to checkout
+          {t('backToCheckout')}
         </Link>
         <h1 className="font-serif text-3xl md:text-4xl font-semibold text-ink-900 dark:text-mint-100 mb-2">
-          Pay with M-Pesa
+          {t('mpesaTitle')}
         </h1>
-        <p className="text-sm text-ink-600 dark:text-mint-300">
-          Enter your M-Pesa phone number to receive a payment prompt.
-        </p>
+        <p className="text-sm text-ink-600 dark:text-mint-300">{t('mpesaSubtitle')}</p>
       </div>
 
       {error && (
@@ -238,9 +215,9 @@ function MpesaPaymentContent() {
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
           <Input
-            label="M-Pesa phone number"
+            label={t('phoneNumber')}
             type="tel"
-            placeholder="254712345678"
+            placeholder={t('phoneNumberPlaceholder')}
             leftIcon={<Phone className="h-4 w-4" />}
             error={errors.phoneNumber?.message}
             autoComplete="tel"
@@ -249,12 +226,11 @@ function MpesaPaymentContent() {
           />
 
           <p className="text-xs text-ink-500 dark:text-mint-300/70 leading-relaxed">
-            Enter the Safaricom or Airtel number registered to M-Pesa. You&apos;ll receive a prompt
-            on this phone asking to confirm the payment.
+            {t('phoneNumberHint')}
           </p>
 
           <Button type="submit" size="lg" className="w-full" isLoading={submitting}>
-            Send Payment Request
+            {t('sendPaymentRequest')}
           </Button>
         </form>
       </Card>
@@ -262,9 +238,6 @@ function MpesaPaymentContent() {
   );
 }
 
-// ============================================
-// PAGE WRAPPER
-// ============================================
 export default function MpesaPaymentPage() {
   return (
     <Suspense
