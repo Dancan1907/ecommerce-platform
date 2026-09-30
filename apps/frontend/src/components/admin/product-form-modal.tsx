@@ -3,11 +3,11 @@
 /**
  * Product Form Modal
  *
- * Reusable form for creating/editing products.
- * Used by the admin products page.
+ * Reusable form for creating/editing products with translations.
  */
 
 import { useEffect, useState } from 'react';
+import { useTranslations } from 'next-intl';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -17,9 +17,6 @@ import { Button, Input, Textarea, Select, Modal } from '@/components/ui';
 import { api, extractErrorMessage } from '@/lib/api';
 import type { Category, Product } from '@/types/product';
 
-// ============================================
-// VALIDATION
-// ============================================
 const productSchema = z.object({
   name: z.string().min(3, 'Name must be at least 3 characters').max(200),
   description: z.string().min(10, 'Description must be at least 10 characters'),
@@ -36,7 +33,7 @@ export interface ProductFormModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSuccess: () => void;
-  product?: Product | null; // null/undefined = create mode
+  product?: Product | null;
   categories: Category[];
 }
 
@@ -48,6 +45,9 @@ export function ProductFormModal({
   categories,
 }: ProductFormModalProps) {
   const isEditMode = !!product;
+  const t = useTranslations('admin.products');
+  const tCommon = useTranslations('admin.common');
+
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -69,7 +69,6 @@ export function ProductFormModal({
     },
   });
 
-  // Reset form when modal opens with a product (edit) or without (create)
   useEffect(() => {
     if (!isOpen) return;
     setError(null);
@@ -97,9 +96,6 @@ export function ProductFormModal({
     }
   }, [isOpen, product, categories, reset]);
 
-  // ============================================
-  // SUBMIT
-  // ============================================
   async function onSubmit(data: ProductFormData) {
     setSubmitting(true);
     setError(null);
@@ -107,16 +103,16 @@ export function ProductFormModal({
     try {
       if (isEditMode && product) {
         await api.put(`/products/${product.id}`, data);
-        toast.success('Product updated');
+        toast.success(t('updatedToast'));
       } else {
         await api.post('/products', data);
-        toast.success('Product created');
+        toast.success(t('createdToast'));
       }
       onSuccess();
       onClose();
     } catch (err) {
       setError(extractErrorMessage(err));
-      toast.error(isEditMode ? 'Failed to update' : 'Failed to create');
+      toast.error(isEditMode ? t('updateFailed') : t('createFailed'));
     } finally {
       setSubmitting(false);
     }
@@ -126,8 +122,10 @@ export function ProductFormModal({
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-      title={isEditMode ? 'Edit Product' : 'Create Product'}
-      description={isEditMode ? `Update "${product?.name}"` : 'Add a new product to your catalog'}
+      title={isEditMode ? t('editTitle') : t('createTitle')}
+      description={
+        isEditMode ? t('editDescription', { name: product?.name ?? '' }) : t('createDescription')
+      }
       size="lg"
       closeOnBackdrop={false}
     >
@@ -142,29 +140,26 @@ export function ProductFormModal({
       )}
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
-        {/* Name */}
         <Input
-          label="Product Name"
+          label={t('formName')}
           type="text"
-          placeholder="e.g., Wireless Bluetooth Headphones"
+          placeholder={t('formNamePlaceholder')}
           error={errors.name?.message}
           autoFocus
           {...register('name')}
         />
 
-        {/* Description */}
         <Textarea
-          label="Description"
-          placeholder="Describe the product, its features, materials, etc."
+          label={t('formDescription')}
+          placeholder={t('formDescriptionPlaceholder')}
           rows={4}
           error={errors.description?.message}
           {...register('description')}
         />
 
-        {/* Price + Stock */}
         <div className="grid grid-cols-2 gap-4">
           <Input
-            label="Price (KES)"
+            label={t('formPrice')}
             type="number"
             step="0.01"
             placeholder="0.00"
@@ -172,7 +167,7 @@ export function ProductFormModal({
             {...register('price')}
           />
           <Input
-            label="Stock Quantity"
+            label={t('formStock')}
             type="number"
             placeholder="0"
             error={errors.stockQuantity?.message}
@@ -180,17 +175,20 @@ export function ProductFormModal({
           />
         </div>
 
-        {/* SKU + Category */}
         <div className="grid grid-cols-2 gap-4">
           <Input
-            label="SKU"
+            label={t('formSku')}
             type="text"
-            placeholder="e.g., PROD-001"
+            placeholder={t('formSkuPlaceholder')}
             error={errors.sku?.message}
             {...register('sku')}
           />
-          <Select label="Category" error={errors.categoryId?.message} {...register('categoryId')}>
-            <option value="">Select a category</option>
+          <Select
+            label={t('formCategory')}
+            error={errors.categoryId?.message}
+            {...register('categoryId')}
+          >
+            <option value="">{t('formCategoryPlaceholder')}</option>
             {categories.map((cat) => (
               <option key={cat.id} value={cat.id}>
                 {cat.name}
@@ -199,25 +197,21 @@ export function ProductFormModal({
           </Select>
         </div>
 
-        {/* Active */}
         <label className="flex items-center gap-3 cursor-pointer">
           <input
             type="checkbox"
             {...register('isActive')}
             className="h-4 w-4 rounded border-cream-400 text-emerald-600 focus:ring-emerald-500"
           />
-          <span className="text-sm text-ink-700 dark:text-mint-300">
-            Active (visible on storefront)
-          </span>
+          <span className="text-sm text-ink-700 dark:text-mint-300">{t('formActive')}</span>
         </label>
 
-        {/* Actions */}
         <div className="flex justify-end gap-3 pt-4 border-t border-cream-200 dark:border-forest-800">
           <Button type="button" variant="outline" onClick={onClose} disabled={submitting}>
-            Cancel
+            {tCommon('cancel')}
           </Button>
           <Button type="submit" isLoading={submitting}>
-            {isEditMode ? 'Save Changes' : 'Create Product'}
+            {isEditMode ? t('submitEdit') : t('submitCreate')}
           </Button>
         </div>
       </form>

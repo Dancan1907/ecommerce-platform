@@ -2,7 +2,8 @@
  * ProductGrid Tests
  */
 
-import { render, screen } from '@testing-library/react';
+import { screen } from '@testing-library/react';
+import { renderWithProvider } from '@/test/test-utils';
 import { ProductGrid } from '../product-grid';
 import type { Product } from '@/types/product';
 
@@ -46,18 +47,20 @@ const mkProduct = (id: string, name: string): Product => ({
 
 describe('ProductGrid', () => {
   it('renders all products', () => {
-    render(<ProductGrid products={[mkProduct('1', 'Alpha'), mkProduct('2', 'Beta')]} />);
+    renderWithProvider(
+      <ProductGrid products={[mkProduct('1', 'Alpha'), mkProduct('2', 'Beta')]} />
+    );
     expect(screen.getByText('Alpha')).toBeInTheDocument();
     expect(screen.getByText('Beta')).toBeInTheDocument();
   });
 
   it('shows default empty state', () => {
-    render(<ProductGrid products={[]} />);
+    renderWithProvider(<ProductGrid products={[]} />);
     expect(screen.getByText('No products found')).toBeInTheDocument();
   });
 
   it('shows custom empty message when provided', () => {
-    render(<ProductGrid products={[]} emptyMessage="Nothing here, sorry!" />);
+    renderWithProvider(<ProductGrid products={[]} emptyMessage="Nothing here, sorry!" />);
     expect(screen.getByText('Nothing here, sorry!')).toBeInTheDocument();
   });
 });
