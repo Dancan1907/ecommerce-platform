@@ -1,1 +1,8 @@
-uploads/
+# User uploads should not be committed
+uploads/*
+# …except demo/seed product images, which ship with the repo
+!uploads/products/
+!uploads/products/*.jpg
+!uploads/products/*.jpeg
+!uploads/products/*.png
+!uploads/products/*.webp
