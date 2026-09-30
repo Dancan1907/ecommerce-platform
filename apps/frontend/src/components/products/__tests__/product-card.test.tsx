@@ -108,6 +108,8 @@ describe('ProductCard', () => {
     });
     fireEvent.click(button);
     expect(mockAddItem).toHaveBeenCalledWith('prod-1', 1);
+    // Flush async handler so state updates settle before test ends
+    await screen.findByRole('button', { name: /add to cart/i });
   });
 
   it('shows fallback icon when no image', () => {
