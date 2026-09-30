@@ -3,11 +3,12 @@
 /**
  * Forgot Password Page
  *
- * User enters email → backend sends reset link (stubbed for now)
- * Shows success message regardless (don't leak whether email exists).
+ * User enters email → backend sends reset link.
+ * Fully translated with next-intl.
  */
 
 import { useState } from 'react';
+import { useTranslations } from 'next-intl';
 import { Link } from '@/i18n/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -18,6 +19,7 @@ import { api, extractErrorMessage } from '@/lib/api';
 import { forgotPasswordSchema, type ForgotPasswordInput } from '@/lib/validation/auth-schemas';
 
 export default function ForgotPasswordPage() {
+  const t = useTranslations('auth.forgotPassword');
   const [submitting, setSubmitting] = useState(false);
   const [sent, setSent] = useState(false);
 
@@ -35,9 +37,9 @@ export default function ForgotPasswordPage() {
     try {
       await api.post('/auth/forgot-password', { email: data.email });
       setSent(true);
-      toast.success('Check your email for reset instructions');
+      toast.success(t('sentToast'));
     } catch (err) {
-      // Even on error, show generic message to avoid leaking account existence
+      // Still show success to avoid leaking account existence
       setSent(true);
       toast.error(extractErrorMessage(err));
     } finally {
@@ -55,15 +57,14 @@ export default function ForgotPasswordPage() {
           <CheckCircle2 className="h-8 w-8 text-emerald-600 dark:text-emerald-400" />
         </div>
         <h1 className="font-serif text-3xl font-semibold text-ink-900 dark:text-mint-100 mb-3">
-          Check your email
+          {t('successTitle')}
         </h1>
         <p className="text-sm text-ink-600 dark:text-mint-300 mb-8 leading-relaxed">
-          If an account exists with that email, we&apos;ve sent instructions to reset your password.
-          The link expires in 1 hour.
+          {t('successMessage')}
         </p>
         <Link href="/login">
           <Button variant="secondary" leftIcon={<ArrowLeft className="h-4 w-4" />}>
-            Back to sign in
+            {t('backToSignIn')}
           </Button>
         </Link>
       </div>
@@ -76,19 +77,18 @@ export default function ForgotPasswordPage() {
   return (
     <div>
       <div className="mb-8">
+        <span className="label-caps mb-2 block">{t('eyebrow')}</span>
         <h1 className="font-serif text-3xl font-semibold text-ink-900 dark:text-mint-100 mb-2">
-          Forgot password?
+          {t('title')}
         </h1>
-        <p className="text-sm text-ink-600 dark:text-mint-300">
-          Enter your email and we&apos;ll send you instructions to reset it.
-        </p>
+        <p className="text-sm text-ink-600 dark:text-mint-300">{t('subtitle')}</p>
       </div>
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
         <Input
-          label="Email"
+          label={t('email')}
           type="email"
-          placeholder="you@example.com"
+          placeholder={t('emailPlaceholder')}
           leftIcon={<Mail className="h-4 w-4" />}
           error={errors.email?.message}
           autoComplete="email"
@@ -97,7 +97,7 @@ export default function ForgotPasswordPage() {
         />
 
         <Button type="submit" size="lg" className="w-full" isLoading={submitting}>
-          Send reset link
+          {t('sendLink')}
         </Button>
       </form>
 
@@ -107,7 +107,7 @@ export default function ForgotPasswordPage() {
           className="inline-flex items-center gap-1.5 text-sm text-forest-700 dark:text-emerald-500 hover:underline"
         >
           <ArrowLeft className="h-3.5 w-3.5" />
-          Back to sign in
+          {t('backToSignIn')}
         </Link>
       </div>
     </div>
