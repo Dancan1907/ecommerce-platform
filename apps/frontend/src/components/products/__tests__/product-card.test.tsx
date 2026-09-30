@@ -2,7 +2,8 @@
  * ProductCard Tests
  */
 
-import { render, screen, fireEvent } from '@testing-library/react';
+import { screen, fireEvent } from '@testing-library/react';
+import { renderWithProvider } from '@/test/test-utils';
 import { ProductCard } from '../product-card';
 import type { Product } from '@/types/product';
 
@@ -74,34 +75,34 @@ describe('ProductCard', () => {
   });
 
   it('renders product name and formatted price', () => {
-    render(<ProductCard product={mockProduct} />);
+    renderWithProvider(<ProductCard product={mockProduct} />);
     expect(screen.getByText('Test Headphones')).toBeInTheDocument();
     expect(screen.getByText(/45,999/)).toBeInTheDocument();
   });
 
   it('renders category label', () => {
-    render(<ProductCard product={mockProduct} />);
+    renderWithProvider(<ProductCard product={mockProduct} />);
     expect(screen.getByText('Electronics')).toBeInTheDocument();
   });
 
   it('renders main image', () => {
-    render(<ProductCard product={mockProduct} />);
+    renderWithProvider(<ProductCard product={mockProduct} />);
     const img = screen.getByAltText('Test Headphones');
     expect(img).toHaveAttribute('src', 'https://example.com/image.jpg');
   });
 
   it('shows Out of Stock badge when stock is zero', () => {
-    render(<ProductCard product={{ ...mockProduct, stockQuantity: 0 }} />);
+    renderWithProvider(<ProductCard product={{ ...mockProduct, stockQuantity: 0 }} />);
     expect(screen.getByText('Out of Stock')).toBeInTheDocument();
   });
 
   it('shows Low Stock badge when stock is 5 or less', () => {
-    render(<ProductCard product={{ ...mockProduct, stockQuantity: 3 }} />);
+    renderWithProvider(<ProductCard product={{ ...mockProduct, stockQuantity: 3 }} />);
     expect(screen.getByText(/Only 3 left/)).toBeInTheDocument();
   });
 
   it('calls addItem when quick-add button is clicked', async () => {
-    render(<ProductCard product={mockProduct} />);
+    renderWithProvider(<ProductCard product={mockProduct} />);
     const button = screen.getByRole('button', {
       name: /add test headphones to cart/i,
     });
@@ -110,7 +111,7 @@ describe('ProductCard', () => {
   });
 
   it('shows fallback icon when no image', () => {
-    render(<ProductCard product={{ ...mockProduct, images: [] }} />);
+    renderWithProvider(<ProductCard product={{ ...mockProduct, images: [] }} />);
     expect(screen.queryByAltText('Test Headphones')).not.toBeInTheDocument();
   });
 });
