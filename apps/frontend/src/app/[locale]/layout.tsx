@@ -7,11 +7,7 @@ import { AppProviders } from '@/providers/app-providers';
 import { Header } from '@/components/layout/header';
 import { Footer } from '@/components/layout/footer';
 import { locales, type Locale } from '@/i18n/config';
-import './globals.css';
 
-// ============================================
-// FONTS
-// ============================================
 const fraunces = Fraunces({
   subsets: ['latin'],
   display: 'swap',
@@ -25,16 +21,10 @@ const plusJakarta = Plus_Jakarta_Sans({
   variable: '--font-plus-jakarta',
 });
 
-// ============================================
-// STATIC PARAMS
-// ============================================
 export function generateStaticParams() {
   return locales.map((locale) => ({ locale }));
 }
 
-// ============================================
-// METADATA
-// ============================================
 export const metadata: Metadata = {
   title: {
     default: 'E-Commerce Platform — Curated Local Treasures',
@@ -43,9 +33,6 @@ export const metadata: Metadata = {
   description: 'Discover curated local treasures. Shop quality, artisanal goods, delivered fast.',
 };
 
-// ============================================
-// LAYOUT
-// ============================================
 export default async function LocaleLayout({
   children,
   params,
@@ -55,29 +42,24 @@ export default async function LocaleLayout({
 }) {
   const { locale } = params;
 
-  // Validate locale
   if (!locales.includes(locale as Locale)) {
     notFound();
   }
 
-  // Load messages for the locale
   const messages = await getMessages();
 
   return (
-    <html
+    <div
+      className={`${fraunces.variable} ${plusJakarta.variable} font-sans flex min-h-screen flex-col bg-cream-200 text-ink-900 dark:bg-forest-950 dark:text-mint-200 transition-colors`}
       lang={locale}
-      suppressHydrationWarning
-      className={`${fraunces.variable} ${plusJakarta.variable}`}
     >
-      <body className="font-sans flex min-h-screen flex-col bg-cream-200 text-ink-900 dark:bg-forest-950 dark:text-mint-200 transition-colors">
-        <NextIntlClientProvider messages={messages}>
-          <AppProviders>
-            <Header />
-            <main className="flex-1">{children}</main>
-            <Footer />
-          </AppProviders>
-        </NextIntlClientProvider>
-      </body>
-    </html>
+      <NextIntlClientProvider messages={messages}>
+        <AppProviders>
+          <Header />
+          <main className="flex-1">{children}</main>
+          <Footer />
+        </AppProviders>
+      </NextIntlClientProvider>
+    </div>
   );
 }

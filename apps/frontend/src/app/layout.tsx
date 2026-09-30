@@ -1,23 +1,25 @@
 /**
  * Root Layout
  *
- * Minimal shell. The full app layout with providers, header, footer,
- * and i18n lives in [locale]/layout.tsx.
- *
- * This root layout exists to satisfy Next.js's requirement and to
- * render the global 404 and error pages.
+ * Minimal HTML shell. The locale-specific layout ([locale]/layout.tsx)
+ * wraps everything with providers, header, footer, and i18n.
  */
 
 import type { Metadata } from 'next';
+import './[locale]/globals.css';
 
 export const metadata: Metadata = {
   title: {
-    default: 'E-Commerce Platform',
+    default: 'E-Commerce Platform — Curated Local Treasures',
     template: '%s | E-Commerce Platform',
   },
-  description: 'Discover curated local treasures.',
+  description: 'Discover curated local treasures. Shop quality, artisanal goods, delivered fast.',
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
-  return children;
+  return (
+    <html lang="en" suppressHydrationWarning>
+      <body>{children}</body>
+    </html>
+  );
 }
