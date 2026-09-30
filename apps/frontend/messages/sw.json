@@ -129,27 +129,97 @@
     "continueToPayment": "Endelea kwa Malipo"
   },
   "auth": {
+    "layout": {
+      "welcome": "Karibu",
+      "tagline": "Hazina za ndani zilizochaguliwa, zinazofikishwa haraka.",
+      "description": "Nunua bidhaa bora za ufundi kutoka kwa wabunifu wa Kenya. Malipo salama ikiwa ni pamoja na M-Pesa."
+    },
     "login": {
+      "eyebrow": "Ingia",
       "title": "Karibu tena",
       "subtitle": "Ingia kwenye akaunti yako kuendelea.",
       "email": "Barua pepe",
+      "emailPlaceholder": "wewe@mfano.com",
       "password": "Nenosiri",
       "forgotPassword": "Umesahau nenosiri?",
       "signIn": "Ingia",
+      "signingIn": "Inaingia...",
       "noAccount": "Hauna akaunti?",
-      "signUp": "Jisajili"
+      "signUp": "Jisajili",
+      "welcomeBack": "Karibu tena!",
+      "invalidCredentials": "Barua pepe au nenosiri si sahihi. Tafadhali jaribu tena."
     },
     "register": {
+      "eyebrow": "Unda Akaunti",
       "title": "Unda akaunti yako",
       "subtitle": "Jiunge nasi kununua hazina za ndani zilizochaguliwa.",
       "firstName": "Jina la kwanza",
+      "firstNamePlaceholder": "Jane",
       "lastName": "Jina la mwisho",
+      "lastNamePlaceholder": "Doe",
       "email": "Barua pepe",
+      "emailPlaceholder": "wewe@mfano.com",
       "password": "Nenosiri",
+      "passwordPlaceholder": "Angalau herufi 8",
       "confirmPassword": "Thibitisha nenosiri",
+      "confirmPasswordPlaceholder": "Weka tena nenosiri lako",
       "createAccount": "Unda akaunti",
+      "creatingAccount": "Inaunda akaunti...",
       "haveAccount": "Tayari una akaunti?",
-      "signIn": "Ingia"
+      "signIn": "Ingia",
+      "welcomeMessage": "Karibu! Akaunti yako iko tayari.",
+      "failureMessage": "Usajili umeshindwa. Barua pepe hii inaweza kuwa inatumika."
+    },
+    "forgotPassword": {
+      "eyebrow": "Weka upya Nenosiri",
+      "title": "Umesahau nenosiri?",
+      "subtitle": "Weka barua pepe yako na tutakutumia maelekezo ya kuweka upya.",
+      "email": "Barua pepe",
+      "emailPlaceholder": "wewe@mfano.com",
+      "sendLink": "Tuma kiungo cha kuweka upya",
+      "sending": "Inatuma...",
+      "successTitle": "Angalia barua pepe yako",
+      "successMessage": "Kama akaunti ipo na barua pepe hiyo, tumetuma maelekezo ya kuweka upya nenosiri lako. Kiungo kinaisha baada ya saa 1.",
+      "backToSignIn": "Rudi kuingia",
+      "sentToast": "Angalia barua pepe yako kwa maelekezo ya kuweka upya"
+    },
+    "resetPassword": {
+      "eyebrow": "Nenosiri Jipya",
+      "title": "Weka nenosiri jipya",
+      "subtitle": "Chagua nenosiri imara ambalo hukutumia hapo awali.",
+      "newPassword": "Nenosiri jipya",
+      "newPasswordPlaceholder": "Angalau herufi 8",
+      "confirmPassword": "Thibitisha nenosiri jipya",
+      "confirmPasswordPlaceholder": "Weka tena nenosiri lako",
+      "resetButton": "Weka upya nenosiri",
+      "resetting": "Inaweka upya...",
+      "successTitle": "Nenosiri limewekwa upya!",
+      "successMessage": "Nenosiri lako limebadilishwa. Tunakupeleka kuingia…",
+      "goToSignIn": "Nenda kuingia",
+      "invalidTitle": "Kiungo batili",
+      "invalidMessage": "Kiungo cha kuweka upya nenosiri hakipo au si sahihi. Tafadhali omba kipya.",
+      "requestNewLink": "Omba kiungo kipya",
+      "missingToken": "Namba ya kuweka upya haipo. Tafadhali tumia kiungo kutoka kwa barua pepe yako.",
+      "successToast": "Nenosiri limewekwa upya! Unaweza kuingia sasa.",
+      "failureToast": "Imeshindwa kuweka upya nenosiri"
+    },
+    "verifyEmail": {
+      "verifyingTitle": "Inathibitisha barua pepe yako",
+      "verifyingMessage": "Subiri kidogo tafadhali…",
+      "successTitle": "Barua pepe imethibitishwa!",
+      "successMessage": "Barua pepe yako imethibitishwa. Unaweza kuanza kununua.",
+      "signIn": "Ingia",
+      "browseProducts": "Vinjari bidhaa",
+      "missingTokenTitle": "Kiungo cha uthibitisho kinahitajika",
+      "missingTokenMessage": "Tunahitaji namba ya uthibitisho kuthibitisha barua pepe yako. Tafadhali angalia kikasha chako kwa kiungo cha uthibitisho au omba kipya.",
+      "backToSignIn": "Rudi kuingia",
+      "errorTitle": "Uthibitisho umeshindwa",
+      "errorMessage": "Kiungo hiki cha uthibitisho kinaweza kuwa kimeisha muda wake au si sahihi.",
+      "getHelp": "Pata msaada"
+    },
+    "common": {
+      "showPassword": "Onyesha nenosiri",
+      "hidePassword": "Ficha nenosiri"
     }
   },
   "footer": {
