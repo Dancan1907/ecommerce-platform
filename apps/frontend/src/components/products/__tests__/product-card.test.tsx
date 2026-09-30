@@ -104,7 +104,7 @@ describe('ProductCard', () => {
   it('calls addItem when quick-add button is clicked', async () => {
     renderWithProvider(<ProductCard product={mockProduct} />);
     const button = screen.getByRole('button', {
-      name: /add test headphones to cart/i,
+      name: /add to cart/i,
     });
     fireEvent.click(button);
     expect(mockAddItem).toHaveBeenCalledWith('prod-1', 1);
