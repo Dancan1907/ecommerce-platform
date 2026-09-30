@@ -2,9 +2,12 @@
 
 /**
  * Admin Orders Page
+ *
+ * List all orders, filter by status, and update status with translations.
  */
 
 import { useCallback, useEffect, useState } from 'react';
+import { useTranslations } from 'next-intl';
 import { Link } from '@/i18n/navigation';
 import { Search, AlertCircle, ShoppingBag, Eye } from 'lucide-react';
 import { Input, Select, Card, Badge, Skeleton } from '@/components/ui';
@@ -65,6 +68,9 @@ const VALID_TRANSITIONS: Record<string, string[]> = {
 const ALL_STATUSES = ['PENDING', 'PAID', 'SHIPPED', 'DELIVERED', 'CANCELLED'];
 
 export default function AdminOrdersPage() {
+  const t = useTranslations('admin.orders');
+  const tStatus = useTranslations('orders.status');
+
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -111,12 +117,12 @@ export default function AdminOrdersPage() {
   return (
     <div className="space-y-6">
       <div>
-        <span className="label-caps mb-2 block">Sales</span>
+        <span className="label-caps mb-2 block">{t('eyebrow')}</span>
         <h1 className="font-serif text-3xl md:text-4xl font-semibold text-ink-900 dark:text-mint-100 mb-2">
-          Orders
+          {t('title')}
         </h1>
         <p className="text-sm text-ink-600 dark:text-mint-300">
-          {total} {total === 1 ? 'order' : 'orders'} total
+          {t('countSuffix', { count: total })}
         </p>
       </div>
 
@@ -124,16 +130,16 @@ export default function AdminOrdersPage() {
         <div className="grid sm:grid-cols-[1fr_200px] gap-3">
           <Input
             type="text"
-            placeholder="Search by order number…"
+            placeholder={t('searchPlaceholder')}
             leftIcon={<Search className="h-4 w-4" />}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
           <Select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}>
-            <option value="">All statuses</option>
+            <option value="">{t('allStatuses')}</option>
             {ALL_STATUSES.map((s) => (
               <option key={s} value={s}>
-                {s}
+                {tStatus(s as never)}
               </option>
             ))}
           </Select>
@@ -162,12 +168,10 @@ export default function AdminOrdersPage() {
               <ShoppingBag className="h-8 w-8 text-forest-600 dark:text-emerald-500" />
             </div>
             <h3 className="font-serif text-lg font-semibold text-ink-900 dark:text-mint-100 mb-2">
-              {search || statusFilter ? 'No orders match your filters' : 'No orders yet'}
+              {search || statusFilter ? t('empty') : t('emptyAll')}
             </h3>
             <p className="text-sm text-ink-600 dark:text-mint-300">
-              {search || statusFilter
-                ? 'Try different search terms or clear the filter.'
-                : 'Orders will appear here once customers start buying.'}
+              {search || statusFilter ? t('emptyHint') : t('emptyAllHint')}
             </p>
           </div>
         ) : (
@@ -176,20 +180,22 @@ export default function AdminOrdersPage() {
               <thead className="bg-cream-50 dark:bg-forest-900/40">
                 <tr className="border-b border-cream-200 dark:border-forest-800">
                   <th className="text-left px-4 py-3 label-caps text-[10px] font-semibold">
-                    Order
+                    {t('columns.order')}
                   </th>
                   <th className="text-left px-4 py-3 label-caps text-[10px] font-semibold">
-                    Customer
-                  </th>
-                  <th className="text-left px-4 py-3 label-caps text-[10px] font-semibold">Date</th>
-                  <th className="text-right px-4 py-3 label-caps text-[10px] font-semibold">
-                    Total
+                    {t('columns.customer')}
                   </th>
                   <th className="text-left px-4 py-3 label-caps text-[10px] font-semibold">
-                    Status
+                    {t('columns.date')}
                   </th>
                   <th className="text-right px-4 py-3 label-caps text-[10px] font-semibold">
-                    Actions
+                    {t('columns.total')}
+                  </th>
+                  <th className="text-left px-4 py-3 label-caps text-[10px] font-semibold">
+                    {t('columns.status')}
+                  </th>
+                  <th className="text-right px-4 py-3 label-caps text-[10px] font-semibold">
+                    {t('columns.actions')}
                   </th>
                 </tr>
               </thead>
@@ -207,7 +213,7 @@ export default function AdminOrdersPage() {
                           {order.orderNumber}
                         </span>
                         <p className="text-xs text-ink-500 dark:text-mint-300/70 mt-0.5">
-                          {order.items.length} {order.items.length === 1 ? 'item' : 'items'}
+                          {t('items', { count: order.items.length })}
                         </p>
                       </td>
                       <td className="px-4 py-3">
@@ -226,7 +232,7 @@ export default function AdminOrdersPage() {
                       </td>
                       <td className="px-4 py-3">
                         <Badge variant={STATUS_VARIANTS[order.status] ?? 'neutral'}>
-                          {order.status}
+                          {tStatus(order.status as never)}
                         </Badge>
                       </td>
                       <td className="px-4 py-3">
@@ -244,11 +250,11 @@ export default function AdminOrdersPage() {
                               className="text-xs rounded-lg border border-cream-400 dark:border-forest-700 bg-white dark:bg-forest-900/60 px-2 py-1.5 text-ink-900 dark:text-mint-100 cursor-pointer disabled:opacity-50"
                             >
                               <option value="">
-                                {updatingId === order.id ? 'Updating…' : 'Change status'}
+                                {updatingId === order.id ? t('updating') : t('changeStatus')}
                               </option>
                               {nextStatuses.map((s) => (
                                 <option key={s} value={s}>
-                                  → {s}
+                                  {t('statusTransition', { status: tStatus(s as never) })}
                                 </option>
                               ))}
                             </select>
