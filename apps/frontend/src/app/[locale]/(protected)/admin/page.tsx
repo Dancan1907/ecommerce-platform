@@ -3,10 +3,11 @@
 /**
  * Admin Overview Page
  *
- * Dashboard with key metrics + recent activity.
+ * Dashboard with key metrics + recent activity, fully translated.
  */
 
 import { useEffect, useState } from 'react';
+import { useTranslations } from 'next-intl';
 import { Link } from '@/i18n/navigation';
 import {
   Users,
@@ -58,6 +59,9 @@ const STATUS_VARIANTS: Record<
 };
 
 export default function AdminOverviewPage() {
+  const t = useTranslations('admin.overview');
+  const tOrders = useTranslations('orders.status');
+
   const [stats, setStats] = useState<Stats | null>(null);
   const [recentOrders, setRecentOrders] = useState<RecentOrder[]>([]);
   const [topProducts, setTopProducts] = useState<TopProduct[]>([]);
@@ -91,9 +95,6 @@ export default function AdminOverviewPage() {
     };
   }, []);
 
-  // ============================================
-  // LOADING
-  // ============================================
   if (loading) {
     return (
       <div className="space-y-6">
@@ -120,77 +121,76 @@ export default function AdminOverviewPage() {
 
   return (
     <div className="space-y-8">
-      {/* ============================================
-          STATS GRID
-          ============================================ */}
+      {/* Stats Grid */}
       <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <StatCard
           icon={DollarSign}
-          label="Total Revenue"
+          label={t('revenue')}
           value={formatKES(stats.totalRevenue)}
           accent
         />
         <StatCard
           icon={ShoppingBag}
-          label="Total Orders"
+          label={t('orders')}
           value={stats.totalOrders.toString()}
-          subtext={`${stats.pendingOrders} pending`}
+          subtext={t('pendingSuffix', { count: stats.pendingOrders })}
         />
-        <StatCard icon={Users} label="Users" value={stats.totalUsers.toString()} />
+        <StatCard icon={Users} label={t('users')} value={stats.totalUsers.toString()} />
         <StatCard
           icon={Package}
-          label="Products"
+          label={t('products')}
           value={stats.totalProducts.toString()}
-          subtext={stats.lowStockProducts > 0 ? `${stats.lowStockProducts} low stock` : undefined}
+          subtext={
+            stats.lowStockProducts > 0
+              ? t('lowStockSuffix', { count: stats.lowStockProducts })
+              : undefined
+          }
         />
       </div>
 
-      {/* ============================================
-          LOW STOCK ALERT
-          ============================================ */}
+      {/* Low Stock Alert */}
       {stats.lowStockProducts > 0 && (
         <Card className="p-5 border-amber-200 dark:border-amber-900/50 bg-amber-50 dark:bg-amber-950/30">
           <div className="flex items-start gap-3">
             <AlertTriangle className="h-5 w-5 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" />
             <div className="flex-1">
               <p className="font-medium text-amber-900 dark:text-amber-300">
-                {stats.lowStockProducts}{' '}
-                {stats.lowStockProducts === 1 ? 'product is' : 'products are'} running low on stock
+                {t('lowStockAlert', { count: stats.lowStockProducts })}
               </p>
               <p className="text-sm text-amber-800 dark:text-amber-300/80 mt-1">
-                Review and restock to avoid running out.
+                {t('lowStockDescription')}
               </p>
             </div>
             <Link
               href="/admin/products"
               className="text-sm font-medium text-amber-800 dark:text-amber-300 hover:underline whitespace-nowrap"
             >
-              View products →
+              {t('viewProducts')}
             </Link>
           </div>
         </Card>
       )}
 
-      {/* ============================================
-          RECENT ORDERS
-          ============================================ */}
+      {/* Recent Orders */}
       <Card className="p-6">
         <div className="flex items-center justify-between mb-5">
           <h2 className="font-serif text-xl font-semibold text-ink-900 dark:text-mint-100 flex items-center gap-2">
             <ShoppingBag className="h-5 w-5 text-forest-700 dark:text-emerald-500" />
-            Recent Orders
+            {t('recentOrders')}
           </h2>
           <Link
             href="/admin/orders"
             className="text-sm font-medium text-forest-700 dark:text-emerald-500 hover:underline inline-flex items-center gap-1"
           >
-            View all
+            {t('recentOrders')}
             <ArrowRight className="h-3.5 w-3.5" />
           </Link>
         </div>
 
         {recentOrders.length === 0 ? (
-          <p className="text-sm text-ink-600 dark:text-mint-300 text-center py-6">No orders yet.</p>
+          <p className="text-sm text-ink-600 dark:text-mint-300 text-center py-6">
+            {t('noOrders')}
+          </p>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
@@ -228,7 +228,7 @@ export default function AdminOverviewPage() {
                     </td>
                     <td className="py-3 text-right">
                       <Badge variant={STATUS_VARIANTS[order.status] ?? 'neutral'}>
-                        {order.status}
+                        {tOrders(order.status as never)}
                       </Badge>
                     </td>
                   </tr>
@@ -239,20 +239,18 @@ export default function AdminOverviewPage() {
         )}
       </Card>
 
-      {/* ============================================
-          TOP PRODUCTS
-          ============================================ */}
+      {/* Top Products */}
       <Card className="p-6">
         <div className="flex items-center justify-between mb-5">
           <h2 className="font-serif text-xl font-semibold text-ink-900 dark:text-mint-100 flex items-center gap-2">
             <TrendingUp className="h-5 w-5 text-forest-700 dark:text-emerald-500" />
-            Top Selling Products
+            {t('topProducts')}
           </h2>
         </div>
 
         {topProducts.length === 0 ? (
           <p className="text-sm text-ink-600 dark:text-mint-300 text-center py-6">
-            No sales data yet.
+            {t('noSalesData')}
           </p>
         ) : (
           <div className="space-y-3">
@@ -268,11 +266,13 @@ export default function AdminOverviewPage() {
                   <p className="font-medium text-ink-900 dark:text-mint-100 truncate">
                     {item.product?.name ?? item.sku}
                   </p>
-                  <p className="text-xs text-ink-500 dark:text-mint-300/70">SKU: {item.sku}</p>
+                  <p className="text-xs text-ink-500 dark:text-mint-300/70">
+                    {t('skus', { sku: item.sku })}
+                  </p>
                 </div>
                 <div className="text-right">
                   <p className="font-medium text-ink-900 dark:text-mint-100">
-                    {item.quantitySold} sold
+                    {t('quantitySold', { count: item.quantitySold })}
                   </p>
                 </div>
               </div>
@@ -284,9 +284,6 @@ export default function AdminOverviewPage() {
   );
 }
 
-/**
- * Stat card for the top grid.
- */
 function StatCard({
   icon: Icon,
   label,
