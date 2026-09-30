@@ -2,9 +2,12 @@
 
 /**
  * Change Password Page
+ *
+ * Fully translated with next-intl.
  */
 
 import { useState } from 'react';
+import { useTranslations } from 'next-intl';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -13,9 +16,6 @@ import { Lock, Eye, EyeOff, AlertCircle, CheckCircle2 } from 'lucide-react';
 import { Button, Input, Card } from '@/components/ui';
 import { api, extractErrorMessage } from '@/lib/api';
 
-// ============================================
-// VALIDATION
-// ============================================
 const passwordSchema = z
   .object({
     currentPassword: z.string().min(1, 'Current password is required'),
@@ -39,6 +39,9 @@ const passwordSchema = z
 type PasswordInput = z.infer<typeof passwordSchema>;
 
 export default function ChangePasswordPage() {
+  const t = useTranslations('dashboard');
+  const tCommon = useTranslations('auth.common');
+
   const [submitting, setSubmitting] = useState(false);
   const [showCurrent, setShowCurrent] = useState(false);
   const [showNew, setShowNew] = useState(false);
@@ -72,11 +75,11 @@ export default function ChangePasswordPage() {
       });
       setSuccess(true);
       reset();
-      toast.success('Password changed successfully');
+      toast.success(t('passwordChanged'));
       setTimeout(() => setSuccess(false), 5000);
     } catch (err) {
       setError(extractErrorMessage(err));
-      toast.error('Failed to change password');
+      toast.error(t('passwordChangeFailed'));
     } finally {
       setSubmitting(false);
     }
@@ -84,15 +87,12 @@ export default function ChangePasswordPage() {
 
   return (
     <div className="space-y-8">
-      {/* Header */}
       <div>
-        <span className="label-caps mb-2 block">Security</span>
+        <span className="label-caps mb-2 block">{t('passwordEyebrow')}</span>
         <h1 className="font-serif text-3xl md:text-4xl font-semibold text-ink-900 dark:text-mint-100 mb-2">
-          Change Password
+          {t('passwordTitle')}
         </h1>
-        <p className="text-sm text-ink-600 dark:text-mint-300">
-          Choose a strong, unique password you don&apos;t use elsewhere.
-        </p>
+        <p className="text-sm text-ink-600 dark:text-mint-300">{t('passwordSubtitle')}</p>
       </div>
 
       <Card className="p-6 md:p-8 max-w-xl">
@@ -112,21 +112,21 @@ export default function ChangePasswordPage() {
             className="mb-5 flex items-start gap-2.5 rounded-lg border border-emerald-200 bg-emerald-50 p-3 text-sm text-emerald-800 dark:border-emerald-900 dark:bg-emerald-950/40 dark:text-emerald-300"
           >
             <CheckCircle2 className="mt-0.5 h-4 w-4 flex-shrink-0" />
-            <span>Password changed successfully.</span>
+            <span>{t('passwordChanged')}</span>
           </div>
         )}
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
           <Input
-            label="Current password"
+            label={t('currentPassword')}
             type={showCurrent ? 'text' : 'password'}
-            placeholder="Enter current password"
+            placeholder={t('currentPasswordPlaceholder')}
             leftIcon={<Lock className="h-4 w-4" />}
             rightIcon={
               <button
                 type="button"
                 onClick={() => setShowCurrent((s) => !s)}
-                aria-label={showCurrent ? 'Hide password' : 'Show password'}
+                aria-label={showCurrent ? tCommon('hidePassword') : tCommon('showPassword')}
                 className="pointer-events-auto text-forest-500 dark:text-mint-300 hover:text-forest-800 dark:hover:text-mint-100"
                 tabIndex={-1}
               >
@@ -139,15 +139,15 @@ export default function ChangePasswordPage() {
           />
 
           <Input
-            label="New password"
+            label={t('newPassword')}
             type={showNew ? 'text' : 'password'}
-            placeholder="At least 8 characters"
+            placeholder={t('newPasswordPlaceholder')}
             leftIcon={<Lock className="h-4 w-4" />}
             rightIcon={
               <button
                 type="button"
                 onClick={() => setShowNew((s) => !s)}
-                aria-label={showNew ? 'Hide password' : 'Show password'}
+                aria-label={showNew ? tCommon('hidePassword') : tCommon('showPassword')}
                 className="pointer-events-auto text-forest-500 dark:text-mint-300 hover:text-forest-800 dark:hover:text-mint-100"
                 tabIndex={-1}
               >
@@ -155,21 +155,21 @@ export default function ChangePasswordPage() {
               </button>
             }
             error={errors.newPassword?.message}
-            hint="Include uppercase, lowercase, and a number"
+            hint={t('newPasswordHint')}
             autoComplete="new-password"
             {...register('newPassword')}
           />
 
           <Input
-            label="Confirm new password"
+            label={t('confirmPassword')}
             type={showConfirm ? 'text' : 'password'}
-            placeholder="Re-enter new password"
+            placeholder={t('confirmPasswordPlaceholder')}
             leftIcon={<Lock className="h-4 w-4" />}
             rightIcon={
               <button
                 type="button"
                 onClick={() => setShowConfirm((s) => !s)}
-                aria-label={showConfirm ? 'Hide password' : 'Show password'}
+                aria-label={showConfirm ? tCommon('hidePassword') : tCommon('showPassword')}
                 className="pointer-events-auto text-forest-500 dark:text-mint-300 hover:text-forest-800 dark:hover:text-mint-100"
                 tabIndex={-1}
               >
@@ -183,7 +183,7 @@ export default function ChangePasswordPage() {
 
           <div className="flex justify-end pt-2">
             <Button type="submit" isLoading={submitting}>
-              Update Password
+              {t('updatePassword')}
             </Button>
           </div>
         </form>
