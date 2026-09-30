@@ -37,8 +37,8 @@ async function bootstrap() {
 
   // ✅ Swagger configuration
   const config = new DocumentBuilder()
-    .setTitle('E-Commerce API')
-    .setDescription('Modern e-commerce platform API')
+    .setTitle('The Racing Shop API')
+    .setDescription('The Racing Shop — Backend API')
     .setVersion('1.0')
     .addBearerAuth(
       {

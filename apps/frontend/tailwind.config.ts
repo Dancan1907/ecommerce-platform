@@ -1,7 +1,7 @@
 import type { Config } from 'tailwindcss';
 
 /**
- * Tailwind Configuration — E-Commerce Design System
+ * * Tailwind Configuration — The Racing Shop Design System
  *
  * Palette: Artisanal / Warm
  *  - Primary: Forest Green (#1A3D2E) + Cream (#F5F1E8)

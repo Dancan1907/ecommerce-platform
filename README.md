@@ -1,6 +1,6 @@
-# 🛒 E-Commerce Platform
+# 🏎️ The Racing Shop
 
-A modern full-stack e-commerce platform built with Next.js, NestJS, and PostgreSQL.
+The Racing Shop — a modern full-stack e-commerce platform for Formula 1 merchandise, built with Next.js, NestJS, and PostgreSQL.
 
 ## 🚀 Tech Stack
 

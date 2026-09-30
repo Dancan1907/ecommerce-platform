@@ -19,8 +19,7 @@ export function Footer() {
           {/* Brand */}
           <div className="col-span-2 md:col-span-1">
             <div className="flex items-center gap-2 mb-4">
-              <span className="font-serif text-2xl font-semibold">E</span>
-              <span className="font-serif text-lg font-medium tracking-wide">E-Commerce</span>
+              <span className="font-serif text-lg font-medium tracking-wide">The Racing Shop</span>
             </div>
             <p className="text-sm text-cream-200/70 leading-relaxed">{t('tagline')}</p>
           </div>

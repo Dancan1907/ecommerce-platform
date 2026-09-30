@@ -31,7 +31,7 @@ export function Header() {
         {/* Logo */}
         <Link href="/" className="flex items-center gap-2" onClick={closeMobile}>
           <span className="font-serif text-lg font-medium text-cream-200 tracking-wide">
-            E-Commerce
+            The Racing Shop
           </span>
         </Link>
 
