@@ -104,7 +104,20 @@
     "subtotal": "Subtotal",
     "shipping": "Shipping",
     "total": "Total",
-    "checkout": "Proceed to Checkout"
+    "checkout": "Proceed to Checkout",
+    "itemCount_one": "{count} item",
+    "itemCount_other": "{count} items",
+    "subtotalWithCount": "Subtotal ({count} items)",
+    "each": "{price} each",
+    "maxStockReached": "Max stock reached ({count} available)",
+    "itemRemoved": "{name} removed",
+    "updateFailed": "Failed to update quantity",
+    "removeFailed": "Failed to remove item",
+    "removeItem": "Remove {name}",
+    "decreaseQuantity": "Decrease quantity",
+    "increaseQuantity": "Increase quantity",
+    "itemsInCart": "{count} items in your cart",
+    "shippingCalculated": "Shipping calculated at checkout"
   },
   "checkout": {
     "title": "Checkout",
