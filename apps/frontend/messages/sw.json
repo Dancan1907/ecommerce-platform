@@ -104,7 +104,20 @@
     "subtotal": "Jumla Ndogo",
     "shipping": "Usafirishaji",
     "total": "Jumla",
-    "checkout": "Endelea Malipo"
+    "checkout": "Endelea Malipo",
+    "itemCount_one": "Bidhaa {count}",
+    "itemCount_other": "Bidhaa {count}",
+    "subtotalWithCount": "Jumla Ndogo ({count} bidhaa)",
+    "each": "{price} kila moja",
+    "maxStockReached": "Kiwango cha juu cha hisa kimefikiwa ({count} inapatikana)",
+    "itemRemoved": "{name} imeondolewa",
+    "updateFailed": "Imeshindwa kubadilisha idadi",
+    "removeFailed": "Imeshindwa kuondoa bidhaa",
+    "removeItem": "Ondoa {name}",
+    "decreaseQuantity": "Punguza idadi",
+    "increaseQuantity": "Ongeza idadi",
+    "itemsInCart": "Bidhaa {count} kwenye kikapu chako",
+    "shippingCalculated": "Usafirishaji utahesabiwa wakati wa malipo"
   },
   "checkout": {
     "title": "Malipo",
