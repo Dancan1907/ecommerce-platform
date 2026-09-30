@@ -1,6 +1,13 @@
 'use client';
 
+/**
+ * Admin Products Page
+ *
+ * List, create, edit, and delete products with translations.
+ */
+
 import { useCallback, useEffect, useState } from 'react';
+import { useTranslations } from 'next-intl';
 import { Plus, Search, Pencil, Trash2, Package, AlertCircle } from 'lucide-react';
 import { Button, Input, Card, Badge, Skeleton } from '@/components/ui';
 import { ProductFormModal } from '@/components/admin/product-form-modal';
@@ -11,6 +18,8 @@ import { fetchCategories } from '@/lib/products';
 import type { Category, PaginatedProducts, Product } from '@/types/product';
 
 export default function AdminProductsPage() {
+  const t = useTranslations('admin.products');
+
   const [products, setProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
@@ -62,23 +71,23 @@ export default function AdminProductsPage() {
     <div className="space-y-6">
       <div className="flex items-start justify-between flex-wrap gap-4">
         <div>
-          <span className="label-caps mb-2 block">Catalog</span>
+          <span className="label-caps mb-2 block">{t('eyebrow')}</span>
           <h1 className="font-serif text-3xl md:text-4xl font-semibold text-ink-900 dark:text-mint-100 mb-2">
-            Products
+            {t('title')}
           </h1>
           <p className="text-sm text-ink-600 dark:text-mint-300">
-            {total} {total === 1 ? 'product' : 'products'} in your catalog
+            {t('countSuffix', { count: total })}
           </p>
         </div>
         <Button onClick={openCreateModal} leftIcon={<Plus className="h-4 w-4" />}>
-          Create Product
+          {t('createButton')}
         </Button>
       </div>
 
       <Card className="p-4">
         <Input
           type="text"
-          placeholder="Search products by name or SKU…"
+          placeholder={t('searchPlaceholder')}
           leftIcon={<Search className="h-4 w-4" />}
           value={search}
           onChange={(e) => setSearch(e.target.value)}
@@ -107,16 +116,14 @@ export default function AdminProductsPage() {
               <Package className="h-8 w-8 text-forest-600 dark:text-emerald-500" />
             </div>
             <h3 className="font-serif text-lg font-semibold text-ink-900 dark:text-mint-100 mb-2">
-              {search ? 'No products match your search' : 'No products yet'}
+              {search ? t('noResults') : t('empty')}
             </h3>
             <p className="text-sm text-ink-600 dark:text-mint-300 mb-6">
-              {search
-                ? 'Try a different search term.'
-                : 'Create your first product to get started.'}
+              {search ? t('noResultsHint') : t('emptyHint')}
             </p>
             {!search && (
               <Button onClick={openCreateModal} leftIcon={<Plus className="h-4 w-4" />}>
-                Create Product
+                {t('createButton')}
               </Button>
             )}
           </div>
@@ -126,20 +133,22 @@ export default function AdminProductsPage() {
               <thead className="bg-cream-50 dark:bg-forest-900/40">
                 <tr className="border-b border-cream-200 dark:border-forest-800">
                   <th className="text-left px-4 py-3 label-caps text-[10px] font-semibold">
-                    Product
+                    {t('columns.product')}
                   </th>
-                  <th className="text-left px-4 py-3 label-caps text-[10px] font-semibold">SKU</th>
                   <th className="text-left px-4 py-3 label-caps text-[10px] font-semibold">
-                    Category
+                    {t('columns.sku')}
+                  </th>
+                  <th className="text-left px-4 py-3 label-caps text-[10px] font-semibold">
+                    {t('columns.category')}
                   </th>
                   <th className="text-right px-4 py-3 label-caps text-[10px] font-semibold">
-                    Price
+                    {t('columns.price')}
                   </th>
                   <th className="text-right px-4 py-3 label-caps text-[10px] font-semibold">
-                    Stock
+                    {t('columns.stock')}
                   </th>
                   <th className="text-right px-4 py-3 label-caps text-[10px] font-semibold">
-                    Actions
+                    {t('columns.actions')}
                   </th>
                 </tr>
               </thead>
@@ -156,7 +165,7 @@ export default function AdminProductsPage() {
                         </p>
                         {!product.isActive && (
                           <Badge variant="neutral" className="mt-1 text-[10px]">
-                            Inactive
+                            {t('inactive')}
                           </Badge>
                         )}
                       </div>
