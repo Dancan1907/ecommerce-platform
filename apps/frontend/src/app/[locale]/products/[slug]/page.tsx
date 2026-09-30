@@ -14,7 +14,7 @@ import Image from 'next/image';
 import { ChevronRight, Package, ShoppingCart, Minus, Plus, Store, ArrowLeft } from 'lucide-react';
 import { toast } from 'sonner';
 import { Button, Badge, Card, Skeleton } from '@/components/ui';
-import { formatKES, cn } from '@/lib/utils';
+import { formatKES, cn, resolveImageUrl } from '@/lib/utils';
 import { fetchProductBySlug } from '@/lib/products';
 import { useCartStore } from '@/stores/cart-store';
 import { useAuthStore } from '@/stores/auth-store';
@@ -162,7 +162,7 @@ export default function ProductDetailPage() {
             <div className="relative aspect-square bg-cream-100 dark:bg-forest-900">
               {selectedImage ? (
                 <Image
-                  src={selectedImage.url}
+                  src={resolveImageUrl(selectedImage.url)}
                   alt={product.name}
                   fill
                   priority
@@ -192,7 +192,7 @@ export default function ProductDetailPage() {
                   aria-label={`View image ${img.displayOrder + 1}`}
                 >
                   <Image
-                    src={img.url}
+                    src={resolveImageUrl(img.url)}
                     alt={`${product.name} - view ${img.displayOrder + 1}`}
                     fill
                     sizes="100px"
