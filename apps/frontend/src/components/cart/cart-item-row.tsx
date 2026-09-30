@@ -3,11 +3,11 @@
 /**
  * Cart Item Row
  *
- * Single row in the cart: image, name, price, quantity controls, subtotal, remove.
- * Inline quantity updates with optimistic feedback.
+ * Single row in the cart with translations.
  */
 
 import { useState } from 'react';
+import { useTranslations } from 'next-intl';
 import { Link } from '@/i18n/navigation';
 import Image from 'next/image';
 import { Minus, Plus, Trash2, Package } from 'lucide-react';
@@ -21,6 +21,7 @@ export interface CartItemRowProps {
 }
 
 export function CartItemRow({ item }: CartItemRowProps) {
+  const t = useTranslations('cart');
   const updateItem = useCartStore((s) => s.updateItem);
   const removeItem = useCartStore((s) => s.removeItem);
   const [pending, setPending] = useState<'update' | 'remove' | null>(null);
@@ -32,13 +33,13 @@ export function CartItemRow({ item }: CartItemRowProps) {
   async function handleQuantityChange(newQty: number) {
     if (newQty < 1) return;
     if (newQty > item.product.stockQuantity) {
-      toast.error(`Only ${item.product.stockQuantity} units available`);
+      toast.error(t('maxStockReached', { count: item.product.stockQuantity }));
       return;
     }
     setPending('update');
     const success = await updateItem(item.productId, newQty);
     setPending(null);
-    if (!success) toast.error('Failed to update quantity');
+    if (!success) toast.error(t('updateFailed'));
   }
 
   async function handleRemove() {
@@ -46,15 +47,14 @@ export function CartItemRow({ item }: CartItemRowProps) {
     const success = await removeItem(item.productId);
     setPending(null);
     if (success) {
-      toast.success(`${item.product.name} removed`);
+      toast.success(t('itemRemoved', { name: item.product.name }));
     } else {
-      toast.error('Failed to remove item');
+      toast.error(t('removeFailed'));
     }
   }
 
   return (
     <div className="flex gap-4 py-5 border-b border-cream-300 dark:border-forest-800 last:border-0">
-      {/* Image */}
       <Link
         href={`/products/${item.product.slug}`}
         className="relative h-24 w-24 flex-shrink-0 overflow-hidden rounded-lg bg-cream-100 dark:bg-forest-900"
@@ -74,7 +74,6 @@ export function CartItemRow({ item }: CartItemRowProps) {
         )}
       </Link>
 
-      {/* Details */}
       <div className="flex-1 min-w-0">
         <div className="flex justify-between gap-4 mb-2">
           <div className="min-w-0">
@@ -85,7 +84,7 @@ export function CartItemRow({ item }: CartItemRowProps) {
               {item.product.name}
             </Link>
             <p className="text-sm text-ink-600 dark:text-mint-300 mt-0.5">
-              {formatKES(item.product.price)} each
+              {t('each', { price: formatKES(item.product.price) })}
             </p>
           </div>
           <Button
@@ -93,7 +92,7 @@ export function CartItemRow({ item }: CartItemRowProps) {
             size="icon"
             onClick={handleRemove}
             disabled={pending === 'remove'}
-            aria-label={`Remove ${item.product.name}`}
+            aria-label={t('removeItem', { name: item.product.name })}
             className="text-red-600 hover:bg-red-50 dark:hover:bg-red-950/40"
           >
             <Trash2 className="h-4 w-4" />
@@ -101,13 +100,12 @@ export function CartItemRow({ item }: CartItemRowProps) {
         </div>
 
         <div className="flex items-center justify-between gap-4">
-          {/* Quantity controls */}
           <div className="flex items-center rounded-lg border border-cream-400 dark:border-forest-700 overflow-hidden">
             <button
               type="button"
               onClick={() => handleQuantityChange(item.quantity - 1)}
               disabled={item.quantity <= 1 || pending === 'update'}
-              aria-label="Decrease quantity"
+              aria-label={t('decreaseQuantity')}
               className={cn(
                 'p-2 text-ink-700 dark:text-mint-300 transition-colors',
                 'hover:bg-cream-200 dark:hover:bg-forest-800',
@@ -123,7 +121,7 @@ export function CartItemRow({ item }: CartItemRowProps) {
               type="button"
               onClick={() => handleQuantityChange(item.quantity + 1)}
               disabled={isAtMaxStock || pending === 'update'}
-              aria-label="Increase quantity"
+              aria-label={t('increaseQuantity')}
               className={cn(
                 'p-2 text-ink-700 dark:text-mint-300 transition-colors',
                 'hover:bg-cream-200 dark:hover:bg-forest-800',
@@ -134,16 +132,14 @@ export function CartItemRow({ item }: CartItemRowProps) {
             </button>
           </div>
 
-          {/* Line total */}
           <span className="font-serif text-lg font-semibold text-forest-800 dark:text-emerald-400">
             {formatKES(lineTotal)}
           </span>
         </div>
 
-        {/* Stock warnings */}
         {isAtMaxStock && (
           <p className="text-xs text-amber-600 dark:text-amber-400 mt-2">
-            Max stock reached ({item.product.stockQuantity} available)
+            {t('maxStockReached', { count: item.product.stockQuantity })}
           </p>
         )}
       </div>
