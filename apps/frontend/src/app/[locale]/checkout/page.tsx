@@ -4,12 +4,12 @@
  * Checkout Page
  *
  * Order review + shipping address + payment method selection.
- * Creates the order and redirects to the chosen payment method.
+ * Fully translated with next-intl.
  */
 
 import { useEffect, useState } from 'react';
-import { Link } from '@/i18n/navigation';
-import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
+import { Link, useRouter } from '@/i18n/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -29,11 +29,12 @@ const checkoutSchema = z.object({
 });
 
 type CheckoutInput = z.infer<typeof checkoutSchema>;
-
 type PaymentMethod = 'STRIPE' | 'MPESA';
 
 export default function CheckoutPage() {
   const router = useRouter();
+  const t = useTranslations('checkout');
+  const tCart = useTranslations('cart');
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
   const cart = useCartStore((s) => s.cart);
   const clearCart = useCartStore((s) => s.clearCart);
@@ -51,9 +52,6 @@ export default function CheckoutPage() {
     defaultValues: { shippingAddress: '' },
   });
 
-  // ============================================
-  // AUTH + CART GUARDS
-  // ============================================
   useEffect(() => {
     if (!isAuthenticated) {
       router.push('/login?next=/checkout');
@@ -70,26 +68,19 @@ export default function CheckoutPage() {
     return null;
   }
 
-  // ============================================
-  // SUBMIT
-  // ============================================
   async function onSubmit(data: CheckoutInput) {
     setSubmitting(true);
     setCheckoutError(null);
 
     try {
-      // Create the order
       const response = await api.post('/orders', {
         shippingAddress: data.shippingAddress,
         paymentMethod,
       });
 
       const order = response.data;
-
-      // Clear cart locally
       await clearCart();
 
-      // Redirect to payment page based on method
       if (paymentMethod === 'STRIPE') {
         router.push(`/checkout/stripe?orderId=${order.id}`);
       } else {
@@ -97,24 +88,23 @@ export default function CheckoutPage() {
       }
     } catch (err) {
       setCheckoutError(extractErrorMessage(err));
-      toast.error('Failed to create order');
+      toast.error(t('failedToCreateOrder'));
       setSubmitting(false);
     }
   }
 
   return (
     <div className="container-page py-8 md:py-12">
-      {/* Header */}
       <div className="mb-8">
         <Link
           href="/cart"
           className="inline-flex items-center gap-1.5 text-sm text-ink-600 dark:text-mint-300 hover:text-forest-700 dark:hover:text-emerald-400 mb-4 transition-colors"
         >
           <ArrowLeft className="h-4 w-4" />
-          Back to cart
+          {t('backToCart')}
         </Link>
         <h1 className="font-serif text-4xl md:text-5xl font-semibold text-ink-900 dark:text-mint-100">
-          Checkout
+          {t('title')}
         </h1>
       </div>
 
@@ -130,16 +120,13 @@ export default function CheckoutPage() {
 
       <form onSubmit={handleSubmit(onSubmit)}>
         <div className="grid lg:grid-cols-[1fr_360px] gap-8">
-          {/* ============================================
-              LEFT: FORM
-              ============================================ */}
           <div className="space-y-6">
             {/* Shipping */}
             <Card className="p-6">
               <div className="flex items-center gap-2 mb-5">
                 <MapPin className="h-5 w-5 text-forest-700 dark:text-emerald-500" />
                 <h2 className="font-serif text-xl font-semibold text-ink-900 dark:text-mint-100">
-                  Shipping Address
+                  {t('shippingAddress')}
                 </h2>
               </div>
 
@@ -148,13 +135,13 @@ export default function CheckoutPage() {
                   htmlFor="shippingAddress"
                   className="block text-sm font-medium text-forest-800 dark:text-mint-200"
                 >
-                  Full delivery address
+                  {t('shippingAddressLabel')}
                 </label>
                 <textarea
                   id="shippingAddress"
                   {...register('shippingAddress')}
                   rows={4}
-                  placeholder="House number, street, area, city, county"
+                  placeholder={t('shippingAddressPlaceholder')}
                   className={cn(
                     'w-full rounded-lg border px-3 py-2 text-sm',
                     'bg-white dark:bg-forest-900/60',
@@ -172,22 +159,21 @@ export default function CheckoutPage() {
                   </p>
                 )}
                 <p className="text-xs text-ink-500 dark:text-mint-300/70">
-                  Provide a complete address for accurate delivery
+                  {t('shippingAddressHint')}
                 </p>
               </div>
             </Card>
 
-            {/* Payment method */}
+            {/* Payment Method */}
             <Card className="p-6">
               <div className="flex items-center gap-2 mb-5">
                 <CreditCard className="h-5 w-5 text-forest-700 dark:text-emerald-500" />
                 <h2 className="font-serif text-xl font-semibold text-ink-900 dark:text-mint-100">
-                  Payment Method
+                  {t('paymentMethod')}
                 </h2>
               </div>
 
               <div className="space-y-3">
-                {/* Stripe */}
                 <button
                   type="button"
                   onClick={() => setPaymentMethod('STRIPE')}
@@ -203,18 +189,17 @@ export default function CheckoutPage() {
                     <div className="flex-1">
                       <div className="flex items-center gap-2">
                         <span className="font-medium text-ink-900 dark:text-mint-100">
-                          Card Payment
+                          {t('cardPayment')}
                         </span>
                         <Badge variant="default">Stripe</Badge>
                       </div>
                       <p className="text-xs text-ink-600 dark:text-mint-300 mt-0.5">
-                        Pay with Visa, Mastercard, or American Express
+                        {t('cardPaymentDescription')}
                       </p>
                     </div>
                   </div>
                 </button>
 
-                {/* M-Pesa */}
                 <button
                   type="button"
                   onClick={() => setPaymentMethod('MPESA')}
@@ -229,11 +214,13 @@ export default function CheckoutPage() {
                     <Smartphone className="h-6 w-6 text-forest-700 dark:text-emerald-500" />
                     <div className="flex-1">
                       <div className="flex items-center gap-2">
-                        <span className="font-medium text-ink-900 dark:text-mint-100">M-Pesa</span>
-                        <Badge variant="success">Fast</Badge>
+                        <span className="font-medium text-ink-900 dark:text-mint-100">
+                          {t('mpesaPayment')}
+                        </span>
+                        <Badge variant="success">{t('fastBadge')}</Badge>
                       </div>
                       <p className="text-xs text-ink-600 dark:text-mint-300 mt-0.5">
-                        Receive STK push on your phone — enter PIN to confirm
+                        {t('mpesaPaymentDescription')}
                       </p>
                     </div>
                   </div>
@@ -242,13 +229,11 @@ export default function CheckoutPage() {
             </Card>
           </div>
 
-          {/* ============================================
-              RIGHT: SUMMARY
-              ============================================ */}
+          {/* Order Review Sidebar */}
           <div className="lg:sticky lg:top-24 h-fit space-y-4">
             <Card className="p-6">
               <h2 className="font-serif text-xl font-semibold text-ink-900 dark:text-mint-100 mb-5">
-                Order Review
+                {t('orderReview')}
               </h2>
 
               <div className="space-y-3 mb-5 max-h-64 overflow-y-auto">
@@ -262,7 +247,7 @@ export default function CheckoutPage() {
                         {item.product.name}
                       </p>
                       <p className="text-xs text-ink-500 dark:text-mint-300/70">
-                        Qty: {item.quantity} × {formatKES(item.product.price)}
+                        {item.quantity} × {formatKES(item.product.price)}
                       </p>
                     </div>
                     <span className="font-medium text-ink-900 dark:text-mint-100 whitespace-nowrap">
@@ -274,18 +259,18 @@ export default function CheckoutPage() {
 
               <div className="space-y-2 pt-3 border-t border-cream-300 dark:border-forest-800 text-sm">
                 <div className="flex justify-between">
-                  <span className="text-ink-600 dark:text-mint-300">Subtotal</span>
+                  <span className="text-ink-600 dark:text-mint-300">{tCart('subtotal')}</span>
                   <span className="font-medium">{formatKES(cart.subtotal)}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="flex items-center gap-1.5 text-ink-600 dark:text-mint-300">
                     <Truck className="h-3.5 w-3.5" />
-                    Shipping
+                    {tCart('shipping')}
                   </span>
                   <span className="font-medium">{formatKES(250)}</span>
                 </div>
                 <div className="flex justify-between pt-3 border-t border-cream-300 dark:border-forest-800">
-                  <span className="font-serif text-lg font-semibold">Total</span>
+                  <span className="font-serif text-lg font-semibold">{tCart('total')}</span>
                   <span className="font-serif text-lg font-semibold text-forest-800 dark:text-emerald-400">
                     {formatKES(cart.subtotal + 250)}
                   </span>
@@ -293,12 +278,12 @@ export default function CheckoutPage() {
               </div>
 
               <Button type="submit" size="lg" className="w-full mt-6" isLoading={submitting}>
-                Continue to Payment
+                {t('continueToPayment')}
               </Button>
             </Card>
 
             <p className="text-xs text-ink-500 dark:text-mint-300/70 text-center">
-              Your order will be created when you continue. Payment is processed securely.
+              {t('orderCreatedNote')}
             </p>
           </div>
         </div>
