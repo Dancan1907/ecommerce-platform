@@ -11,6 +11,7 @@ import { ArrowRight, Truck, Shield, Package } from 'lucide-react';
 import { Button, Card, CardContent } from '@/components/ui';
 import { ProductCard } from '@/components/products/product-card';
 import { fetchCategories, fetchProducts } from '@/lib/products';
+import { resolveImageUrl } from '@/lib/utils';
 import type { Category, Product } from '@/types/product';
 
 export const revalidate = 60;
@@ -66,7 +67,7 @@ export default async function HomePage() {
 
             <div className="relative h-64 md:h-auto md:min-h-[500px]">
               <Image
-                src="https://images.unsplash.com/photo-1541443131876-44b03de101c5?w=1200&q=80"
+                src="/hero.jpg"
                 alt="Formula 1 racing car on track"
                 fill
                 priority
@@ -103,8 +104,21 @@ export default async function HomePage() {
             {topCategories.map((category) => (
               <Link key={category.id} href={`/categories/${category.slug}`} className="group">
                 <Card className="overflow-hidden h-full">
-                  <div className="relative aspect-square bg-gradient-to-br from-forest-700 via-forest-800 to-forest-900 dark:from-forest-800 dark:via-forest-900 dark:to-forest-950 flex items-center justify-center">
-                    <Package className="h-12 w-12 text-cream-200/40" />
+                  <div className="relative aspect-square bg-gradient-to-br from-forest-700 via-forest-800 to-forest-900 dark:from-forest-800 dark:via-forest-900 dark:to-forest-950">
+                    {category.imageUrl ? (
+                      <Image
+                        src={resolveImageUrl(category.imageUrl)}
+                        alt={category.name}
+                        fill
+                        sizes="(max-width: 768px) 50vw, 25vw"
+                        className="object-cover transition-transform duration-500 group-hover:scale-105"
+                      />
+                    ) : (
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <Package className="h-12 w-12 text-cream-200/40" />
+                      </div>
+                    )}
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
                     <div className="absolute bottom-3 left-3 right-3">
                       <h3 className="font-serif text-lg font-semibold text-cream-100 truncate">
                         {category.name}

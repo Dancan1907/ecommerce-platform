@@ -4,15 +4,16 @@
  * Product Form Modal
  *
  * Reusable form for creating/editing products with translations.
+ * Supports optional image upload via POST /products/:id/images.
  */
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { toast } from 'sonner';
-import { AlertCircle } from 'lucide-react';
+import { AlertCircle, ImagePlus, X } from 'lucide-react';
 import { Button, Input, Textarea, Select, Modal } from '@/components/ui';
 import { api, extractErrorMessage } from '@/lib/api';
 import type { Category, Product } from '@/types/product';
@@ -50,6 +51,9 @@ export function ProductFormModal({
 
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const {
     register,
@@ -69,9 +73,11 @@ export function ProductFormModal({
     },
   });
 
+  // Reset form when modal opens
   useEffect(() => {
     if (!isOpen) return;
     setError(null);
+    setImageFile(null);
 
     if (product) {
       reset({
@@ -83,6 +89,9 @@ export function ProductFormModal({
         categoryId: product.categoryId,
         isActive: product.isActive,
       });
+      // Show existing main image as preview
+      const mainImage = product.images?.find((img) => img.isMain) ?? product.images?.[0];
+      setImagePreview(mainImage?.url ?? null);
     } else {
       reset({
         name: '',
@@ -93,8 +102,59 @@ export function ProductFormModal({
         categoryId: categories[0]?.id ?? '',
         isActive: true,
       });
+      setImagePreview(null);
     }
   }, [isOpen, product, categories, reset]);
+
+  // Cleanup preview URL on unmount or change
+  useEffect(() => {
+    return () => {
+      if (imagePreview && imagePreview.startsWith('blob:')) {
+        URL.revokeObjectURL(imagePreview);
+      }
+    };
+  }, [imagePreview]);
+
+  function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0] ?? null;
+    if (!file) return;
+
+    // Basic validation
+    if (!file.type.startsWith('image/')) {
+      setError('Only image files are allowed');
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      setError('Image must be smaller than 5MB');
+      return;
+    }
+
+    setError(null);
+    setImageFile(file);
+
+    // Preview
+    if (imagePreview?.startsWith('blob:')) {
+      URL.revokeObjectURL(imagePreview);
+    }
+    setImagePreview(URL.createObjectURL(file));
+  }
+
+  function clearImage() {
+    setImageFile(null);
+    if (imagePreview?.startsWith('blob:')) {
+      URL.revokeObjectURL(imagePreview);
+    }
+    setImagePreview(null);
+    if (fileInputRef.current) fileInputRef.current.value = '';
+  }
+
+  async function uploadImage(productId: string, file: File) {
+    const formData = new FormData();
+    formData.append('images', file);
+    await api.post(`/products/${productId}/images`, formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    });
+  }
 
   async function onSubmit(data: ProductFormData) {
     setSubmitting(true);
@@ -103,9 +163,16 @@ export function ProductFormModal({
     try {
       if (isEditMode && product) {
         await api.put(`/products/${product.id}`, data);
+        if (imageFile) {
+          await uploadImage(product.id, imageFile);
+        }
         toast.success(t('updatedToast'));
       } else {
-        await api.post('/products', data);
+        const res = await api.post('/products', data);
+        const newProductId = res.data?.id;
+        if (imageFile && newProductId) {
+          await uploadImage(newProductId, imageFile);
+        }
         toast.success(t('createdToast'));
       }
       onSuccess();
@@ -156,6 +223,61 @@ export function ProductFormModal({
           error={errors.description?.message}
           {...register('description')}
         />
+
+        {/* Image Upload */}
+        <div className="space-y-2">
+          <label className="block text-sm font-medium text-forest-800 dark:text-mint-200">
+            Product Image
+          </label>
+
+          {imagePreview ? (
+            <div className="flex items-start gap-3">
+              <div className="relative h-24 w-24 rounded-lg overflow-hidden border border-cream-300 dark:border-forest-700 bg-cream-100 dark:bg-forest-900/60">
+                {/* Preview thumbnail — external URLs and blob: URLs may not be
+                    compatible with next/image, so a plain img is intentional here. */}
+                <img src={imagePreview} alt="Preview" className="h-full w-full object-cover" />
+              </div>
+              <div className="flex-1 text-sm">
+                <p className="text-ink-700 dark:text-mint-300">
+                  {imageFile ? imageFile.name : 'Current image'}
+                </p>
+                {imageFile && (
+                  <p className="text-xs text-ink-500 dark:text-mint-300/70 mt-0.5">
+                    {(imageFile.size / 1024).toFixed(0)} KB
+                  </p>
+                )}
+                <button
+                  type="button"
+                  onClick={clearImage}
+                  className="mt-2 inline-flex items-center gap-1 text-xs text-red-600 hover:underline"
+                >
+                  <X className="h-3 w-3" />
+                  {imageFile ? 'Remove new image' : 'Clear preview'}
+                </button>
+              </div>
+            </div>
+          ) : (
+            <button
+              type="button"
+              onClick={() => fileInputRef.current?.click()}
+              className="flex w-full items-center justify-center gap-2 rounded-lg border-2 border-dashed border-cream-400 dark:border-forest-700 py-6 text-sm text-ink-600 dark:text-mint-300 hover:border-emerald-500 hover:text-emerald-600 transition-colors"
+            >
+              <ImagePlus className="h-5 w-5" />
+              Click to upload product image
+            </button>
+          )}
+
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/*"
+            onChange={handleFileChange}
+            className="hidden"
+          />
+          <p className="text-xs text-ink-500 dark:text-mint-300/70">
+            JPG, PNG, GIF, or WebP. Max 5MB.
+          </p>
+        </div>
 
         <div className="grid grid-cols-2 gap-4">
           <Input

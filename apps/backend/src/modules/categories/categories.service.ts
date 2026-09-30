@@ -7,9 +7,15 @@
  * - Update existing categories
  * - Delete categories (currently hard delete, can be adapted to soft delete)
  * - Get category tree for nested categories
+ * - Upload category images
  */
 
-import { Injectable, NotFoundException, ConflictException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  ConflictException,
+  BadRequestException,
+} from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { CreateCategoryDto } from './dto/create-category.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
@@ -39,7 +45,7 @@ export class CategoriesService {
    * - Validates parent category existence
    */
   async create(createCategoryDto: CreateCategoryDto) {
-    const { name, slug, description, parentId } = createCategoryDto;
+    const { name, slug, description, imageUrl, parentId } = createCategoryDto;
 
     // Check if category with this name already exists
     const existingByName = await this.prisma.category.findUnique({
@@ -70,7 +76,7 @@ export class CategoriesService {
     }
 
     return this.prisma.category.create({
-      data: { name, slug: finalSlug, description, parentId },
+      data: { name, slug: finalSlug, description, imageUrl, parentId },
     });
   }
 
@@ -143,7 +149,7 @@ export class CategoriesService {
       throw new NotFoundException(`Category with ID ${id} not found`);
     }
 
-    const { name, slug, description, parentId } = updateCategoryDto;
+    const { name, slug, description, imageUrl, parentId } = updateCategoryDto;
 
     // Generate slug if name changes but slug not provided
     let finalSlug = slug;
@@ -166,7 +172,31 @@ export class CategoriesService {
 
     return this.prisma.category.update({
       where: { id },
-      data: { name, slug: finalSlug, description, parentId },
+      data: { name, slug: finalSlug, description, imageUrl, parentId },
+    });
+  }
+
+  /**
+   * Upload an image for a category
+   * - Verifies the category exists
+   * - Builds the served URL path
+   * - Updates the category's imageUrl field
+   */
+  async uploadImage(categoryId: string, file: Express.Multer.File) {
+    if (!file) {
+      throw new BadRequestException('No file provided');
+    }
+
+    const category = await this.prisma.category.findUnique({ where: { id: categoryId } });
+    if (!category) {
+      throw new NotFoundException(`Category with ID ${categoryId} not found`);
+    }
+
+    const imageUrl = `/uploads/categories/${file.filename}`;
+
+    return this.prisma.category.update({
+      where: { id: categoryId },
+      data: { imageUrl },
     });
   }
 

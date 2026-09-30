@@ -13,7 +13,7 @@ import Image from 'next/image';
 import { Minus, Plus, Trash2, Package } from 'lucide-react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui';
-import { formatKES, cn } from '@/lib/utils';
+import { formatKES, cn, resolveImageUrl } from '@/lib/utils';
 import { useCartStore, type CartItem } from '@/stores/cart-store';
 
 export interface CartItemRowProps {
@@ -61,7 +61,7 @@ export function CartItemRow({ item }: CartItemRowProps) {
       >
         {mainImage ? (
           <Image
-            src={mainImage}
+            src={resolveImageUrl(mainImage)}
             alt={item.product.name}
             fill
             sizes="96px"
