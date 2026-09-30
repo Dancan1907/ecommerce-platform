@@ -3,22 +3,20 @@
 /**
  * Product Card
  *
- * Reusable product card for listings, home page, related products.
- * Shows image, name, price, and an add-to-cart button.
+ * Reusable product card with translations.
  */
 
 import { useState } from 'react';
-import { Link } from '@/i18n/navigation';
+import { useTranslations } from 'next-intl';
+import { Link, useRouter } from '@/i18n/navigation';
 import Image from 'next/image';
 import { ShoppingCart, Package } from 'lucide-react';
 import { toast } from 'sonner';
 import { Card, Badge } from '@/components/ui';
-import { formatKES } from '@/lib/utils';
-import { cn } from '@/lib/utils';
+import { formatKES, cn } from '@/lib/utils';
 import type { Product } from '@/types/product';
 import { useCartStore } from '@/stores/cart-store';
 import { useAuthStore } from '@/stores/auth-store';
-import { useRouter } from '@/i18n/navigation';
 
 export interface ProductCardProps {
   product: Product;
@@ -30,6 +28,7 @@ export function ProductCard({ product, className }: ProductCardProps) {
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
   const addItem = useCartStore((s) => s.addItem);
   const [adding, setAdding] = useState(false);
+  const t = useTranslations('products');
 
   const mainImage = product.images?.find((img) => img.isMain) ?? product.images?.[0] ?? null;
 
@@ -37,17 +36,17 @@ export function ProductCard({ product, className }: ProductCardProps) {
   const isLowStock = product.stockQuantity > 0 && product.stockQuantity <= 5;
 
   async function handleAddToCart(e: React.MouseEvent) {
-    e.preventDefault(); // don't trigger the parent Link
+    e.preventDefault();
     e.stopPropagation();
 
     if (!isAuthenticated) {
-      toast.error('Please sign in to add items to your cart');
+      toast.error(t('signInToAdd'));
       router.push('/login');
       return;
     }
 
     if (isOutOfStock) {
-      toast.error('Product is out of stock');
+      toast.error(t('outOfStock'));
       return;
     }
 
@@ -56,7 +55,7 @@ export function ProductCard({ product, className }: ProductCardProps) {
     setAdding(false);
 
     if (success) {
-      toast.success(`${product.name} added to cart`);
+      toast.success(t('addedToCart', { name: product.name }));
     } else {
       toast.error('Failed to add to cart');
     }
@@ -65,9 +64,6 @@ export function ProductCard({ product, className }: ProductCardProps) {
   return (
     <Link href={`/products/${product.slug}`} className={cn('group block', className)}>
       <Card className="overflow-hidden h-full flex flex-col">
-        {/* ============================================
-            IMAGE
-            ============================================ */}
         <div className="relative aspect-square overflow-hidden bg-cream-100 dark:bg-forest-900">
           {mainImage ? (
             <Image
@@ -83,23 +79,21 @@ export function ProductCard({ product, className }: ProductCardProps) {
             </div>
           )}
 
-          {/* Stock badges */}
           {isOutOfStock && (
             <div className="absolute top-3 left-3">
-              <Badge variant="danger">Out of Stock</Badge>
+              <Badge variant="danger">{t('outOfStock')}</Badge>
             </div>
           )}
           {isLowStock && !isOutOfStock && (
             <div className="absolute top-3 left-3">
-              <Badge variant="warning">Only {product.stockQuantity} left</Badge>
+              <Badge variant="warning">{t('lowStock', { count: product.stockQuantity })}</Badge>
             </div>
           )}
 
-          {/* Quick add-to-cart on hover (desktop) */}
           <button
             onClick={handleAddToCart}
             disabled={adding || isOutOfStock}
-            aria-label={`Add ${product.name} to cart`}
+            aria-label={t('addToCart')}
             className={cn(
               'absolute bottom-3 right-3 h-10 w-10 rounded-full',
               'bg-emerald-600 text-white shadow-soft',
@@ -113,9 +107,6 @@ export function ProductCard({ product, className }: ProductCardProps) {
           </button>
         </div>
 
-        {/* ============================================
-            INFO
-            ============================================ */}
         <div className="p-4 flex flex-col flex-1">
           {product.category && (
             <span className="label-caps mb-1 text-[10px]">{product.category.name}</span>
