@@ -3,10 +3,11 @@
 /**
  * Admin Categories Page
  *
- * List, create, edit, and delete product categories.
+ * List, create, edit, and delete categories with translations.
  */
 
 import { useCallback, useEffect, useState } from 'react';
+import { useTranslations } from 'next-intl';
 import { Plus, Pencil, Trash2, FolderTree, AlertCircle } from 'lucide-react';
 import { Button, Card, Badge, Skeleton } from '@/components/ui';
 import { CategoryFormModal } from '@/components/admin/category-form-modal';
@@ -15,6 +16,8 @@ import { api, extractErrorMessage } from '@/lib/api';
 import type { Category } from '@/types/product';
 
 export default function AdminCategoriesPage() {
+  const t = useTranslations('admin.categories');
+
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -56,16 +59,14 @@ export default function AdminCategoriesPage() {
     <div className="space-y-6">
       <div className="flex items-start justify-between flex-wrap gap-4">
         <div>
-          <span className="label-caps mb-2 block">Catalog</span>
+          <span className="label-caps mb-2 block">{t('eyebrow')}</span>
           <h1 className="font-serif text-3xl md:text-4xl font-semibold text-ink-900 dark:text-mint-100 mb-2">
-            Categories
+            {t('title')}
           </h1>
-          <p className="text-sm text-ink-600 dark:text-mint-300">
-            {total} {total === 1 ? 'category' : 'categories'}
-          </p>
+          <p className="text-sm text-ink-600 dark:text-mint-300">{t('count', { count: total })}</p>
         </div>
         <Button onClick={openCreateModal} leftIcon={<Plus className="h-4 w-4" />}>
-          Create Category
+          {t('createButton')}
         </Button>
       </div>
 
@@ -90,13 +91,11 @@ export default function AdminCategoriesPage() {
             <FolderTree className="h-8 w-8 text-forest-600 dark:text-emerald-500" />
           </div>
           <h3 className="font-serif text-lg font-semibold text-ink-900 dark:text-mint-100 mb-2">
-            No categories yet
+            {t('empty')}
           </h3>
-          <p className="text-sm text-ink-600 dark:text-mint-300 mb-6">
-            Create your first category to organize products.
-          </p>
+          <p className="text-sm text-ink-600 dark:text-mint-300 mb-6">{t('emptyHint')}</p>
           <Button onClick={openCreateModal} leftIcon={<Plus className="h-4 w-4" />}>
-            Create Category
+            {t('createButton')}
           </Button>
         </Card>
       ) : (
@@ -113,12 +112,12 @@ export default function AdminCategoriesPage() {
                   </p>
                 </div>
                 {(cat.children?.length ?? 0) > 0 && (
-                  <Badge variant="neutral">{cat.children!.length} sub</Badge>
+                  <Badge variant="neutral">{t('subSuffix', { count: cat.children!.length })}</Badge>
                 )}
               </div>
 
               <p className="text-sm text-ink-600 dark:text-mint-300 line-clamp-2 mb-4 flex-1">
-                {cat.description || 'No description'}
+                {cat.description || t('noDescription')}
               </p>
 
               <div className="flex items-center gap-1 justify-end pt-3 border-t border-cream-200 dark:border-forest-800">
@@ -161,7 +160,7 @@ export default function AdminCategoriesPage() {
           endpoint={`/categories/${deletingCategory.id}`}
           itemName={deletingCategory.name}
           itemType="Category"
-          description={`You're about to delete "${deletingCategory.name}". Products in this category may become uncategorized. This action cannot be undone.`}
+          description={t('deleteConfirm', { name: deletingCategory.name })}
         />
       )}
     </div>
