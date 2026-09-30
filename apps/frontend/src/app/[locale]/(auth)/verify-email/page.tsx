@@ -4,10 +4,11 @@
  * Verify Email Page
  *
  * User arrives from email link: /verify-email?token=xxx
- * Confirms their email address.
+ * Fully translated with next-intl.
  */
 
 import { Suspense, useEffect, useState } from 'react';
+import { useTranslations } from 'next-intl';
 import { Link } from '@/i18n/navigation';
 import { useSearchParams } from 'next/navigation';
 import { CheckCircle2, AlertCircle, Loader2 } from 'lucide-react';
@@ -22,6 +23,8 @@ type Status = 'loading' | 'success' | 'error' | 'missing-token';
 function VerifyEmailContent() {
   const searchParams = useSearchParams();
   const token = searchParams.get('token');
+  const t = useTranslations('auth.verifyEmail');
+
   const [status, setStatus] = useState<Status>(token ? 'loading' : 'missing-token');
   const [errorMessage, setErrorMessage] = useState<string>('');
 
@@ -36,7 +39,7 @@ function VerifyEmailContent() {
         if (!cancelled) setStatus('success');
       } catch (err) {
         if (!cancelled) {
-          setErrorMessage(extractErrorMessage(err) || 'Email verification failed');
+          setErrorMessage(extractErrorMessage(err) || t('errorMessage'));
           setStatus('error');
         }
       }
@@ -47,10 +50,10 @@ function VerifyEmailContent() {
     return () => {
       cancelled = true;
     };
-  }, [token]);
+  }, [token, t]);
 
   // ============================================
-  // LOADING STATE
+  // LOADING
   // ============================================
   if (status === 'loading') {
     return (
@@ -59,15 +62,15 @@ function VerifyEmailContent() {
           <Loader2 className="h-8 w-8 animate-spin text-forest-700 dark:text-emerald-500" />
         </div>
         <h1 className="font-serif text-3xl font-semibold text-ink-900 dark:text-mint-100 mb-3">
-          Verifying your email
+          {t('verifyingTitle')}
         </h1>
-        <p className="text-sm text-ink-600 dark:text-mint-300">Just a moment please…</p>
+        <p className="text-sm text-ink-600 dark:text-mint-300">{t('verifyingMessage')}</p>
       </div>
     );
   }
 
   // ============================================
-  // SUCCESS STATE
+  // SUCCESS
   // ============================================
   if (status === 'success') {
     return (
@@ -76,17 +79,15 @@ function VerifyEmailContent() {
           <CheckCircle2 className="h-8 w-8 text-emerald-600 dark:text-emerald-400" />
         </div>
         <h1 className="font-serif text-3xl font-semibold text-ink-900 dark:text-mint-100 mb-3">
-          Email verified!
+          {t('successTitle')}
         </h1>
-        <p className="text-sm text-ink-600 dark:text-mint-300 mb-8">
-          Your email is now confirmed. You can start shopping.
-        </p>
+        <p className="text-sm text-ink-600 dark:text-mint-300 mb-8">{t('successMessage')}</p>
         <div className="flex flex-col sm:flex-row gap-3 justify-center">
           <Link href="/login">
-            <Button>Sign in</Button>
+            <Button>{t('signIn')}</Button>
           </Link>
           <Link href="/products">
-            <Button variant="secondary">Browse products</Button>
+            <Button variant="secondary">{t('browseProducts')}</Button>
           </Link>
         </div>
       </div>
@@ -103,21 +104,20 @@ function VerifyEmailContent() {
           <AlertCircle className="h-8 w-8 text-amber-600 dark:text-amber-400" />
         </div>
         <h1 className="font-serif text-3xl font-semibold text-ink-900 dark:text-mint-100 mb-3">
-          Verification link needed
+          {t('missingTokenTitle')}
         </h1>
         <p className="text-sm text-ink-600 dark:text-mint-300 mb-8 leading-relaxed">
-          We need a verification token to confirm your email. Please check your inbox for the
-          verification link or request a new one.
+          {t('missingTokenMessage')}
         </p>
         <Link href="/login">
-          <Button>Back to sign in</Button>
+          <Button>{t('backToSignIn')}</Button>
         </Link>
       </div>
     );
   }
 
   // ============================================
-  // ERROR STATE
+  // ERROR
   // ============================================
   return (
     <div className="text-center">
@@ -125,17 +125,17 @@ function VerifyEmailContent() {
         <AlertCircle className="h-8 w-8 text-red-600 dark:text-red-400" />
       </div>
       <h1 className="font-serif text-3xl font-semibold text-ink-900 dark:text-mint-100 mb-3">
-        Verification failed
+        {t('errorTitle')}
       </h1>
       <p className="text-sm text-ink-600 dark:text-mint-300 mb-8">
-        {errorMessage || 'This verification link may be expired or invalid.'}
+        {errorMessage || t('errorMessage')}
       </p>
       <div className="flex flex-col sm:flex-row gap-3 justify-center">
         <Link href="/login">
-          <Button>Back to sign in</Button>
+          <Button>{t('backToSignIn')}</Button>
         </Link>
         <Link href="/forgot-password">
-          <Button variant="secondary">Get help</Button>
+          <Button variant="secondary">{t('getHelp')}</Button>
         </Link>
       </div>
     </div>
@@ -143,17 +143,11 @@ function VerifyEmailContent() {
 }
 
 // ============================================
-// PAGE WRAPPER (Suspense for useSearchParams)
+// PAGE WRAPPER
 // ============================================
 export default function VerifyEmailPage() {
   return (
-    <Suspense
-      fallback={
-        <div className="flex justify-center py-12">
-          <div className="h-8 w-8 animate-spin rounded-full border-4 border-forest-800 dark:border-emerald-500 border-t-transparent" />
-        </div>
-      }
-    >
+    <Suspense fallback={<div className="py-8" />}>
       <VerifyEmailContent />
     </Suspense>
   );
