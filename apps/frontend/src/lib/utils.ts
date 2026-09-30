@@ -106,7 +106,7 @@ export function resolveImageUrl(url: string | null | undefined): string {
   if (!url) return '';
   if (url.startsWith('http://') || url.startsWith('https://')) return url;
 
-  const base = (process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3000').replace(/\/+$/, '');
+  const base = (process.env.NEXT_PUBLIC_ASSET_URL ?? 'http://localhost:3000').replace(/\/+$/, '');
   const path = url.startsWith('/') ? url : `/${url}`;
   return `${base}${path}`;
 }
