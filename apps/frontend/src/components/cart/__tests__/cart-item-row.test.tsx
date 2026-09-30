@@ -2,7 +2,8 @@
  * CartItemRow Tests
  */
 
-import { render, screen, fireEvent } from '@testing-library/react';
+import { screen, fireEvent } from '@testing-library/react';
+import { renderWithProvider } from '@/test/test-utils';
 import { CartItemRow } from '../cart-item-row';
 import type { CartItem } from '@/stores/cart-store';
 
@@ -48,35 +49,35 @@ describe('CartItemRow', () => {
   beforeEach(() => jest.clearAllMocks());
 
   it('renders product name and price', () => {
-    render(<CartItemRow item={mockItem} />);
+    renderWithProvider(<CartItemRow item={mockItem} />);
     expect(screen.getByText('Test Product')).toBeInTheDocument();
     expect(screen.getAllByText(/1,500/).length).toBeGreaterThan(0);
   });
 
   it('renders quantity', () => {
-    render(<CartItemRow item={mockItem} />);
+    renderWithProvider(<CartItemRow item={mockItem} />);
     expect(screen.getByText('2')).toBeInTheDocument();
   });
 
   it('calls updateItem when increase clicked', () => {
-    render(<CartItemRow item={mockItem} />);
+    renderWithProvider(<CartItemRow item={mockItem} />);
     fireEvent.click(screen.getByLabelText('Increase quantity'));
     expect(mockUpdateItem).toHaveBeenCalledWith('prod-1', 3);
   });
 
   it('calls updateItem when decrease clicked', () => {
-    render(<CartItemRow item={mockItem} />);
+    renderWithProvider(<CartItemRow item={mockItem} />);
     fireEvent.click(screen.getByLabelText('Decrease quantity'));
     expect(mockUpdateItem).toHaveBeenCalledWith('prod-1', 1);
   });
 
   it('disables decrease at quantity 1', () => {
-    render(<CartItemRow item={{ ...mockItem, quantity: 1 }} />);
+    renderWithProvider(<CartItemRow item={{ ...mockItem, quantity: 1 }} />);
     expect(screen.getByLabelText('Decrease quantity')).toBeDisabled();
   });
 
   it('disables increase at max stock', () => {
-    render(
+    renderWithProvider(
       <CartItemRow
         item={{
           ...mockItem,
@@ -89,7 +90,7 @@ describe('CartItemRow', () => {
   });
 
   it('calls removeItem when trash clicked', () => {
-    render(<CartItemRow item={mockItem} />);
+    renderWithProvider(<CartItemRow item={mockItem} />);
     fireEvent.click(screen.getByLabelText('Remove Test Product'));
     expect(mockRemoveItem).toHaveBeenCalledWith('prod-1');
   });
