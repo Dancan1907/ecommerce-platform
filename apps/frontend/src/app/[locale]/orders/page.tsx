@@ -3,18 +3,17 @@
 /**
  * Orders List Page
  *
- * Shows the current user's order history.
- * Protected — redirects to login if unauthenticated.
+ * Shows the current user's order history with translations.
  */
 
 import { useEffect, useState } from 'react';
-import { Link } from '@/i18n/navigation';
+import { useTranslations } from 'next-intl';
+import { Link, useRouter } from '@/i18n/navigation';
 import { Package, ChevronRight } from 'lucide-react';
 import { Button, Card, Badge, Skeleton } from '@/components/ui';
 import { api, extractErrorMessage } from '@/lib/api';
 import { formatKES, formatDate } from '@/lib/utils';
 import { useAuthStore } from '@/stores/auth-store';
-import { useRouter } from '@/i18n/navigation';
 
 interface OrderItem {
   id: string;
@@ -53,6 +52,7 @@ const STATUS_VARIANTS: Record<
 
 export default function OrdersPage() {
   const router = useRouter();
+  const t = useTranslations('orders');
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
 
   const [orders, setOrders] = useState<Order[]>([]);
@@ -85,7 +85,7 @@ export default function OrdersPage() {
     };
   }, [isAuthenticated, router]);
 
-  // Loading
+  // LOADING
   if (loading) {
     return (
       <div className="container-page py-8 md:py-12">
@@ -99,7 +99,7 @@ export default function OrdersPage() {
     );
   }
 
-  // Empty state
+  // EMPTY
   if (orders.length === 0) {
     return (
       <div className="container-page py-20 text-center">
@@ -107,13 +107,13 @@ export default function OrdersPage() {
           <Package className="h-10 w-10 text-forest-600 dark:text-emerald-500" />
         </div>
         <h1 className="font-serif text-3xl font-semibold text-ink-900 dark:text-mint-100 mb-3">
-          No orders yet
+          {t('empty')}
         </h1>
         <p className="text-sm text-ink-600 dark:text-mint-300 mb-8 max-w-md mx-auto">
-          Once you place an order, it will show up here. Start shopping to see your order history.
+          {t('emptyDescription')}
         </p>
         <Link href="/products">
-          <Button size="lg">Browse Products</Button>
+          <Button size="lg">{t('browseProducts')}</Button>
         </Link>
       </div>
     );
@@ -122,12 +122,12 @@ export default function OrdersPage() {
   return (
     <div className="container-page py-8 md:py-12">
       <div className="mb-8">
-        <span className="label-caps mb-2 block">Your Account</span>
+        <span className="label-caps mb-2 block">{t('eyebrow')}</span>
         <h1 className="font-serif text-4xl md:text-5xl font-semibold text-ink-900 dark:text-mint-100 mb-3">
-          My Orders
+          {t('title')}
         </h1>
         <p className="text-sm text-ink-600 dark:text-mint-300">
-          {orders.length} {orders.length === 1 ? 'order' : 'orders'}
+          {t('count', { count: orders.length })}
         </p>
       </div>
 
@@ -149,18 +149,27 @@ export default function OrdersPage() {
                   <span className="font-serif text-lg font-semibold text-ink-900 dark:text-mint-100">
                     {order.orderNumber}
                   </span>
-                  <Badge variant={STATUS_VARIANTS[order.status] ?? 'neutral'}>{order.status}</Badge>
+                  <Badge variant={STATUS_VARIANTS[order.status] ?? 'neutral'}>
+                    {t(`status.${order.status}` as never)}
+                  </Badge>
                 </div>
                 <p className="text-xs text-ink-500 dark:text-mint-300/70 mb-2">
-                  Placed {formatDate(order.createdAt)}
+                  {t('placedOn', { date: formatDate(order.createdAt) })}
                 </p>
                 <p className="text-sm text-ink-600 dark:text-mint-300 truncate">
-                  {order.items.length} {order.items.length === 1 ? 'item' : 'items'}:{' '}
-                  {order.items
-                    .slice(0, 2)
-                    .map((i) => i.productName)
-                    .join(', ')}
-                  {order.items.length > 2 && ` +${order.items.length - 2} more`}
+                  {order.items.length > 2
+                    ? t('itemPreviewMore', {
+                        count: order.items.length,
+                        names: order.items
+                          .slice(0, 2)
+                          .map((i) => i.productName)
+                          .join(', '),
+                        more: order.items.length - 2,
+                      })
+                    : t('itemPreview', {
+                        count: order.items.length,
+                        names: order.items.map((i) => i.productName).join(', '),
+                      })}
                 </p>
               </div>
 
