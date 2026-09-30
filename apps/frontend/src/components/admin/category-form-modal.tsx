@@ -3,10 +3,11 @@
 /**
  * Category Form Modal
  *
- * Reusable form for creating/editing categories.
+ * Reusable form for creating/editing categories with translations.
  */
 
 import { useEffect, useState } from 'react';
+import { useTranslations } from 'next-intl';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -29,7 +30,7 @@ export interface CategoryFormModalProps {
   onClose: () => void;
   onSuccess: () => void;
   category?: Category | null;
-  categories: Category[]; // for parent selection
+  categories: Category[];
 }
 
 export function CategoryFormModal({
@@ -40,6 +41,9 @@ export function CategoryFormModal({
   categories,
 }: CategoryFormModalProps) {
   const isEditMode = !!category;
+  const t = useTranslations('admin.categories');
+  const tCommon = useTranslations('admin.common');
+
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -72,7 +76,6 @@ export function CategoryFormModal({
     setSubmitting(true);
     setError(null);
 
-    // Clean up empty strings
     const payload = {
       name: data.name,
       description: data.description || undefined,
@@ -82,10 +85,10 @@ export function CategoryFormModal({
     try {
       if (isEditMode && category) {
         await api.put(`/categories/${category.id}`, payload);
-        toast.success('Category updated');
+        toast.success(t('updatedToast'));
       } else {
         await api.post('/categories', payload);
-        toast.success('Category created');
+        toast.success(t('createdToast'));
       }
       onSuccess();
       onClose();
@@ -97,15 +100,16 @@ export function CategoryFormModal({
     }
   }
 
-  // Filter out the current category from parent options (can't be own parent)
   const parentOptions = categories.filter((c) => c.id !== category?.id);
 
   return (
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-      title={isEditMode ? 'Edit Category' : 'Create Category'}
-      description={isEditMode ? `Update "${category?.name}"` : 'Add a new product category'}
+      title={isEditMode ? t('editTitle') : t('createTitle')}
+      description={
+        isEditMode ? t('editDescription', { name: category?.name ?? '' }) : t('createDescription')
+      }
       closeOnBackdrop={false}
     >
       {error && (
@@ -120,28 +124,24 @@ export function CategoryFormModal({
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
         <Input
-          label="Category Name"
+          label={t('formName')}
           type="text"
-          placeholder="e.g., Electronics"
+          placeholder={t('formNamePlaceholder')}
           error={errors.name?.message}
           autoFocus
           {...register('name')}
         />
 
         <Textarea
-          label="Description"
-          placeholder="Briefly describe this category"
+          label={t('formDescription')}
+          placeholder={t('formDescriptionPlaceholder')}
           rows={3}
           error={errors.description?.message}
           {...register('description')}
         />
 
-        <Select
-          label="Parent Category (optional)"
-          error={errors.parentId?.message}
-          {...register('parentId')}
-        >
-          <option value="">None (top-level category)</option>
+        <Select label={t('formParent')} error={errors.parentId?.message} {...register('parentId')}>
+          <option value="">{t('formParentNone')}</option>
           {parentOptions.map((cat) => (
             <option key={cat.id} value={cat.id}>
               {cat.name}
@@ -151,10 +151,10 @@ export function CategoryFormModal({
 
         <div className="flex justify-end gap-3 pt-4 border-t border-cream-200 dark:border-forest-800">
           <Button type="button" variant="outline" onClick={onClose} disabled={submitting}>
-            Cancel
+            {tCommon('cancel')}
           </Button>
           <Button type="submit" isLoading={submitting}>
-            {isEditMode ? 'Save Changes' : 'Create Category'}
+            {isEditMode ? t('submitEdit') : t('submitCreate')}
           </Button>
         </div>
       </form>
