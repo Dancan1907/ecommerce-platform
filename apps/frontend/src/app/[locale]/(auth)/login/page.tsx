@@ -3,15 +3,12 @@
 /**
  * Login Page
  *
- * - React Hook Form + Zod validation
- * - Password visibility toggle
- * - Persistent error banner (survives toast fade)
- * - Redirects to ?next= URL after login (admins land on /admin by default)
+ * Email + password login with translations.
  */
 
 import { Suspense, useState } from 'react';
-import { Link } from '@/i18n/navigation';
-import { useRouter } from '@/i18n/navigation';
+import { useTranslations } from 'next-intl';
+import { Link, useRouter } from '@/i18n/navigation';
 import { useSearchParams } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -21,17 +18,17 @@ import { Button, Input } from '@/components/ui';
 import { useAuthStore } from '@/stores/auth-store';
 import { loginSchema, type LoginInput } from '@/lib/validation/auth-schemas';
 
-function LoginForm() {
+function LoginContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const nextUrl = searchParams.get('next') ?? '/';
   const login = useAuthStore((s) => s.login);
+  const t = useTranslations('auth.login');
+  const tCommon = useTranslations('auth.common');
+
   const [submitting, setSubmitting] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [loginError, setLoginError] = useState<string | null>(null);
-
-  // Only allow same-origin relative paths (prevents open-redirect via ?next=)
-  const rawNext = searchParams.get('next');
-  const nextUrl = rawNext && rawNext.startsWith('/') && !rawNext.startsWith('//') ? rawNext : '/';
 
   const {
     register,
@@ -50,8 +47,7 @@ function LoginForm() {
     setSubmitting(false);
 
     if (success) {
-      toast.success('Welcome back!');
-      // Redirect admins to admin dashboard, others to home or next URL
+      toast.success(t('welcomeBack'));
       const currentUser = useAuthStore.getState().user;
       if (currentUser?.role === 'ADMIN' && nextUrl === '/') {
         router.push('/admin');
@@ -59,20 +55,19 @@ function LoginForm() {
         router.push(nextUrl);
       }
     } else {
-      setLoginError('Invalid email or password. Please try again.');
-      toast.error('Invalid email or password', { duration: 6000 });
+      setLoginError(t('invalidCredentials'));
+      toast.error(t('invalidCredentials'), { duration: 6000 });
     }
   }
 
   return (
     <div>
       <div className="mb-8">
+        <span className="label-caps mb-2 block">{t('eyebrow')}</span>
         <h1 className="font-serif text-3xl font-semibold text-ink-900 dark:text-mint-100 mb-2">
-          Welcome back
+          {t('title')}
         </h1>
-        <p className="text-sm text-ink-600 dark:text-mint-300">
-          Sign in to your account to continue.
-        </p>
+        <p className="text-sm text-ink-600 dark:text-mint-300">{t('subtitle')}</p>
       </div>
 
       {loginError && (
@@ -87,9 +82,9 @@ function LoginForm() {
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
         <Input
-          label="Email"
+          label={t('email')}
           type="email"
-          placeholder="you@example.com"
+          placeholder={t('emailPlaceholder')}
           leftIcon={<Mail className="h-4 w-4" />}
           error={errors.email?.message}
           autoComplete="email"
@@ -97,7 +92,7 @@ function LoginForm() {
         />
 
         <Input
-          label="Password"
+          label={t('password')}
           type={showPassword ? 'text' : 'password'}
           placeholder="••••••••"
           leftIcon={<Lock className="h-4 w-4" />}
@@ -105,7 +100,7 @@ function LoginForm() {
             <button
               type="button"
               onClick={() => setShowPassword((s) => !s)}
-              aria-label={showPassword ? 'Hide password' : 'Show password'}
+              aria-label={showPassword ? tCommon('hidePassword') : tCommon('showPassword')}
               className="pointer-events-auto text-forest-500 dark:text-mint-300 hover:text-forest-800 dark:hover:text-mint-100 transition-colors"
               tabIndex={-1}
             >
@@ -122,22 +117,22 @@ function LoginForm() {
             href="/forgot-password"
             className="text-sm text-forest-700 dark:text-emerald-500 hover:underline"
           >
-            Forgot password?
+            {t('forgotPassword')}
           </Link>
         </div>
 
         <Button type="submit" size="lg" className="w-full" isLoading={submitting}>
-          Sign In
+          {t('signIn')}
         </Button>
       </form>
 
       <p className="mt-6 text-center text-sm text-ink-600 dark:text-mint-300">
-        Don&apos;t have an account?{' '}
+        {t('noAccount')}{' '}
         <Link
           href="/register"
           className="text-forest-800 dark:text-emerald-500 font-medium hover:underline"
         >
-          Sign up
+          {t('signUp')}
         </Link>
       </p>
     </div>
@@ -146,8 +141,8 @@ function LoginForm() {
 
 export default function LoginPage() {
   return (
-    <Suspense fallback={null}>
-      <LoginForm />
+    <Suspense fallback={<div className="py-8" />}>
+      <LoginContent />
     </Suspense>
   );
 }
