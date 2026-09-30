@@ -90,3 +90,23 @@ export function toCsv<T extends Record<string, unknown>>(rows: T[]): string {
   ];
   return lines.join('\n');
 }
+
+/**
+ * Resolve a product image URL.
+ *
+ * The DB stores relative paths like `/uploads/products/foo.jpg`.
+ * In dev, the backend runs on :3000 while the frontend runs on :3001,
+ * so a bare `/uploads/*` path 404s when rendered on the frontend origin.
+ * We prepend the API origin, read from NEXT_PUBLIC_API_URL
+ * (falls back to http://localhost:3000 in local dev).
+ *
+ * Already-absolute URLs (http/https) are returned unchanged.
+ */
+export function resolveImageUrl(url: string | null | undefined): string {
+  if (!url) return '';
+  if (url.startsWith('http://') || url.startsWith('https://')) return url;
+
+  const base = (process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3000').replace(/\/+$/, '');
+  const path = url.startsWith('/') ? url : `/${url}`;
+  return `${base}${path}`;
+}
