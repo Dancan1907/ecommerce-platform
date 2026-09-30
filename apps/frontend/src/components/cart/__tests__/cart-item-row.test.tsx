@@ -59,16 +59,19 @@ describe('CartItemRow', () => {
     expect(screen.getByText('2')).toBeInTheDocument();
   });
 
-  it('calls updateItem when increase clicked', () => {
+  it('calls updateItem when increase clicked', async () => {
     renderWithProvider(<CartItemRow item={mockItem} />);
     fireEvent.click(screen.getByLabelText('Increase quantity'));
     expect(mockUpdateItem).toHaveBeenCalledWith('prod-1', 3);
+    // Flush async handler so state updates settle before test ends
+    await screen.findByLabelText('Increase quantity');
   });
 
-  it('calls updateItem when decrease clicked', () => {
+  it('calls updateItem when decrease clicked', async () => {
     renderWithProvider(<CartItemRow item={mockItem} />);
     fireEvent.click(screen.getByLabelText('Decrease quantity'));
     expect(mockUpdateItem).toHaveBeenCalledWith('prod-1', 1);
+    await screen.findByLabelText('Decrease quantity');
   });
 
   it('disables decrease at quantity 1', () => {
@@ -89,9 +92,10 @@ describe('CartItemRow', () => {
     expect(screen.getByLabelText('Increase quantity')).toBeDisabled();
   });
 
-  it('calls removeItem when trash clicked', () => {
+  it('calls removeItem when trash clicked', async () => {
     renderWithProvider(<CartItemRow item={mockItem} />);
     fireEvent.click(screen.getByLabelText('Remove Test Product'));
     expect(mockRemoveItem).toHaveBeenCalledWith('prod-1');
+    await screen.findByLabelText('Remove Test Product');
   });
 });
