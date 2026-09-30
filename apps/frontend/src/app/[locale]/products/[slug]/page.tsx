@@ -3,19 +3,14 @@
 /**
  * Product Detail Page
  *
- * Individual product view with:
- *  - Image gallery (main + thumbnails)
- *  - Product info (name, category, SKU, description)
- *  - Price + stock indicator
- *  - Quantity selector + Add to cart
- *  - Seller info
+ * Individual product view with translations.
  */
 
 import { useEffect, useState } from 'react';
-import { Link } from '@/i18n/navigation';
-import Image from 'next/image';
+import { useTranslations } from 'next-intl';
 import { useParams } from 'next/navigation';
-import { useRouter } from '@/i18n/navigation';
+import { Link, useRouter } from '@/i18n/navigation';
+import Image from 'next/image';
 import { ChevronRight, Package, ShoppingCart, Minus, Plus, Store, ArrowLeft } from 'lucide-react';
 import { toast } from 'sonner';
 import { Button, Badge, Card, Skeleton } from '@/components/ui';
@@ -27,8 +22,9 @@ import type { Product, ProductImage } from '@/types/product';
 
 export default function ProductDetailPage() {
   const params = useParams();
-  const router = useRouter();
   const slug = params.slug as string;
+  const router = useRouter();
+  const t = useTranslations('products');
 
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
   const addItem = useCartStore((s) => s.addItem);
@@ -40,9 +36,6 @@ export default function ProductDetailPage() {
   const [quantity, setQuantity] = useState(1);
   const [adding, setAdding] = useState(false);
 
-  // ============================================
-  // FETCH PRODUCT
-  // ============================================
   useEffect(() => {
     let cancelled = false;
     setLoading(true);
@@ -67,25 +60,22 @@ export default function ProductDetailPage() {
     };
   }, [slug]);
 
-  // ============================================
-  // HANDLERS
-  // ============================================
   async function handleAddToCart() {
     if (!product) return;
 
     if (!isAuthenticated) {
-      toast.error('Please sign in to add items to your cart');
+      toast.error(t('signInToAdd'));
       router.push(`/login?next=/products/${slug}`);
       return;
     }
 
     if (product.stockQuantity === 0) {
-      toast.error('Product is out of stock');
+      toast.error(t('outOfStock'));
       return;
     }
 
     if (quantity > product.stockQuantity) {
-      toast.error(`Only ${product.stockQuantity} units available`);
+      toast.error(t('lowStock', { count: product.stockQuantity }));
       return;
     }
 
@@ -94,15 +84,12 @@ export default function ProductDetailPage() {
     setAdding(false);
 
     if (success) {
-      toast.success(`${quantity} × ${product.name} added to cart`);
+      toast.success(t('addedToCart', { name: product.name }));
     } else {
       toast.error('Failed to add to cart');
     }
   }
 
-  // ============================================
-  // LOADING STATE
-  // ============================================
   if (loading) {
     return (
       <div className="container-page py-8 md:py-12">
@@ -120,9 +107,6 @@ export default function ProductDetailPage() {
     );
   }
 
-  // ============================================
-  // NOT FOUND
-  // ============================================
   if (notFound || !product) {
     return (
       <div className="container-page py-20 text-center">
@@ -130,21 +114,18 @@ export default function ProductDetailPage() {
           <Package className="h-10 w-10 text-forest-600 dark:text-emerald-500" />
         </div>
         <h1 className="font-serif text-3xl font-semibold text-ink-900 dark:text-mint-100 mb-3">
-          Product not found
+          {t('productNotFound')}
         </h1>
         <p className="text-sm text-ink-600 dark:text-mint-300 mb-8">
-          The product you&apos;re looking for doesn&apos;t exist or has been removed.
+          {t('productNotFoundDescription')}
         </p>
         <Link href="/products">
-          <Button leftIcon={<ArrowLeft className="h-4 w-4" />}>Back to products</Button>
+          <Button leftIcon={<ArrowLeft className="h-4 w-4" />}>{t('backToProducts')}</Button>
         </Link>
       </div>
     );
   }
 
-  // ============================================
-  // RENDER
-  // ============================================
   const isOutOfStock = product.stockQuantity === 0;
   const isLowStock = product.stockQuantity > 0 && product.stockQuantity <= 5;
 
@@ -157,7 +138,7 @@ export default function ProductDetailPage() {
         </Link>
         <ChevronRight className="h-3.5 w-3.5" />
         <Link href="/products" className="hover:text-forest-700 dark:hover:text-emerald-400">
-          Products
+          {t('title')}
         </Link>
         {product.category && (
           <>
@@ -175,11 +156,8 @@ export default function ProductDetailPage() {
       </nav>
 
       <div className="grid md:grid-cols-2 gap-8 md:gap-12">
-        {/* ============================================
-            LEFT: IMAGE GALLERY
-            ============================================ */}
+        {/* LEFT: Image Gallery */}
         <div className="space-y-4">
-          {/* Main image */}
           <Card className="overflow-hidden">
             <div className="relative aspect-square bg-cream-100 dark:bg-forest-900">
               {selectedImage ? (
@@ -199,7 +177,6 @@ export default function ProductDetailPage() {
             </div>
           </Card>
 
-          {/* Thumbnails */}
           {product.images && product.images.length > 1 && (
             <div className="grid grid-cols-4 gap-2">
               {product.images.map((img) => (
@@ -227,51 +204,44 @@ export default function ProductDetailPage() {
           )}
         </div>
 
-        {/* ============================================
-            RIGHT: PRODUCT INFO
-            ============================================ */}
+        {/* RIGHT: Product Info */}
         <div className="space-y-6">
-          {/* Category + Stock */}
           <div className="flex items-center gap-3">
             {product.category && (
               <span className="label-caps text-[11px]">{product.category.name}</span>
             )}
-            {isOutOfStock && <Badge variant="danger">Out of Stock</Badge>}
+            {isOutOfStock && <Badge variant="danger">{t('outOfStock')}</Badge>}
             {isLowStock && !isOutOfStock && (
-              <Badge variant="warning">Only {product.stockQuantity} left</Badge>
+              <Badge variant="warning">{t('lowStock', { count: product.stockQuantity })}</Badge>
             )}
-            {!isOutOfStock && !isLowStock && <Badge variant="success">In Stock</Badge>}
+            {!isOutOfStock && !isLowStock && <Badge variant="success">{t('inStock')}</Badge>}
           </div>
 
-          {/* Name */}
           <h1 className="font-serif text-3xl md:text-4xl font-semibold text-ink-900 dark:text-mint-100 leading-tight">
             {product.name}
           </h1>
 
-          {/* Price */}
           <div className="flex items-baseline gap-3">
             <span className="font-serif text-3xl md:text-4xl font-bold text-forest-800 dark:text-emerald-400">
               {formatKES(product.price)}
             </span>
           </div>
 
-          {/* Description */}
           <div>
-            <h2 className="label-caps mb-2">Description</h2>
+            <h2 className="label-caps mb-2">{t('description')}</h2>
             <p className="text-ink-700 dark:text-mint-300 leading-relaxed whitespace-pre-line">
               {product.description}
             </p>
           </div>
 
-          {/* SKU + Seller */}
           <div className="grid grid-cols-2 gap-4 pt-4 border-t border-cream-300 dark:border-forest-800">
             <div>
-              <span className="label-caps mb-1 block text-[10px]">SKU</span>
+              <span className="label-caps mb-1 block text-[10px]">{t('sku')}</span>
               <span className="text-sm text-ink-700 dark:text-mint-300">{product.sku}</span>
             </div>
             {product.seller && (
               <div>
-                <span className="label-caps mb-1 block text-[10px]">Seller</span>
+                <span className="label-caps mb-1 block text-[10px]">{t('seller')}</span>
                 <span className="text-sm text-ink-700 dark:text-mint-300 flex items-center gap-1.5">
                   <Store className="h-3.5 w-3.5" />
                   {product.seller.firstName} {product.seller.lastName}
@@ -280,10 +250,9 @@ export default function ProductDetailPage() {
             )}
           </div>
 
-          {/* Quantity + Add to Cart */}
           <div className="space-y-4 pt-4 border-t border-cream-300 dark:border-forest-800">
             <div className="flex items-center gap-4">
-              <span className="label-caps">Quantity</span>
+              <span className="label-caps">{t('quantity')}</span>
               <div className="flex items-center rounded-lg border border-cream-400 dark:border-forest-700 overflow-hidden">
                 <button
                   type="button"
@@ -317,7 +286,7 @@ export default function ProductDetailPage() {
               isLoading={adding}
               leftIcon={!adding ? <ShoppingCart className="h-5 w-5" /> : undefined}
             >
-              {isOutOfStock ? 'Out of Stock' : 'Add to Cart'}
+              {isOutOfStock ? t('outOfStock') : t('addToCart')}
             </Button>
           </div>
         </div>
