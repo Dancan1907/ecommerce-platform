@@ -66,7 +66,7 @@ export default async function HomePage() {
 
             <div className="relative h-64 md:h-auto md:min-h-[500px]">
               <Image
-                src="https://images.unsplash.com/photo-1541443131876-44b03de101c5?w=1200&q=80"
+                src="/hero.jpg"
                 alt="Formula 1 racing car on track"
                 fill
                 priority
