@@ -1,6 +1,12 @@
 /**
  * Database Seeding Script
- * Populates the database with initial test data
+ *
+ * Seeds foundational accounts only (admin + demo user).
+ *
+ * Products and categories are NOT seeded — they are managed through
+ * the admin UI (/admin/products, /admin/categories). This keeps the
+ * database as the single source of truth for catalog data.
+ *
  * Run with: npx prisma db seed
  */
 
@@ -12,7 +18,7 @@ const prisma = new PrismaClient();
 async function main() {
   console.log('🌱 Starting database seeding...');
 
-  // Create admin user
+  // ---------- Admin user ----------
   const adminPassword = await bcrypt.hash('Admin123!', 10);
   const admin = await prisma.user.upsert({
     where: { email: 'admin@ecommerce.com' },
@@ -26,9 +32,9 @@ async function main() {
       isEmailVerified: true,
     },
   });
-  console.log(`✅ Created admin user: ${admin.email}`);
+  console.log(`✅ Admin user: ${admin.email}`);
 
-  // Create test user
+  // ---------- Test user ----------
   const userPassword = await bcrypt.hash('User123!', 10);
   const user = await prisma.user.upsert({
     where: { email: 'user@ecommerce.com' },
@@ -42,67 +48,9 @@ async function main() {
       isEmailVerified: true,
     },
   });
-  console.log(`✅ Created test user: ${user.email}`);
+  console.log(`✅ Test user: ${user.email}`);
 
-  // Create categories
-  const electronics = await prisma.category.upsert({
-    where: { slug: 'electronics' },
-    update: {},
-    create: {
-      name: 'Electronics',
-      slug: 'electronics',
-      description: 'Electronic devices and gadgets',
-    },
-  });
-  console.log(`✅ Created category: ${electronics.name}`);
-
-  const clothing = await prisma.category.upsert({
-    where: { slug: 'clothing' },
-    update: {},
-    create: {
-      name: 'Clothing',
-      slug: 'clothing',
-      description: 'Fashion and apparel',
-    },
-  });
-  console.log(`✅ Created category: ${clothing.name}`);
-
-  // Create sample products
-  const product1 = await prisma.product.upsert({
-    where: { sku: 'PROD-001' },
-    update: {},
-    create: {
-      name: 'Wireless Headphones',
-      slug: 'wireless-headphones',
-      description: 'Premium noise-cancelling headphones with 30-hour battery life',
-      price: 99.99,
-      stockQuantity: 50,
-      sku: 'PROD-001',
-      categoryId: electronics.id,
-      sellerId: admin.id,
-      isActive: true,
-    },
-  });
-  console.log(`✅ Created product: ${product1.name}`);
-
-  const product2 = await prisma.product.upsert({
-    where: { sku: 'PROD-002' },
-    update: {},
-    create: {
-      name: 'Cotton T-Shirt',
-      slug: 'cotton-t-shirt',
-      description: 'Comfortable 100% cotton t-shirt, available in multiple colors',
-      price: 24.99,
-      stockQuantity: 100,
-      sku: 'PROD-002',
-      categoryId: clothing.id,
-      sellerId: admin.id,
-      isActive: true,
-    },
-  });
-  console.log(`✅ Created product: ${product2.name}`);
-
-  console.log('✅ Database seeding completed successfully!');
+  console.log('🎉 Seeding completed successfully.');
 }
 
 main()
