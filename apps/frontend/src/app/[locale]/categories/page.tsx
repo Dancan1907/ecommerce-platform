@@ -3,11 +3,14 @@
  *
  * Shows all product categories as a navigable grid.
  * Clicking a category goes to its filtered products page.
+ * Renders a real image when the category has one.
  */
 
+import Image from 'next/image';
 import { Link } from '@/i18n/navigation';
 import { ArrowRight, Package } from 'lucide-react';
 import { Card } from '@/components/ui';
+import { resolveImageUrl } from '@/lib/utils';
 import { fetchCategoryTree } from '@/lib/products';
 import type { Category } from '@/types/product';
 
@@ -62,8 +65,8 @@ export default async function CategoriesPage() {
 /**
  * Category Card
  *
- * Visual card with a graceful gradient placeholder.
- * Falls back to a gradient + icon if no category image is provided.
+ * Renders a real image when the category has one.
+ * Falls back to a gradient + icon if no image is provided.
  */
 function CategoryCard({ category }: { category: Category }) {
   const hasChildren = (category.children?.length ?? 0) > 0;
@@ -71,12 +74,22 @@ function CategoryCard({ category }: { category: Category }) {
   return (
     <Link href={`/categories/${category.slug}`} className="group block">
       <Card className="overflow-hidden h-full">
-        {/* Gradient background placeholder */}
+        {/* Image header */}
         <div className="relative aspect-[16/9] bg-gradient-to-br from-forest-700 via-forest-800 to-forest-900 dark:from-forest-800 dark:via-forest-900 dark:to-forest-950">
-          <div className="absolute inset-0 flex items-center justify-center opacity-30">
-            <Package className="h-20 w-20 text-cream-200" />
-          </div>
-          <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
+          {category.imageUrl ? (
+            <Image
+              src={resolveImageUrl(category.imageUrl)}
+              alt={category.name}
+              fill
+              sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+              className="object-cover transition-transform duration-500 group-hover:scale-105"
+            />
+          ) : (
+            <div className="absolute inset-0 flex items-center justify-center opacity-30">
+              <Package className="h-20 w-20 text-cream-200" />
+            </div>
+          )}
+          <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
 
           {/* Category name overlay */}
           <div className="absolute bottom-4 left-5 right-5">
