@@ -1,4 +1,8 @@
 import { defineConfig, devices } from '@playwright/test';
+import { config as loadEnv } from 'dotenv';
+
+// Load .env.test.local for E2E_ADMIN_EMAIL / E2E_ADMIN_PASSWORD
+loadEnv({ path: '.env.test.local' });
 
 /**
  * Playwright Configuration
