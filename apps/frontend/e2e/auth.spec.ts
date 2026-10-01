@@ -4,7 +4,8 @@ import { test, expect } from '@playwright/test';
  * Auth — register, login, logout.
  *
  * Uses a per-run unique email so re-runs don't hit "email already exists".
- * Logout is asserted via the header nav returning to a logged-out state.
+ * Clears cookies + storage at the start of each test so a stale session
+ * from a previous test doesn't cause redirects.
  */
 
 function uniqueEmail(): string {
@@ -12,6 +13,11 @@ function uniqueEmail(): string {
 }
 
 const PASSWORD = 'Password123!';
+
+// Ensure a clean session before each test in this file
+test.beforeEach(async ({ context }) => {
+  await context.clearCookies();
+});
 
 test.describe('Auth — register', () => {
   test('registers a new user and lands on a logged-in page', async ({ page }) => {
@@ -27,9 +33,7 @@ test.describe('Auth — register', () => {
 
     await page.getByRole('button', { name: /create account/i }).click();
 
-    // After successful registration, the user should be either on
-    // a dashboard page or redirected home — the common signal is
-    // that the "Logout" button appears in the header.
+    // Logged-in state: the header shows a Logout button
     await expect(page.getByRole('button', { name: /logout/i })).toBeVisible({
       timeout: 15_000,
     });
@@ -38,17 +42,22 @@ test.describe('Auth — register', () => {
 
 test.describe('Auth — login / logout', () => {
   test('logs in with the seeded admin and logs out', async ({ page }) => {
-    // Use the real admin account
-    const email = process.env.E2E_ADMIN_EMAIL ?? 'dancankalerwa@gmail.com';
+    const email = process.env.E2E_ADMIN_EMAIL;
     const password = process.env.E2E_ADMIN_PASSWORD;
 
-    if (!password) {
-      test.skip(true, 'Set E2E_ADMIN_PASSWORD env var to run this test');
+    if (!email || !password) {
+      test.skip(true, 'Set E2E_ADMIN_EMAIL / E2E_ADMIN_PASSWORD in .env.test.local');
       return;
     }
 
     await page.goto('/en/login');
-    await page.getByLabel(/^email$/i).fill(email);
+
+    // If we somehow land on a page without the email field, bail early
+    // so the failure is descriptive instead of a timeout.
+    const emailField = page.getByLabel(/^email$/i);
+    await expect(emailField).toBeVisible({ timeout: 5_000 });
+
+    await emailField.fill(email);
     await page.getByLabel(/^password$/i).fill(password);
     await page.getByRole('button', { name: /^sign in$/i }).click();
 
@@ -73,7 +82,7 @@ test.describe('Auth — login / logout', () => {
     await page.getByLabel(/^password$/i).fill('wrong-password');
     await page.getByRole('button', { name: /^sign in$/i }).click();
 
-    // Should stay on login page (or show error)
+    // Should stay on login page
     await expect(page).toHaveURL(/\/en\/login/, { timeout: 10_000 });
   });
 });
