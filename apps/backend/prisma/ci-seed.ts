@@ -14,12 +14,31 @@ import * as bcrypt from 'bcrypt';
 const prisma = new PrismaClient();
 
 async function main() {
-  const email = process.env.CI_ADMIN_EMAIL;
-  const password = process.env.CI_ADMIN_PASSWORD;
+  const rawEmail = process.env.CI_ADMIN_EMAIL;
+  const rawPassword = process.env.CI_ADMIN_PASSWORD;
 
-  if (!email || !password) {
+  if (!rawEmail || !rawPassword) {
     throw new Error('CI_ADMIN_EMAIL and CI_ADMIN_PASSWORD must be set');
   }
+
+  // Trim whitespace/newlines that can sneak in from CI secrets.
+  // GitHub's secret editor sometimes preserves a trailing newline
+  // when pasting; the browser trims whitespace on input fields,
+  // but the seed does not — so the DB would store a different
+  // value than the test sends (email length 25 vs 23 → 401).
+  const email = rawEmail.trim();
+  const password = rawPassword.trim();
+
+  if (email !== rawEmail) {
+    console.warn(
+      `⚠️  CI_ADMIN_EMAIL had ${rawEmail.length - email.length} whitespace char(s) — trimmed`
+    );
+  }
+  if (password !== rawPassword) {
+    console.warn(`⚠️  CI_ADMIN_PASSWORD had whitespace — trimmed`);
+  }
+
+  console.log(`Seeding admin: email length ${email.length}, password length ${password.length}`);
 
   // ---------- Admin user ----------
   const hash = await bcrypt.hash(password, 10);
