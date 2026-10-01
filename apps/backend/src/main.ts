@@ -4,6 +4,13 @@
  *
  * Swagger UI will be available at: /api/docs
  * API endpoint: /api/v1
+ * Health check: GET /api/v1/health
+ *
+ * Configuration is env-driven so the same build runs in dev, CI, and
+ * production without code changes:
+ *  - ALLOWED_ORIGINS: comma-separated list of frontend origins (CORS)
+ *  - PUBLIC_API_URL:  the public URL of this API (Swagger server entry)
+ *  - PORT:            listen port (Render assigns this dynamically)
  */
 
 import { NestFactory } from '@nestjs/core';
@@ -18,12 +25,16 @@ async function bootstrap() {
     rawBody: true,
   });
 
-  // ✅ Serve static files (uploads directory)
+  // ─────────────────────────────────────────────
+  // Static file serving (product/category images)
+  // ─────────────────────────────────────────────
   app.useStaticAssets(join(process.cwd(), 'uploads'), {
     prefix: '/uploads/',
   });
 
-  // ✅ Global validation pipe
+  // ─────────────────────────────────────────────
+  // Global validation
+  // ─────────────────────────────────────────────
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,
@@ -32,11 +43,18 @@ async function bootstrap() {
     })
   );
 
-  // ✅ API prefix
+  // ─────────────────────────────────────────────
+  // API prefix
+  // ─────────────────────────────────────────────
   app.setGlobalPrefix('api/v1');
 
-  // ✅ Swagger configuration
-  const config = new DocumentBuilder()
+  // ─────────────────────────────────────────────
+  // Swagger
+  // ─────────────────────────────────────────────
+  const publicApiUrl = process.env.PUBLIC_API_URL;
+  const isProd = process.env.NODE_ENV === 'production';
+
+  const swaggerConfig = new DocumentBuilder()
     .setTitle('The Racing Shop API')
     .setDescription('The Racing Shop — Backend API')
     .setVersion('1.0')
@@ -50,11 +68,18 @@ async function bootstrap() {
         in: 'header',
       },
       'access-token'
-    )
-    .addServer('http://localhost:3000', 'Development Server')
-    .build();
+    );
 
-  const document = SwaggerModule.createDocument(app, config);
+  // In production, use PUBLIC_API_URL if set. Otherwise fall back to
+  // localhost for local dev. This makes the Swagger "Try it out"
+  // buttons hit the right host in both environments.
+  if (isProd && publicApiUrl) {
+    swaggerConfig.addServer(publicApiUrl, 'Production');
+  } else {
+    swaggerConfig.addServer(`http://localhost:${process.env.PORT ?? 3000}`, 'Development');
+  }
+
+  const document = SwaggerModule.createDocument(app, swaggerConfig.build());
   SwaggerModule.setup('api/docs', app, document, {
     swaggerOptions: {
       persistAuthorization: true,
@@ -63,21 +88,38 @@ async function bootstrap() {
     },
   });
 
-  // ✅ Enable CORS - Allow both frontend and Swagger UI
+  // ─────────────────────────────────────────────
+  // CORS — env-driven allowlist
+  // ─────────────────────────────────────────────
+  // ALLOWED_ORIGINS is a comma-separated list, e.g.:
+  //   dev:  "http://localhost:3000,http://localhost:3001"
+  //   prod: "https://the-racing-shop.vercel.app"
+  const allowedOrigins = (
+    process.env.ALLOWED_ORIGINS ?? 'http://localhost:3000,http://localhost:3001'
+  )
+    .split(',')
+    .map((o) => o.trim())
+    .filter(Boolean);
+
+  console.log(`🌐 CORS allowed origins: ${allowedOrigins.join(', ')}`);
+
   app.enableCors({
-    origin: [
-      'http://localhost:3000', // Swagger UI
-      'http://localhost:3001', // Frontend
-    ],
+    origin: allowedOrigins,
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization', 'Accept'],
   });
 
-  const port = process.env.PORT || 3000;
-  await app.listen(port);
-  console.log(`🚀 Application is running on: http://localhost:${port}`);
-  console.log(`📚 Swagger API documentation: http://localhost:${port}/api/docs`);
-  console.log(`🖼 Static uploads available at: http://localhost:${port}/uploads/`);
+  // ─────────────────────────────────────────────
+  // Listen
+  // ─────────────────────────────────────────────
+  const port = process.env.PORT ?? 3000;
+  await app.listen(port, '0.0.0.0');
+
+  const envLabel = process.env.NODE_ENV ?? 'development';
+  console.log(`🚀 Application is running on port ${port} (${envLabel})`);
+  console.log(`📚 Swagger API docs: /api/docs`);
+  console.log(`🖼 Static uploads served at: /uploads/`);
 }
+
 bootstrap();
