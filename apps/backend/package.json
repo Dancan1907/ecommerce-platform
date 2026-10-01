@@ -19,6 +19,7 @@
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
     "prisma:migrate:deploy": "prisma migrate deploy",
+    "prisma:seed": "prisma db seed",
     "prisma:studio": "prisma studio",
     "cleanup:e2e-users": "ts-node prisma/cleanup-e2e-users.ts"
   },
@@ -45,6 +46,9 @@
     "stripe": "^14.25.0",
     "swagger-ui-express": "^5.0.1",
     "uuid": "^9.0.1"
+  },
+  "prisma": {
+    "seed": "ts-node prisma/ci-seed.ts"
   },
   "devDependencies": {
     "@faker-js/faker": "^10.6.0",
