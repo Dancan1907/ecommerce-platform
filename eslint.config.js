@@ -24,6 +24,7 @@ export default [
       '**/*.d.ts',
       '**/jest.setup.ts',
       '**/jest-integration.config.js',
+      'apps/backend/**',
     ],
   },
 
