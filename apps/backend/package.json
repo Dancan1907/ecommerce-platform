@@ -18,7 +18,8 @@
     "test:all": "pnpm test && pnpm test:integration",
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
-    "prisma:studio": "prisma studio"
+    "prisma:studio": "prisma studio",
+    "cleanup:e2e-users": "ts-node prisma/cleanup-e2e-users.ts"
   },
   "dependencies": {
     "@nestjs/common": "^10.0.0",
