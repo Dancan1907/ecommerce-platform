@@ -162,6 +162,54 @@ jobs:
           pnpm --filter @ecommerce/frontend start &
           npx wait-on http://localhost:3001 -t 120000
 
+      # ─────────────────────────────────────────────────────────
+      # TEMPORARY DIAGNOSTICS — remove once admin login is fixed
+      # ─────────────────────────────────────────────────────────
+
+      - name: Verify seeded admin exists in DB
+        run: |
+          cd apps/backend
+          npx ts-node -e "
+            const { PrismaClient } = require('@prisma/client');
+            const bcrypt = require('bcrypt');
+            const prisma = new PrismaClient();
+            (async () => {
+              const u = await prisma.user.findUnique({ where: { email: process.env.CI_ADMIN_EMAIL } });
+              console.log('User found:', !!u);
+              console.log('Role:', u?.role);
+              console.log('Email matches secret:', u?.email === process.env.CI_ADMIN_EMAIL);
+              if (u) {
+                const passOk = await bcrypt.compare(process.env.CI_ADMIN_PASSWORD, u.passwordHash);
+                console.log('Password matches hash:', passOk);
+              }
+              await prisma.\$disconnect();
+            })();
+          "
+        env:
+          CI_ADMIN_EMAIL: ${{ secrets.E2E_ADMIN_EMAIL }}
+          CI_ADMIN_PASSWORD: ${{ secrets.E2E_ADMIN_PASSWORD }}
+
+      - name: Verify admin login works (via curl)
+        run: |
+          echo "Email length: ${#E2E_ADMIN_EMAIL}"
+          echo "Password length: ${#E2E_ADMIN_PASSWORD}"
+          echo ""
+          echo "=== Testing login against backend ==="
+          RESPONSE=$(curl -s -w "\n%{http_code}" -X POST http://localhost:3000/api/v1/auth/login \
+            -H "Content-Type: application/json" \
+            -d "{\"email\":\"$E2E_ADMIN_EMAIL\",\"password\":\"$E2E_ADMIN_PASSWORD\"}")
+          HTTP_CODE=$(echo "$RESPONSE" | tail -1)
+          BODY=$(echo "$RESPONSE" | head -n -1)
+          echo "HTTP status: $HTTP_CODE"
+          echo "Body (first 200 chars): ${BODY:0:200}"
+        env:
+          E2E_ADMIN_EMAIL: ${{ secrets.E2E_ADMIN_EMAIL }}
+          E2E_ADMIN_PASSWORD: ${{ secrets.E2E_ADMIN_PASSWORD }}
+
+      # ─────────────────────────────────────────────────────────
+      # END TEMPORARY DIAGNOSTICS
+      # ─────────────────────────────────────────────────────────
+
       - name: Run Playwright E2E tests
         run: pnpm --filter @ecommerce/frontend test:e2e
         env:
