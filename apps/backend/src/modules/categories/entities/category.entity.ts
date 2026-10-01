@@ -27,6 +27,13 @@ export class CategoryEntity {
   description?: string;
 
   @ApiProperty({
+    example: '/uploads/categories/abc123.jpg',
+    description: 'Category image URL (optional)',
+    required: false,
+  })
+  imageUrl?: string;
+
+  @ApiProperty({
     example: 'uuid-parent',
     description: 'Parent category ID (optional, for nested categories)',
     required: false,

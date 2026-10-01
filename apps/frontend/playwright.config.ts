@@ -5,9 +5,9 @@ import { defineConfig, devices } from '@playwright/test';
  *
  * Runs E2E tests against a locally built Next.js app.
  *
- * Env vars for admin credentials are loaded from .env.test.local
- * via Playwright's built-in `dotenv` option (loads into workers too,
- * not just the config process).
+ * Env vars for admin credentials are loaded in globalSetup so they
+ * reach test workers (the config file's process.env does not always
+ * propagate to workers).
  *
  * Local dev: Playwright boots the production build via `webServer`.
  * CI: the GitHub Actions workflow starts the backend and frontend
@@ -21,8 +21,8 @@ const BASE_URL = `http://localhost:${PORT}`;
 export default defineConfig({
   testDir: './e2e',
 
-  // Load .env.test.local into BOTH the config process and test workers
-  dotenv: { path: '.env.test.local' },
+  // Load env vars once, before any worker starts
+  globalSetup: './e2e/global-setup.ts',
 
   // Fail the build on CI if test.only is left in the source
   forbidOnly: !!process.env.CI,
