@@ -1,20 +1,11 @@
 import { defineConfig, devices } from '@playwright/test';
-import { config as loadEnv } from 'dotenv';
-
-// Load .env.test.local for E2E_ADMIN_EMAIL / E2E_ADMIN_PASSWORD
-loadEnv({ path: '.env.test.local' });
 
 /**
  * Playwright Configuration
  *
- * Runs E2E tests against a locally built Next.js app.
- *
- * Two projects (en, sw) exercise both locales. Tests use a baseURL
- * and the locale is chosen inside each spec via `test.use()` or a
- * helper, so a single spec can be run against both languages.
- *
- * webServer block: Playwright boots the built app before tests and
- * shuts it down after — no need to run `pnpm dev` manually.
+ * Env vars for admin credentials are loaded in globalSetup so they
+ * reach test workers (the config file's process.env does not always
+ * propagate to workers).
  */
 
 const PORT = 3001;
@@ -23,16 +14,12 @@ const BASE_URL = `http://localhost:${PORT}`;
 export default defineConfig({
   testDir: './e2e',
 
-  // Fail the build on CI if test.only is left in the source
+  // Load env vars once, before any worker starts
+  globalSetup: './e2e/global-setup.ts',
+
   forbidOnly: !!process.env.CI,
-
-  // Retry once on CI to smooth over flaky network calls
   retries: process.env.CI ? 1 : 0,
-
-  // Serialize tests on CI; parallelize locally
   workers: process.env.CI ? 1 : undefined,
-
-  // 'list' locally for readable output, 'github' on CI for annotations
   reporter: process.env.CI ? 'github' : 'list',
 
   use: {
@@ -49,8 +36,6 @@ export default defineConfig({
     },
   ],
 
-  // Boot the production build before tests. Reuses an already-running
-  // server locally so you can keep `pnpm dev` open while iterating.
   webServer: {
     command: 'pnpm build && pnpm start',
     url: BASE_URL,
