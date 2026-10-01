@@ -15,8 +15,18 @@ function uniqueEmail(): string {
 const PASSWORD = 'Password123!';
 
 // Ensure a clean session before each test in this file
-test.beforeEach(async ({ context }) => {
+test.beforeEach(async ({ context, page }) => {
+  // Clear HTTP cookies
   await context.clearCookies();
+
+  // Visit a page first so we have a document to run storage APIs on
+  await page.goto('/en');
+
+  // Clear any persisted auth state (Zustand persist, etc.)
+  await page.evaluate(() => {
+    localStorage.clear();
+    sessionStorage.clear();
+  });
 });
 
 test.describe('Auth — register', () => {
@@ -49,6 +59,18 @@ test.describe('Auth — login / logout', () => {
       test.skip(true, 'Set E2E_ADMIN_EMAIL / E2E_ADMIN_PASSWORD in .env.test.local');
       return;
     }
+
+    // Log the login API response so failures are self-explanatory
+    page.on('response', async (response) => {
+      if (response.url().includes('/auth/login')) {
+        console.log('LOGIN RESPONSE STATUS:', response.status());
+        try {
+          console.log('LOGIN RESPONSE BODY:', await response.text());
+        } catch {
+          /* ignore */
+        }
+      }
+    });
 
     await page.goto('/en/login');
 
