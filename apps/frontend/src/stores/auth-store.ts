@@ -39,7 +39,11 @@ interface AuthState {
 
 export const useAuthStore = create<AuthState>((set) => ({
   user: null,
-  isLoading: false,
+  // Starts true: we haven't checked for a restored session yet.
+  // ProtectedRoute waits on this flag before deciding to redirect,
+  // so it must stay true until fetchProfile() resolves (success or failure)
+  // on initial app mount. See SessionRestore in app-providers.tsx.
+  isLoading: true,
   isAuthenticated: false,
   error: null,
 
