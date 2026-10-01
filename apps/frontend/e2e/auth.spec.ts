@@ -6,6 +6,10 @@ import { test, expect } from '@playwright/test';
  * Uses a per-run unique email so re-runs don't hit "email already exists".
  * Clears cookies + storage at the start of each test so a stale session
  * from a previous test doesn't cause redirects.
+ *
+ * NOTE: The login test currently contains TEMPORARY CI DIAGNOSTICS to
+ * debug a 401 in GitHub Actions. Remove those console.log blocks once
+ * the root cause is fixed.
  */
 
 function uniqueEmail(): string {
@@ -75,15 +79,17 @@ test.describe('Auth — login / logout', () => {
         console.log('LOGIN REQUEST URL:', request.url());
         console.log('LOGIN REQUEST METHOD:', request.method());
 
-        const body = request.postDataJSON?.();
+        const rawBody = request.postData();
+        console.log('LOGIN REQUEST RAW BODY LENGTH:', rawBody?.length ?? 0);
 
-        if (body) {
+        try {
+          const body = request.postDataJSON();
           console.log('LOGIN REQUEST EMAIL LENGTH:', body.email?.length ?? 0);
-
           console.log('LOGIN REQUEST PASSWORD LENGTH:', body.password?.length ?? 0);
+          console.log('LOGIN REQUEST HAS AUTH HEADER:', !!request.headers()['authorization']);
+        } catch {
+          console.log('LOGIN REQUEST BODY: <unable to parse JSON>');
         }
-
-        console.log('LOGIN REQUEST HAS AUTH HEADER:', !!request.headers()['authorization']);
       }
     });
 
@@ -93,7 +99,9 @@ test.describe('Auth — login / logout', () => {
         console.log('LOGIN RESPONSE STATUS:', response.status());
 
         try {
-          console.log('LOGIN RESPONSE BODY:', await response.text());
+          const body = await response.text();
+          console.log('LOGIN RESPONSE BODY LENGTH:', body.length);
+          console.log('LOGIN RESPONSE BODY PREVIEW:', body.slice(0, 200));
         } catch {
           console.log('LOGIN RESPONSE BODY: <unable to read>');
         }
@@ -109,15 +117,18 @@ test.describe('Auth — login / logout', () => {
     // If we somehow land on a page without the email field,
     // bail early so the failure is descriptive instead of a timeout.
     const emailField = page.getByLabel(/^email$/i);
-
-    await expect(emailField).toBeVisible({
-      timeout: 5_000,
-    });
+    console.log('EMAIL FIELD COUNT:', await emailField.count());
+    await expect(emailField).toBeVisible({ timeout: 5_000 });
 
     await emailField.fill(email);
 
-    await page.getByLabel(/^password$/i).fill(password);
+    // Check exactly what is inside the browser input
+    const emailValue = await emailField.inputValue();
+    console.log('EMAIL AFTER FILL LENGTH:', emailValue.length);
+    console.log('EMAIL MATCHES ENV VALUE:', emailValue === email);
+    console.log('EMAIL FIELD TYPE:', await emailField.getAttribute('type'));
 
+    await page.getByLabel(/^password$/i).fill(password);
     await page.getByRole('button', { name: /^sign in$/i }).click();
 
     // Logged-in header shows a Logout button
@@ -141,14 +152,10 @@ test.describe('Auth — login / logout', () => {
     await page.goto('/en/login');
 
     await page.getByLabel(/^email$/i).fill('definitely-not-a-user@example.test');
-
     await page.getByLabel(/^password$/i).fill('wrong-password');
-
     await page.getByRole('button', { name: /^sign in$/i }).click();
 
     // Should stay on login page
-    await expect(page).toHaveURL(/\/en\/login/, {
-      timeout: 10_000,
-    });
+    await expect(page).toHaveURL(/\/en\/login/, { timeout: 10_000 });
   });
 });
