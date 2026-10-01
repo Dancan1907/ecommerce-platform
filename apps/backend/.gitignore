@@ -12,3 +12,10 @@ uploads/*
 !uploads/categories/*.jpeg
 !uploads/categories/*.png
 !uploads/categories/*.webp
+# TypeScript incremental build cache
+*.tsbuildinfo
+
+# Compiled output from ts-node scripts in prisma/
+prisma/**/*.js
+prisma/**/*.js.map
+prisma/**/*.d.ts
