@@ -60,27 +60,64 @@ test.describe('Auth — login / logout', () => {
       return;
     }
 
-    // Log the login API response so failures are self-explanatory
+    // ============================================
+    // TEMPORARY CI DIAGNOSTICS
+    // ============================================
+
+    // Verify that Playwright received the GitHub Actions secrets
+    // without exposing their actual values.
+    console.log('E2E ADMIN EMAIL LENGTH:', email.length);
+    console.log('E2E ADMIN PASSWORD LENGTH:', password.length);
+
+    // Log the actual browser request sent to the backend.
+    page.on('request', (request) => {
+      if (request.url().includes('/auth/login')) {
+        console.log('LOGIN REQUEST URL:', request.url());
+        console.log('LOGIN REQUEST METHOD:', request.method());
+
+        const body = request.postDataJSON?.();
+
+        if (body) {
+          console.log('LOGIN REQUEST EMAIL LENGTH:', body.email?.length ?? 0);
+
+          console.log('LOGIN REQUEST PASSWORD LENGTH:', body.password?.length ?? 0);
+        }
+
+        console.log('LOGIN REQUEST HAS AUTH HEADER:', !!request.headers()['authorization']);
+      }
+    });
+
+    // Log the login response returned to the browser.
     page.on('response', async (response) => {
       if (response.url().includes('/auth/login')) {
         console.log('LOGIN RESPONSE STATUS:', response.status());
+
         try {
           console.log('LOGIN RESPONSE BODY:', await response.text());
         } catch {
-          /* ignore */
+          console.log('LOGIN RESPONSE BODY: <unable to read>');
         }
       }
     });
 
+    // ============================================
+    // LOGIN
+    // ============================================
+
     await page.goto('/en/login');
 
-    // If we somehow land on a page without the email field, bail early
-    // so the failure is descriptive instead of a timeout.
+    // If we somehow land on a page without the email field,
+    // bail early so the failure is descriptive instead of a timeout.
     const emailField = page.getByLabel(/^email$/i);
-    await expect(emailField).toBeVisible({ timeout: 5_000 });
+
+    await expect(emailField).toBeVisible({
+      timeout: 5_000,
+    });
 
     await emailField.fill(email);
+
     await page.getByLabel(/^password$/i).fill(password);
+
     await page.getByRole('button', { name: /^sign in$/i }).click();
 
     // Logged-in header shows a Logout button
@@ -88,7 +125,10 @@ test.describe('Auth — login / logout', () => {
       timeout: 15_000,
     });
 
-    // Log out
+    // ============================================
+    // LOGOUT
+    // ============================================
+
     await page.getByRole('button', { name: /logout/i }).click();
 
     // Sign Up button should be back
@@ -101,10 +141,14 @@ test.describe('Auth — login / logout', () => {
     await page.goto('/en/login');
 
     await page.getByLabel(/^email$/i).fill('definitely-not-a-user@example.test');
+
     await page.getByLabel(/^password$/i).fill('wrong-password');
+
     await page.getByRole('button', { name: /^sign in$/i }).click();
 
     // Should stay on login page
-    await expect(page).toHaveURL(/\/en\/login/, { timeout: 10_000 });
+    await expect(page).toHaveURL(/\/en\/login/, {
+      timeout: 10_000,
+    });
   });
 });
