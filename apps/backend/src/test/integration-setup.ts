@@ -18,6 +18,11 @@ process.env.NODE_ENV = 'test';
 
 // Global test state
 declare global {
+  // `var` is required here: TypeScript's ambient global augmentation only
+  // merges onto `globalThis` with `var`; `let`/`const` are type-valid but
+  // don't actually extend the global type (confirmed — using let broke
+  // `global.__APP__` at compile time).
+  // eslint-disable-next-line no-var
   var __APP__: INestApplication;
 }
 
