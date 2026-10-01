@@ -109,9 +109,13 @@ describe('CategoriesService', () => {
     it('should handle duplicate slug by appending suffix', async () => {
       const createDto = { name: 'Electronics' };
 
+      // CategoriesService.create() calls findUnique twice, in order:
+      //   1. name uniqueness check   -> resolve null (no name conflict)
+      //   2. slug uniqueness check   -> resolve an existing category
+      //      (triggers the timestamp-suffix branch)
       mockPrismaService.category.findUnique
-        .mockResolvedValueOnce(mockCategory)
-        .mockResolvedValueOnce(null);
+        .mockResolvedValueOnce(null)
+        .mockResolvedValueOnce(mockCategory);
 
       mockPrismaService.category.create.mockResolvedValue({
         ...mockCategory,
