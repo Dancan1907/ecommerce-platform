@@ -27,6 +27,31 @@ async function loginAsAdmin(
   });
 }
 
+/**
+ * Waits for the admin products page to finish its initial load.
+ * Detects the end of the skeleton by waiting for either the products
+ * table or the "empty" state to appear.
+ */
+async function waitForProductsReady(page: import('@playwright/test').Page) {
+  // The create button is always in the header, but the page re-renders
+  // while data loads. Wait for the search input to become visible
+  // (it only appears once the header is stable).
+  await expect(page.getByPlaceholder(/search products/i)).toBeVisible({
+    timeout: 15_000,
+  });
+
+  // Then wait for the table (or empty state) to finish loading.
+  // The skeleton uses the Skeleton component; once products or empty
+  // state render, skeletons are gone. Either way, the Create button
+  // is now stable.
+  await expect(page.getByRole('button', { name: /create product/i }).first()).toBeVisible({
+    timeout: 15_000,
+  });
+
+  // Give React one paint cycle to finish any pending re-render
+  await page.waitForTimeout(300);
+}
+
 test.describe('Admin — protected routes', () => {
   test.beforeEach(async ({ context }) => {
     await context.clearCookies();
@@ -34,7 +59,6 @@ test.describe('Admin — protected routes', () => {
 
   test('anonymous user is redirected away from /admin', async ({ page }) => {
     await page.goto('/en/admin');
-    // Expect a redirect to login
     await expect(page).toHaveURL(/\/en\/login/, { timeout: 10_000 });
   });
 
@@ -48,15 +72,10 @@ test.describe('Admin — protected routes', () => {
     }
 
     await loginAsAdmin(page, email, password);
-
     await page.goto('/en/admin/products');
+    await waitForProductsReady(page);
 
-    // The admin products page has a "Create Product" button
-    await expect(page.getByRole('button', { name: /create product/i })).toBeVisible({
-      timeout: 10_000,
-    });
-
-    // And a table of products is rendered (at least the header cells)
+    await expect(page.getByRole('button', { name: /create product/i }).first()).toBeVisible();
     await expect(page.getByRole('columnheader', { name: /product/i })).toBeVisible();
   });
 
@@ -71,14 +90,18 @@ test.describe('Admin — protected routes', () => {
 
     await loginAsAdmin(page, email, password);
     await page.goto('/en/admin/products');
+    await waitForProductsReady(page);
 
-    // Open the modal
-    await page.getByRole('button', { name: /create product/i }).click();
+    // Click — force:true bypasses the re-render race; button is present
+    await page
+      .getByRole('button', { name: /create product/i })
+      .first()
+      .click({ force: true });
 
-    // Modal heading / dialog should appear
+    // Modal appears (your Modal component uses a dialog role)
     await expect(page.getByRole('dialog')).toBeVisible({ timeout: 5_000 });
 
-    // And the Product Name input is present
+    // Product Name field appears
     await expect(page.getByLabel(/product name/i)).toBeVisible();
   });
 
@@ -97,18 +120,25 @@ test.describe('Admin — protected routes', () => {
 
     await loginAsAdmin(page, email, password);
     await page.goto('/en/admin/products');
+    await waitForProductsReady(page);
 
-    await page.getByRole('button', { name: /create product/i }).click();
+    await page
+      .getByRole('button', { name: /create product/i })
+      .first()
+      .click({ force: true });
 
-    // Fill the form
-    await page.getByLabel(/product name/i).fill(name);
-    await page.getByLabel(/description/i).fill('Automated test product — safe to delete.');
-    await page.getByLabel(/price/i).fill('1000');
-    await page.getByLabel(/stock/i).fill('5');
-    await page.getByLabel(/sku/i).fill(sku);
+    const dialog = page.getByRole('dialog');
+    await expect(dialog).toBeVisible({ timeout: 5_000 });
+
+    // Scope every field lookup to the modal to avoid ambiguity with the page
+    await dialog.getByLabel(/product name/i).fill(name);
+    await dialog.getByLabel(/description/i).fill('Automated test product — safe to delete.');
+    await dialog.getByLabel(/price/i).fill('1000');
+    await dialog.getByLabel(/stock/i).fill('5');
+    await dialog.getByLabel(/sku/i).fill(sku);
 
     // Category — pick the first non-empty option
-    const categorySelect = page.getByLabel(/category/i);
+    const categorySelect = dialog.getByLabel(/category/i);
     const options = await categorySelect.locator('option').all();
     for (const opt of options) {
       const value = await opt.getAttribute('value');
@@ -118,16 +148,13 @@ test.describe('Admin — protected routes', () => {
       }
     }
 
-    // Submit — the submit button text is "Create Product" in the modal
-    await page
-      .getByRole('button', { name: /create product/i })
-      .last()
-      .click();
+    // Submit — scoped to the modal to avoid the header's Create button
+    await dialog.getByRole('button', { name: /create product/i }).click();
 
-    // Toast: "Product created"
+    // Toast confirms success
     await expect(page.getByText(/product created/i)).toBeVisible({ timeout: 10_000 });
 
-    // The product name appears in the table
+    // The new product is in the table
     await expect(page.getByText(name)).toBeVisible({ timeout: 10_000 });
   });
 });
