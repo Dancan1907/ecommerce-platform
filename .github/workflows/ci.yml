@@ -1,0 +1,232 @@
+name: CI
+
+on:
+  push:
+    branches: [develop, master]
+  pull_request:
+    branches: [develop, master]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  lint-test-build:
+    name: Lint, unit tests, and build
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 8.10.0
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Generate Prisma client
+        run: pnpm --filter @ecommerce/backend prisma:generate
+
+      - name: Lint
+        run: pnpm lint
+
+      - name: Type-check frontend
+        run: pnpm --filter @ecommerce/frontend type-check
+
+      - name: Unit tests — backend
+        run: pnpm --filter @ecommerce/backend test
+
+      - name: Unit tests — frontend
+        run: pnpm --filter @ecommerce/frontend test
+
+      - name: Build — backend
+        run: pnpm --filter @ecommerce/backend build
+
+      - name: Build — frontend
+        run: pnpm --filter @ecommerce/frontend build
+        env:
+          NEXT_PUBLIC_API_URL: http://localhost:3000/api/v1
+          NEXT_PUBLIC_ASSET_URL: http://localhost:3000
+
+  e2e:
+    name: E2E (Playwright)
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    needs: lint-test-build
+
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: ecommerce_test_db
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    env:
+      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/ecommerce_test_db?schema=public
+      JWT_ACCESS_SECRET: ci-access-secret-key-min-32-characters-long
+      JWT_REFRESH_SECRET: ci-refresh-secret-key-min-32-characters-long
+      JWT_REFRESH_EXPIRES: 7d
+      PORT: '3000'
+      API_PREFIX: /api/v1
+      FRONTEND_URL: http://localhost:3001
+      ALLOWED_ORIGINS: http://localhost:3001
+      NODE_ENV: test
+      STRIPE_SECRET_KEY: sk_test_ci_placeholder
+      STRIPE_WEBHOOK_SECRET: whsec_ci_placeholder
+      STRIPE_CURRENCY: usd
+      STRIPE_KES_TO_USD_RATE: '0.0077'
+      MPESA_ENVIRONMENT: sandbox
+      MPESA_CONSUMER_KEY: ci_placeholder
+      MPESA_CONSUMER_SECRET: ci_placeholder
+      MPESA_SHORTCODE: '174379'
+      MPESA_PASSKEY: ci_placeholder
+      MPESA_CALLBACK_URL: http://localhost:3000/api/v1/payments/mpesa/callback
+      SMTP_HOST: smtp.example.com
+      SMTP_PORT: '587'
+      SMTP_USER: ci@example.com
+      SMTP_PASS: ci_placeholder
+      SMTP_FROM: noreply@example.com
+      UPLOAD_DIR: ./uploads
+      MAX_FILE_SIZE: '5242880'
+      RATE_LIMIT_TTL: '60'
+      RATE_LIMIT_MAX: '100'
+      NEXT_PUBLIC_API_URL: http://localhost:3000/api/v1
+      NEXT_PUBLIC_ASSET_URL: http://localhost:3000
+      E2E_ADMIN_EMAIL: ${{ secrets.E2E_ADMIN_EMAIL }}
+      E2E_ADMIN_PASSWORD: ${{ secrets.E2E_ADMIN_PASSWORD }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 8.10.0
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Generate Prisma client
+        run: pnpm --filter @ecommerce/backend prisma:generate
+
+      - name: Apply database migrations
+        run: pnpm --filter @ecommerce/backend exec prisma migrate deploy
+
+      - name: Seed CI admin user
+        run: pnpm --filter @ecommerce/backend exec ts-node prisma/ci-seed.ts
+        env:
+          CI_ADMIN_EMAIL: ${{ secrets.E2E_ADMIN_EMAIL }}
+          CI_ADMIN_PASSWORD: ${{ secrets.E2E_ADMIN_PASSWORD }}
+
+      - name: Build backend
+        run: pnpm --filter @ecommerce/backend build
+
+      - name: Build frontend
+        run: pnpm --filter @ecommerce/frontend build
+
+      - name: Install Playwright browsers
+        run: pnpm --filter @ecommerce/frontend exec playwright install --with-deps chromium
+
+      - name: Start backend in background
+        run: |
+          pnpm --filter @ecommerce/backend start &
+          npx wait-on http://localhost:3000/api/v1 -t 120000
+
+      - name: Start frontend in background
+        run: |
+          pnpm --filter @ecommerce/frontend start &
+          npx wait-on http://localhost:3001 -t 120000
+
+      # ─────────────────────────────────────────────────────────
+      # TEMPORARY DIAGNOSTICS — remove once admin login is fixed
+      # ─────────────────────────────────────────────────────────
+
+      - name: Verify seeded admin exists in DB
+        run: |
+          cd apps/backend
+          npx ts-node -e "
+            const { PrismaClient } = require('@prisma/client');
+            const bcrypt = require('bcrypt');
+            const prisma = new PrismaClient();
+            (async () => {
+              const u = await prisma.user.findUnique({ where: { email: process.env.CI_ADMIN_EMAIL } });
+              console.log('User found:', !!u);
+              console.log('Role:', u?.role);
+              console.log('Email matches secret:', u?.email === process.env.CI_ADMIN_EMAIL);
+              if (u) {
+                const passOk = await bcrypt.compare(process.env.CI_ADMIN_PASSWORD, u.passwordHash);
+                console.log('Password matches hash:', passOk);
+              }
+              await prisma.\$disconnect();
+            })();
+          "
+        env:
+          CI_ADMIN_EMAIL: ${{ secrets.E2E_ADMIN_EMAIL }}
+          CI_ADMIN_PASSWORD: ${{ secrets.E2E_ADMIN_PASSWORD }}
+
+      - name: Verify admin login works (via curl)
+        run: |
+          echo "Email length: ${#E2E_ADMIN_EMAIL}"
+          echo "Password length: ${#E2E_ADMIN_PASSWORD}"
+          echo ""
+          echo "=== Testing login against backend ==="
+          RESPONSE=$(curl -s -w "\n%{http_code}" -X POST http://localhost:3000/api/v1/auth/login \
+            -H "Content-Type: application/json" \
+            -d "{\"email\":\"$E2E_ADMIN_EMAIL\",\"password\":\"$E2E_ADMIN_PASSWORD\"}")
+          HTTP_CODE=$(echo "$RESPONSE" | tail -1)
+          BODY=$(echo "$RESPONSE" | head -n -1)
+          echo "HTTP status: $HTTP_CODE"
+          echo "Body (first 200 chars): ${BODY:0:200}"
+        env:
+          E2E_ADMIN_EMAIL: ${{ secrets.E2E_ADMIN_EMAIL }}
+          E2E_ADMIN_PASSWORD: ${{ secrets.E2E_ADMIN_PASSWORD }}
+
+      # ─────────────────────────────────────────────────────────
+      # END TEMPORARY DIAGNOSTICS
+      # ─────────────────────────────────────────────────────────
+
+      - name: Run Playwright E2E tests
+        run: pnpm --filter @ecommerce/frontend test:e2e
+        env:
+          CI: 'true'
+
+      - name: Upload Playwright report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: apps/frontend/playwright-report/
+          retention-days: 7
+
+      - name: Upload test results
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-test-results
+          path: apps/frontend/test-results/
+          retention-days: 7

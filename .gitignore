@@ -128,3 +128,7 @@ temp/
 EOF.env
 .env.local
 .env.*.local
+
+# TypeScript build cache
+*.tsbuildinfo
+
