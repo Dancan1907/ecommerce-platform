@@ -19,3 +19,9 @@ uploads/*
 prisma/**/*.js
 prisma/**/*.js.map
 prisma/**/*.d.ts
+
+# Database dumps — never commit
+*.sql
+*.dump
+*.backup
+!prisma/migrations/**/*.sql
